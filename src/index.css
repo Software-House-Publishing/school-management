@@ -11,4 +11,14 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  /* Sidebar design tokens */
+  --sidebar-active-bg: #EEF2FF;     /* light indigo tint for active pill */
+  --sidebar-active-fg: #1F2937;     /* graphite text */
+  --sidebar-active-icon: #2563EB;   /* blue icon color */
+  --sidebar-width: 280px;
+  --sidebar-radius: 16px;
+  --sidebar-shadow: 0 12px 32px rgba(16,24,40,0.08);
+  --sidebar-gutter: 0.5rem; /* distance from screen edge */
+  --content-gutter: 0.5rem;   /* extra space between sidebar and content */
 }
