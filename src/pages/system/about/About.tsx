@@ -6,7 +6,7 @@ export default function About() {
   const { t } = useTranslation();
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-12">
       <Container>
         <Card className="max-w-4xl mx-auto">
           <h1 className="text-3xl font-bold mb-6">About Our School Management System</h1>

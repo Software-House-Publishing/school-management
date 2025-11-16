@@ -134,7 +134,7 @@ export default function SchoolRules() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-12">
       <Container>
         <Card className="max-w-4xl mx-auto">
           <div className="text-center mb-8">

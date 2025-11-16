@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/stores/authStore';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
+import { motion } from 'framer-motion';
 import { Container } from '@/components/layouts/Container';
 import { loginSchema } from '@/utils/validators';
 import { getDefaultRoute } from '@/config/routes';
@@ -95,9 +96,10 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12">
-      <Container size="sm">
-        <Card className="max-w-md mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center py-16">
+      <Container size="full">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
+          <Card variant="glass" className="w-[26rem] max-w-none mx-auto">
           <div className="text-center mb-8">
             <h1 className="text-2xl font-bold text-gray-900">
               {t('auth.login.title')}
@@ -206,7 +208,8 @@ export default function Login() {
               </Button>
             </div>
           </div>
-        </Card>
+          </Card>
+        </motion.div>
       </Container>
     </div>
   );

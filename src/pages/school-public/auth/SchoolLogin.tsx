@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '@/stores/authStore';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
+import { motion } from 'framer-motion';
 import { Container } from '@/components/layouts/Container';
 import { loginSchema } from '@/utils/validators';
 
@@ -154,9 +155,10 @@ export default function SchoolLogin() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12">
-      <Container size="sm">
-        <Card className="max-w-md mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center py-16">
+      <Container size="full">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
+          <Card variant="glass" className="w-[26rem] max-w-none mx-auto">
           {/* School Header */}
           <div className="text-center mb-6">
             {schoolData.logo && (
@@ -238,7 +240,8 @@ export default function SchoolLogin() {
               <p className="mt-2"><em>Password: Any 8+ character password</em></p>
             </div>
           </div>
-        </Card>
+          </Card>
+        </motion.div>
       </Container>
     </div>
   );
