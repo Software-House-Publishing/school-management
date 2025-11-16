@@ -2,14 +2,20 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { useTranslation } from 'react-i18next';
 import { Toaster } from 'sonner';
 
-// Public pages
-import Home from '@/pages/public/home/Home';
-import About from '@/pages/public/about/About';
-import Contact from '@/pages/public/contact/Contact';
-import Rules from '@/pages/public/rules/Rules';
+// System pages (SaaS provider)
+import SystemHome from '@/pages/system/home/Home';
+import SystemAbout from '@/pages/system/about/About';
+import SystemContact from '@/pages/system/contact/Contact';
+import SystemTerms from '@/pages/system/terms/Terms';
+import SystemPrivacy from '@/pages/system/privacy/Privacy';
+import SystemLogin from '@/pages/system/auth/Login';
 
-// Auth pages
-import Login from '@/pages/public/auth/Login';
+// School-specific public pages
+import SchoolHome from '@/pages/school-public/home/SchoolHome';
+import SchoolAbout from '@/pages/school-public/about/SchoolAbout';
+import SchoolContact from '@/pages/school-public/contact/SchoolContact';
+import SchoolRules from '@/pages/school-public/rules/SchoolRules';
+import SchoolLogin from '@/pages/school-public/auth/SchoolLogin';
 
 // Protected route components
 import ProtectedRoute from '@/components/shared/ProtectedRoute';
@@ -46,12 +52,20 @@ function App() {
     <div dir={i18n.language === 'my' ? 'rtl' : 'ltr'}>
       <Router>
         <Routes>
-          {/* Public routes */}
-          <Route path="/" element={<Home />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/rules" element={<Rules />} />
-          <Route path="/login" element={<Login />} />
+          {/* System routes (SaaS provider) */}
+          <Route path="/" element={<SystemHome />} />
+          <Route path="/about" element={<SystemAbout />} />
+          <Route path="/contact" element={<SystemContact />} />
+          <Route path="/terms" element={<SystemTerms />} />
+          <Route path="/privacy" element={<SystemPrivacy />} />
+          <Route path="/login" element={<SystemLogin />} />
+
+          {/* School-specific public routes */}
+          <Route path="/school/:schoolId" element={<SchoolHome />} />
+          <Route path="/school/:schoolId/about" element={<SchoolAbout />} />
+          <Route path="/school/:schoolId/contact" element={<SchoolContact />} />
+          <Route path="/school/:schoolId/rules" element={<SchoolRules />} />
+          <Route path="/school/:schoolId/login" element={<SchoolLogin />} />
 
           {/* Student portal */}
           <Route
