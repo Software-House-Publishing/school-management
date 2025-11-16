@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, Globe, Users, BookOpen, CreditCard, Shield, ChevronDown } from 'lucide-react';
+import { Menu, X, Globe, Users, BookOpen, CreditCard, Info } from 'lucide-react';
 
 export default function SystemHeader() {
   const { t } = useTranslation();
@@ -25,16 +25,16 @@ export default function SystemHeader() {
     const path = location.pathname;
     if (path === '/') setActiveSection('home');
     else if (path === '/contact') setActiveSection('contact');
-    else if (path === '/terms') setActiveSection('terms');
-    else if (path === '/privacy') setActiveSection('privacy');
+    else if (path === '/pricing') setActiveSection('pricing');
+    else if (path === '/about') setActiveSection('about');
   }, [location.pathname]);
 
   const navigationItems = [
     { id: 'home', label: t('navigation.home'), path: '/', icon: Globe },
+    { id: 'about', label: 'About Us', path: '/about', icon: Info },
     { id: 'features', label: 'Features', path: '/#features', icon: BookOpen },
+    { id: 'pricing', label: 'Pricing', path: '/pricing', icon: CreditCard },
     { id: 'contact', label: t('navigation.contact'), path: '/contact', icon: Users },
-    { id: 'terms', label: 'Terms', path: '/terms', icon: Shield },
-    { id: 'privacy', label: 'Privacy', path: '/privacy', icon: Shield },
   ];
 
   const handleNavigation = (path: string) => {
@@ -52,11 +52,9 @@ export default function SystemHeader() {
 
   return (
     <>
-      <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled 
-          ? 'bg-white/95 backdrop-blur-xl shadow-lg border-b border-[#D1D1D6]/60' 
-          : 'bg-transparent'
-      }`}>
+      <header className={
+        'fixed top-0 left-0 right-0 z-50 transition-all duration-300 bg-white/95 backdrop-blur-xl shadow-lg border-b border-[#E5E5EA]/60'
+      }>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
@@ -66,16 +64,12 @@ export default function SystemHeader() {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
-              <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 ${
-                isScrolled 
-                  ? 'bg-gradient-to-br from-blue-500 to-purple-600 shadow-lg' 
-                  : 'bg-slate-900/30 backdrop-blur-sm border border-white/20'
-              }`}>
+              <div className={
+                'w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 bg-gradient-to-br from-blue-500 to-purple-600 shadow-lg'
+              }>
                 <BookOpen className={`w-5 h-5 ${isScrolled ? 'text-white' : 'text-white'}`} />
               </div>
-              <span className={`text-xl font-bold transition-colors duration-300 ${
-                isScrolled ? 'text-gray-600' : 'text-gray-900 drop-shadow-lg'
-              }`}>
+              <span className={'text-xl font-bold transition-colors duration-300 text-gray-900'}>
                 {t('app.name')}
               </span>
             </motion.div>
@@ -83,17 +77,9 @@ export default function SystemHeader() {
             {/* Desktop Navigation - Dynamic Island Style */}
             <div className="hidden md:flex items-center">
               <motion.nav 
-                className={`flex items-center space-x-1 rounded-full px-2 py-1 transition-all duration-300 ${
-                  isScrolled 
-                    ? 'bg-[#F2F2F7]/80 backdrop-blur-sm' 
-                    : 'bg-slate-900/30 backdrop-blur-sm border border-white/20'
-                }`}
+                className={'flex items-center space-x-1 rounded-full px-2 py-1 transition-all duration-300 bg-[#FBFBFD]/90 backdrop-blur-sm'}
                 initial={false}
-                animate={{ 
-                  boxShadow: isScrolled 
-                    ? '0 4px 20px rgba(0, 0, 0, 0.1)' 
-                    : '0 4px 20px rgba(255, 255, 255, 0.2)' 
-                }}
+                animate={{ boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)' }}
               >
                 {navigationItems.map((item) => {
                   const Icon = item.icon;
@@ -103,12 +89,8 @@ export default function SystemHeader() {
                       onClick={() => handleNavigation(item.path)}
                       className={`relative px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
                         activeSection === item.id
-                          ? isScrolled
-                            ? 'text-blue-600 bg-white shadow-md'
-                            : 'text-blue-900 bg-white/95 shadow-md'
-                          : isScrolled
-                            ? 'text-[#6e6e73] hover:text-[#1d1d1f] hover:bg-[#F2F2F7]'
-                            : 'text-gray-900 hover:bg-gray-900/10'
+                          ? 'text-blue-600 bg-white shadow-md'
+                          : 'text-[#6e6e73] hover:text-[#1d1d1f] hover:bg-[#F2F2F7]'
                       }`}
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
@@ -133,11 +115,7 @@ export default function SystemHeader() {
               <div className="ml-6 flex items-center space-x-3">
                 <motion.button
                   onClick={() => navigate('/login')}
-                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
-                    isScrolled
-                      ? 'text-[#6e6e73] hover:text-[#1d1d1f] hover:bg-[#F2F2F7]'
-                      : 'text-gray-900 hover:bg-gray-900/10'
-                  }`}
+                  className={'px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 text-[#6e6e73] hover:text-[#1d1d1f] hover:bg-[#F2F2F7]'}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
@@ -156,9 +134,7 @@ export default function SystemHeader() {
 
             {/* Mobile Menu Button */}
             <motion.button
-              className={`md:hidden p-2 rounded-full transition-colors duration-300 ${
-                isScrolled ? 'text-[#6e6e73] hover:bg-[#F2F2F7]' : 'text-gray-900 hover:bg-gray-900/10'
-              }`}
+              className={'md:hidden p-2 rounded-full transition-colors duration-300 text-[#6e6e73] hover:bg-[#F2F2F7]'}
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               whileTap={{ scale: 0.95 }}
             >
