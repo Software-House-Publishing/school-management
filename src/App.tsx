@@ -8,12 +8,16 @@ import SystemAbout from '@/pages/system/about/About';
 import SystemContact from '@/pages/system/contact/Contact';
 import SystemTerms from '@/pages/system/terms/Terms';
 import SystemPrivacy from '@/pages/system/privacy/Privacy';
+import SystemPricing from '@/pages/system/pricing/Pricing';
 import SystemLogin from '@/pages/system/auth/Login';
+import SystemRegister from '@/pages/system/auth/Register';
+import SystemForgotPassword from '@/pages/system/auth/ForgotPassword';
 
 // School-specific public pages
 import SchoolHome from '@/pages/school-public/home/SchoolHome';
 import SchoolAbout from '@/pages/school-public/about/SchoolAbout';
 import SchoolContact from '@/pages/school-public/contact/SchoolContact';
+import SchoolPricing from '@/pages/school-public/pricing/SchoolPricing';
 import SchoolRules from '@/pages/school-public/rules/SchoolRules';
 import SchoolLogin from '@/pages/school-public/auth/SchoolLogin';
 
@@ -56,14 +60,18 @@ function App() {
           <Route path="/" element={<SystemHome />} />
           <Route path="/about" element={<SystemAbout />} />
           <Route path="/contact" element={<SystemContact />} />
+          <Route path="/pricing" element={<SystemPricing />} />
           <Route path="/terms" element={<SystemTerms />} />
           <Route path="/privacy" element={<SystemPrivacy />} />
           <Route path="/login" element={<SystemLogin />} />
+          <Route path="/register" element={<SystemRegister />} />
+          <Route path="/forgot-password" element={<SystemForgotPassword />} />
 
           {/* School-specific public routes */}
           <Route path="/school/:schoolId" element={<SchoolHome />} />
           <Route path="/school/:schoolId/about" element={<SchoolAbout />} />
           <Route path="/school/:schoolId/contact" element={<SchoolContact />} />
+          <Route path="/school/:schoolId/pricing" element={<SchoolPricing />} />
           <Route path="/school/:schoolId/rules" element={<SchoolRules />} />
           <Route path="/school/:schoolId/login" element={<SchoolLogin />} />
 

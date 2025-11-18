@@ -190,11 +190,19 @@ export function Sidebar({
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: (primary.length + secondary.length) * 0.05 + 0.05 }}
-                    className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-200 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50"
+                    className="w-full flex items-center space-x-3 px-4 py-3 rounded-2xl transition-all duration-200 bg-white/70 backdrop-blur-xl border border-red-500/30 hover:border-red-400/50 hover:bg-red-500/10 group"
                     title={collapsed ? 'Sign out' : undefined}
                   >
-                    <LogOut className="w-5 h-5 text-gray-500" />
-                    {!collapsed && <span className="truncate">Sign out</span>}
+                    {/* Glass reflection overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-red-400/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl" />
+                    
+                    {/* Shimmer effect */}
+                    <div className="absolute inset-0 overflow-hidden rounded-2xl">
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
+                    </div>
+                    
+                    <LogOut className="h-5 w-5 text-red-400 group-hover:text-red-300 transition-colors relative z-10" />
+                    {!collapsed && <span className="text-red-400 group-hover:text-red-300 font-medium transition-colors relative z-10">Sign out</span>}
                   </motion.button>
                 )}
               </div>
