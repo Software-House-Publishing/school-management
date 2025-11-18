@@ -10,9 +10,12 @@ export const ROUTE_PERMISSIONS: RoutePermission[] = [
   // Public routes
   { path: '/', roles: ['student', 'teacher', 'director', 'administrator', 'manager', 'finance_officer', 'help_desk'] },
   { path: '/about', roles: ['student', 'teacher', 'director', 'administrator', 'manager', 'finance_officer', 'help_desk'] },
+  { path: '/pricing', roles: ['student', 'teacher', 'director', 'administrator', 'manager', 'finance_officer', 'help_desk'] },
   { path: '/contact', roles: ['student', 'teacher', 'director', 'administrator', 'manager', 'finance_officer', 'help_desk'] },
   { path: '/rules', roles: ['student', 'teacher', 'director', 'administrator', 'manager', 'finance_officer', 'help_desk'] },
   { path: '/login', roles: ['student', 'teacher', 'director', 'administrator', 'manager', 'finance_officer', 'help_desk'] },
+  { path: '/register', roles: ['student', 'teacher', 'director', 'administrator', 'manager', 'finance_officer', 'help_desk'] },
+  { path: '/forgot-password', roles: ['student', 'teacher', 'director', 'administrator', 'manager', 'finance_officer', 'help_desk'] },
   
   // Student portal
   { path: '/student/*', roles: ['student'] },
