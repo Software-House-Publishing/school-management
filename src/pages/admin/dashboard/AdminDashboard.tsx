@@ -1,6 +1,37 @@
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '@/stores/authStore';
 import { Card } from '@/components/ui/Card';
+import { Button } from '@/components/ui/Button';
+import {
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  LineChart,
+  Line,
+} from 'recharts';
+
+// Dummy data for now – replace with real API data later
+const enrollmentData = [
+  { month: 'Jan', students: 450 },
+  { month: 'Feb', students: 520 },
+  { month: 'Mar', students: 610 },
+  { month: 'Apr', students: 670 },
+  { month: 'May', students: 710 },
+  { month: 'Jun', students: 740 },
+];
+
+const revenueData = [
+  { month: 'Jan', revenue: 45000 },
+  { month: 'Feb', revenue: 52000 },
+  { month: 'Mar', revenue: 60000 },
+  { month: 'Apr', revenue: 68000 },
+  { month: 'May', revenue: 72000 },
+  { month: 'Jun', revenue: 76000 },
+];
 
 export default function AdminDashboard() {
   const { t } = useTranslation();
@@ -69,6 +100,45 @@ export default function AdminDashboard() {
           </div>
         </Card>
       </div>
+
+        
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">
+        <Card>
+          <h2 className="text-lg font-semibold mb-4">Student Enrollment Trend</h2>
+          <div className="h-72">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={enrollmentData}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                <XAxis dataKey="month" />
+                <YAxis />
+                <Tooltip />
+                <Bar dataKey="students" radius={[8, 8, 0, 0]} fill="#000000" />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </Card>
+
+        <Card>
+          <h2 className="text-lg font-semibold mb-4">Revenue Trend</h2>
+          <div className="h-72">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={revenueData}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                <XAxis dataKey="month" />
+                <YAxis />
+                <Tooltip />
+                <Line
+                  type="monotone"
+                  dataKey="revenue"
+                  strokeWidth={2}
+                  dot
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </Card>
+      </div>
+
     </div>
   );
-}
+} 

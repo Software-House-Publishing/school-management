@@ -42,12 +42,18 @@ import TeacherExams from '@/pages/teacher/exams/TeacherExams';
 import TeacherAnnouncements from '@/pages/teacher/announcements/TeacherAnnouncements';
 
 // Admin portal pages
+import AdminAnnouncement from '@/pages/admin/announcement/AdminAnnouncement';
 import AdminDashboard from '@/pages/admin/dashboard/AdminDashboard';
-import AdminUsers from '@/pages/admin/users/AdminUsers';
+// import AdminUsers from '@/pages/admin/users/AdminUsers';
 import AdminCourses from '@/pages/admin/courses/AdminCourses';
+import AdminExams from '@/pages/admin/exams/AdminExams';
 import AdminFinance from '@/pages/admin/finance/AdminFinance';
+import AdminInvoices from '@/pages/admin/invoices/AdminInvoices';
 import AdminReports from '@/pages/admin/reports/AdminReports';
 import AdminSettings from '@/pages/admin/settings/AdminSettings';
+import AdminStudents from '@/pages/admin/students/StudentList';
+import AdminTeachers from '@/pages/admin/teachers/TeacherList';
+
 
 function App() {
   const { i18n } = useTranslation();
@@ -120,11 +126,16 @@ function App() {
           >
             <Route index element={<Navigate to="/admin/dashboard" replace />} />
             <Route path="dashboard" element={<AdminDashboard />} />
-            <Route path="users" element={<AdminUsers />} />
+            {/* <Route path="users" element={<AdminUsers />} /> */}
             <Route path="courses" element={<AdminCourses />} />
             <Route path="finance" element={<AdminFinance />} />
             <Route path="reports" element={<AdminReports />} />
             <Route path="settings" element={<AdminSettings />} />
+            <Route path="students" element={<AdminStudents />} />
+            <Route path="teachers" element={<AdminTeachers />} />
+            <Route path="announcements" element={<AdminAnnouncement />} />
+            <Route path="exams" element={<AdminExams />} />
+            <Route path="invoices" element={<AdminInvoices />} />
           </Route>
 
           {/* Catch all route */}

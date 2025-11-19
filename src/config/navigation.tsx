@@ -7,12 +7,92 @@ import {
   FileText, 
   Settings,
   BarChart3,
-  LogOut
+  BellPlus,
+  UserCog,
+  LogOut,
+  BookCheck
 } from 'lucide-react';
 import { NavItem } from '@/components/shared/Sidebar';
 
-// Admin navigation items
+// For school admin & manager
 export const adminNavItems: NavItem[] = [
+  {
+    id: 'dashboard',
+    label: 'Dashboard',
+    href: '/admin/dashboard',
+    icon: <Home size={18} />,
+    section: 'primary',
+  },
+  {
+    id: 'students',
+    label: 'Students',
+    href: '/admin/students',
+    icon: <Users size={18} />,
+    section: 'primary',
+  },
+  {
+    id: 'teachers',
+    label: 'Teachers',
+    href: '/admin/teachers',
+    icon: <UserCog size={18} />,
+    section: 'primary',
+  },
+  {
+    id: 'courses',
+    label: 'Courses',
+    href: '/admin/courses',
+    icon: <BookOpen size={18} />,
+    section: 'primary',
+  },
+  {
+    id: 'announcements',
+    label: 'Announcements',
+    href: '/admin/announcements',
+    icon: <BellPlus size={18} />,
+    section: 'primary',
+  },
+  {
+    id: 'exams',
+    label: 'Exams/Quizzes',
+    href: '/admin/exams',
+    icon: <BookCheck size={18} />,
+    section: 'primary',
+  },
+  {
+    id: 'finance',
+    label: 'Finance',
+    href: '/admin/finance',
+    icon: <Wallet size={18} />,
+    section: 'primary'
+  },
+  {
+    id: 'invoices',
+    label: 'Invoices',
+    href: '/admin/invoices',
+    icon: <FileText size={18} />,
+    section: 'primary',
+  },
+  {
+    id: 'reports',
+    label: 'Reports',
+    href: '/admin/reports',
+    icon: <BarChart3 size={18} />,
+    section: 'primary',
+  },
+  {
+    id: 'settings',
+    label: 'Settings',
+    href: '/admin/settings',
+    icon: <Settings size={18} />,
+    section: 'secondary'
+  },
+];
+
+
+export const managerNavItems = adminNavItems;
+
+// Admin navigation items
+export const directorNavItems: NavItem[] = [
   {
     id: 'dashboard',
     label: 'Dashboard',
