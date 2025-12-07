@@ -15,16 +15,20 @@ import { LogIn, Mail, Lock } from 'lucide-react';
 export default function Login() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { login, isLoading, setLoading, isAuthenticated, user } = useAuthStore();
+  const { login, logout, isLoading, setLoading, isAuthenticated, user } = useAuthStore();
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [showDemo, setShowDemo] = useState(false);
 
-  // Redirect if already authenticated
+  // Redirect if already authenticated (after a short delay to allow logout option)
   useEffect(() => {
     if (isAuthenticated && user) {
-      const defaultRoute = getDefaultRoute(user.role);
-      navigate(defaultRoute);
+      // Add a small delay to show logout option before redirecting
+      const timer = setTimeout(() => {
+        const defaultRoute = getDefaultRoute(user.role);
+        navigate(defaultRoute);
+      }, 2000); // 2 second delay
+      return () => clearTimeout(timer);
     }
   }, [isAuthenticated, user, navigate]);
 
@@ -35,61 +39,68 @@ export default function Login() {
       loginSchema.parse(formData);
       setErrors({});
       setLoading(true);
+
+      const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+      console.log('Login API_BASE:', API_BASE); // Debug log
       
-      // Mock login - replace with actual API call
-      let role: any = 'student';
-      let firstName = 'Demo';
-      let lastName = 'User';
-      
-      // Demo credentials mapping
-      if (formData.email.includes('director')) {
-        role = 'director';
-        firstName = 'Director';
-      } else if (formData.email.includes('admin')) {
-        role = 'administrator';
-        firstName = 'Admin';
-      } else if (formData.email.includes('manager')) {
-        role = 'manager';
-        firstName = 'Manager';
-      } else if (formData.email.includes('finance')) {
-        role = 'finance_officer';
-        firstName = 'Finance';
-      } else if (formData.email.includes('help')) {
-        role = 'help_desk';
-        firstName = 'Help Desk';
-      } else if (formData.email.includes('teacher')) {
-        role = 'teacher';
-        firstName = 'Teacher';
-      } else if (formData.email.includes('student')) {
-        role = 'student';
-        firstName = 'Student';
+      // Call backend login endpoint
+      const loginResp = await fetch(`${API_BASE}/api/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+        }),
+      });
+
+      if (!loginResp.ok) {
+        const errBody = await loginResp.json().catch(() => null);
+        setLoading(false);
+        // If backend returns validation errors, map them
+        if (errBody && errBody.error) {
+          setErrors({ ...errors, form: String(errBody.error) });
+        } else {
+          setErrors({ ...errors, form: `Login failed (${loginResp.status})` });
+        }
+        return;
       }
-      
-      const mockUser = {
-        id: '1',
+
+      const loginData = await loginResp.json();
+      const token = loginData?.accessToken;
+
+      if (!token) {
+        setLoading(false);
+        setErrors({ ...errors, form: 'No access token received from server' });
+        return;
+      }
+
+      // For now, create a minimal user object since backend only returns token
+      // TODO: Add a /api/auth/me endpoint to fetch full user profile
+      const user = {
+        id: 'temp-id',
         email: formData.email,
-        role: role,
-        firstName: firstName,
-        lastName: lastName,
+        role: 'administrator' as any, // Set to administrator to redirect to admin dashboard
+        firstName: 'User',
+        lastName: 'Name',
         isActive: true,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
-      
-      // Add small delay to simulate API call
-      setTimeout(() => {
-        login(mockUser, 'mock-token');
-        setLoading(false);
-      }, 1000);
+
+      login(user, token);
+      setLoading(false);
       
     } catch (error: any) {
+      console.error('Login error:', error); // Debug log
       setLoading(false);
-      if (error.errors) {
+      if (error?.errors) {
         const newErrors: Record<string, string> = {};
         error.errors.forEach((err: any) => {
           newErrors[err.path[0]] = err.message;
         });
         setErrors(newErrors);
+      } else {
+        setErrors({ form: `Login error: ${error?.message || error?.toString() || 'Please try again.'}` });
       }
     }
   };
@@ -115,6 +126,9 @@ export default function Login() {
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-4">
+                {errors.form && (
+                  <div className="text-sm text-red-600 mb-2">{errors.form}</div>
+                )}
                 <div>
                   <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
                     {t('auth.login.email')}
@@ -127,6 +141,7 @@ export default function Login() {
                       type="email"
                       value={formData.email}
                       onChange={handleChange}
+                      autoComplete="email"
                       className={`w-full pl-9 pr-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                         errors.email ? 'border-red-500' : 'border-gray-300'
                       }`}
@@ -150,6 +165,7 @@ export default function Login() {
                       type="password"
                       value={formData.password}
                       onChange={handleChange}
+                      autoComplete="current-password"
                       className={`w-full pl-9 pr-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                         errors.password ? 'border-red-500' : 'border-gray-300'
                       }`}

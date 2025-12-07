@@ -29,39 +29,95 @@ export default function Register() {
     setErrors({ ...errors, [e.target.name]: '' });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
     try {
       registerSchema.parse(formData);
       setErrors({});
       setLoading(true);
-      setTimeout(() => {
-        const fullName = formData.name.trim();
-        const [firstName, ...rest] = fullName.split(' ');
-        const lastName = rest.join(' ') || 'User';
-        const mockUser = {
-          id: 'new-1',
+
+      const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+      console.log('API_BASE:', API_BASE); // Debug log
+
+      // 1) Call register endpoint
+      const registerResp = await fetch(`${API_BASE}/api/auth/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          // backend expects at minimum email + password
           email: formData.email,
-          role: 'administrator' as any,
-          firstName,
-          lastName,
-          isActive: true,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        };
-        login(mockUser, 'mock-register-token');
-        navigate(getDefaultRoute(mockUser.role));
+          password: formData.password,
+          // include name/school in case you extend backend to store them
+          name: formData.name,
+          school: formData.school,
+        }),
+      });
+
+      if (!registerResp.ok) {
+        const errBody = await registerResp.json().catch(() => null);
         setLoading(false);
-      }, 1000);
+        // If backend returns validation errors, map them
+        if (errBody && errBody.error) {
+          setErrors({ ...errors, form: String(errBody.error) });
+        } else {
+          setErrors({ ...errors, form: `Registration failed (${registerResp.status})` });
+        }
+        return;
+      }
+
+      const registered = await registerResp.json();
+      // registered should include id, email, roles, status, createdAt per backend README
+
+      // 2) Immediately login to get access token
+      const loginResp = await fetch(`${API_BASE}/api/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: formData.email, password: formData.password }),
+      });
+
+      if (!loginResp.ok) {
+        const errBody = await loginResp.json().catch(() => null);
+        setLoading(false);
+        setErrors({ ...errors, form: 'Login after register failed. Try logging in manually.' });
+        return;
+      }
+
+      const loginData = await loginResp.json();
+      const token = loginData?.accessToken;
+
+      // Build a User object matching your frontend types
+      const fullName = formData.name.trim();
+      const [firstName, ...rest] = fullName.split(' ');
+      const lastName = rest.join(' ') || 'User';
+
+      const user = {
+        id: registered.id ?? registered._id ?? 'new',
+        email: registered.email ?? formData.email,
+        role: (registered.roles && registered.roles[0]) ? registered.roles[0] : ('administrator' as any),
+        firstName,
+        lastName,
+        isActive: registered.status ? registered.status === 'active' : true,
+        createdAt: registered.createdAt ?? new Date().toISOString(),
+        updatedAt: registered.createdAt ?? new Date().toISOString(),
+      };
+
+      // update store and navigate
+      login(user as any, token ?? '');
+      navigate(getDefaultRoute((user as any).role));
     } catch (error: any) {
-      setLoading(false);
-      if (error.errors) {
+      console.error('Registration error:', error); // Debug log
+      if (error?.errors) {
         const newErrors: Record<string, string> = {};
         error.errors.forEach((err: any) => {
           newErrors[err.path[0]] = err.message;
         });
         setErrors(newErrors);
+      } else {
+        setErrors({ form: `Unexpected error: ${error?.message || error?.toString() || 'Please try again.'}` });
       }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -81,6 +137,9 @@ export default function Register() {
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-4">
+                {errors.form && (
+                  <div className="text-sm text-red-600 mb-2">{errors.form}</div>
+                )}
                 <div>
                   <label htmlFor="school" className="block text-sm font-medium text-gray-700 mb-1">
                     School Name
@@ -93,9 +152,9 @@ export default function Register() {
                       type="text"
                       value={formData.school}
                       onChange={handleChange}
-                      className={`w-full pl-9 pr-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                        errors.school ? 'border-red-500' : 'border-gray-300'
-                      }`}
+                      autoComplete="organization"
+                      className={`w-full pl-9 pr-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.school ? 'border-red-500' : 'border-gray-300'
+                        }`}
                       placeholder="e.g., Lincoln High School"
                     />
                   </div>
@@ -114,9 +173,9 @@ export default function Register() {
                       type="text"
                       value={formData.name}
                       onChange={handleChange}
-                      className={`w-full pl-9 pr-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                        errors.name ? 'border-red-500' : 'border-gray-300'
-                      }`}
+                      autoComplete="name"
+                      className={`w-full pl-9 pr-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.name ? 'border-red-500' : 'border-gray-300'
+                        }`}
                       placeholder="e.g., Sarah Johnson"
                     />
                   </div>
@@ -135,9 +194,9 @@ export default function Register() {
                       type="email"
                       value={formData.email}
                       onChange={handleChange}
-                      className={`w-full pl-9 pr-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                        errors.email ? 'border-red-500' : 'border-gray-300'
-                      }`}
+                      autoComplete="email"
+                      className={`w-full pl-9 pr-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.email ? 'border-red-500' : 'border-gray-300'
+                        }`}
                       placeholder="you@example.com"
                     />
                   </div>
@@ -156,9 +215,9 @@ export default function Register() {
                       type="password"
                       value={formData.password}
                       onChange={handleChange}
-                      className={`w-full pl-9 pr-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                        errors.password ? 'border-red-500' : 'border-gray-300'
-                      }`}
+                      autoComplete="new-password"
+                      className={`w-full pl-9 pr-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.password ? 'border-red-500' : 'border-gray-300'
+                        }`}
                       placeholder="••••••••"
                     />
                   </div>
