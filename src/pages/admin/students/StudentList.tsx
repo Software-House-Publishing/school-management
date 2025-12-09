@@ -1,50 +1,116 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
-import { Student, loadStudents, saveStudents} from './studentData';
+import { Student } from './studentData';
+import { useAuthStore } from '@/stores/authStore';
+
+const API_BASE_URL = import.meta.env.VITE_API_URL ?? '';
 
 function fullName(s: Student) {
   return `${s.firstName} ${s.lastName}`;
 }
 
 export default function StudentList() {
-  // load from localStorage or mock data
-  const [students, setStudents] = useState<Student[]>(() => loadStudents());
-  const [search, setSearch] = useState('');
   const navigate = useNavigate();
+  const { token } = useAuthStore();
+  const [students, setStudents] = useState<Student[]>([]);
+  const [search, setSearch] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
+  // 👉 Load students from backend
+  useEffect(() => {
+    async function fetchStudents() {
+      try {
+        setLoading(true);
+        setError(null);
+
+        const res = await fetch(`${API_BASE_URL}/api/students`, {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: token ? `Bearer ${token}` : '',
+          },
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.message || 'Failed to load students');
+        }
+
+        setStudents(data.students || []);
+      } catch (err: any) {
+        setError(err.message || 'Failed to load students');
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    if (token) {
+      fetchStudents();
+    }
+  }, [token]);
+
+  // 👉 Search filter (by name or studentId)
   const filtered = useMemo(() => {
-    const term = search.toLowerCase();
-    if (!term) return students;
+    const q = search.trim().toLowerCase();
+    if (!q) return students;
+
     return students.filter((s) => {
       const name = fullName(s).toLowerCase();
-      const classLabel = `${s.enrollment.grade}-${s.enrollment.section ?? ''}`.toLowerCase();
-      return (
-        name.includes(term) ||
-        s.studentId.toLowerCase().includes(term) ||
-        (s.email ?? '').toLowerCase().includes(term) ||
-        classLabel.includes(term)
-      );
+      const id = (s.studentId || '').toLowerCase();
+      return name.includes(q) || id.includes(q);
     });
   }, [students, search]);
 
+  // 👉 View details
   const handleView = (id: string) => {
     navigate(`/admin/students/${id}`);
   };
 
-  function handleDelete(id: string) {
-  const ok = window.confirm('Are you sure you want to delete this student?');
-    if (!ok) return;
+  // 👉 Delete student
+  const handleDelete = async (id: string) => {
+    const confirmed = window.confirm('Are you sure you want to delete this student?');
+    if (!confirmed) return;
 
-    setStudents((prev) => {
-      const updated = prev.filter((s) => s.id !== id);
-      saveStudents(updated);
-      return updated;
-    });
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/students/${id}`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: token ? `Bearer ${token}` : '',
+        },
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.message || 'Failed to delete student');
+      }
+
+      setStudents((prev) => prev.filter((s) => s.id !== id));
+    } catch (err: any) {
+      alert(err.message || 'Failed to delete student');
+    }
+  };
+
+  // ---------- UI ----------
+  if (!token) {
+    return <p className="text-sm text-red-600">You must be logged in to view students.</p>;
   }
 
+  if (loading) {
+    return <p className="text-sm text-slate-600">Loading students…</p>;
+  }
 
+  if (error) {
+    return (
+      <div className="space-y-3">
+        <p className="text-sm text-red-600">{error}</p>
+        <Button type="button" onClick={() => window.location.reload()}>
+          Retry
+        </Button>
+      </div>
+    );
+  }
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-4">
@@ -60,6 +126,13 @@ export default function StudentList() {
       </div>
 
       <Card padding="lg" className="space-y-4">
+        {loading && (
+          <p className="text-sm text-muted-foreground">Loading students...</p>
+        )}
+        {error && (
+          <p className="text-sm text-red-600">{error}</p>
+        )}
+
         <input
           type="text"
           placeholder="Search students by name or ID..."
@@ -82,12 +155,17 @@ export default function StudentList() {
             </thead>
             <tbody>
               {filtered.map((s) => {
-                const classLabel = `${s.enrollment.grade}-${s.enrollment.section ?? ''}`;
-                const status = s.enrollment.status;
+                const classLabel = `${s.enrollment?.grade ?? ''}-${s.enrollment?.section ?? ''}`;
+                const status = s.enrollment?.status ?? 'active';
 
                 return (
-                  <tr key={s.id} className="border-b last:border-0 hover:bg-muted/40">
-                    <td className="px-3 py-2 text-xs font-mono">{s.studentId}</td>
+                  <tr
+                    key={s.id}
+                    className="border-b last:border-0 hover:bg-muted/40"
+                  >
+                    <td className="px-3 py-2 text-xs font-mono">
+                      {s.studentId}
+                    </td>
                     <td
                       className="px-3 py-2 cursor-pointer text-sm font-medium hover:underline"
                       onClick={() => handleView(s.id)}
@@ -131,13 +209,12 @@ export default function StudentList() {
                       >
                         Delete
                       </Button>
-
                     </td>
                   </tr>
                 );
               })}
 
-              {filtered.length === 0 && (
+              {filtered.length === 0 && !loading && (
                 <tr>
                   <td
                     colSpan={6}

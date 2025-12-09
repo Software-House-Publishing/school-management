@@ -13,8 +13,9 @@ import { getDefaultRoute } from '@/config/routes';
 import { LogIn, Mail, Lock } from 'lucide-react';
 
 // 🔑 Backend base URL (change VITE_API_URL in .env if you want)
-const API_BASE_URL =
-  import.meta.env.VITE_API_URL ?? 'http://localhost:5000';
+
+const API_BASE_URL = import.meta.env.VITE_API_URL ?? '';
+
 
 export default function Login() {
   const { t } = useTranslation();
@@ -69,13 +70,13 @@ export default function Login() {
       let appRole: string;
       switch (apiUser.role) {
         case 'admin':
-          appRole = 'director';        // highest power
+          appRole = 'director';     
           break;
         case 'school_admin':
-          appRole = 'administrator';   // school-level admin
+          appRole = 'administrator';   
           break;
         default:
-          appRole = apiUser.role;      // teacher, student stay the same
+          appRole = apiUser.role;      
       }
 
       const [firstName, ...rest] = (apiUser.name || '').split(' ');
@@ -234,7 +235,6 @@ export default function Login() {
                 </Button>
               </form>
 
-              {/* Google/demo stuff below left mostly as-is */}
               <div className="mt-6">
                 <div className="relative">
                   <div className="absolute inset-0 flex items-center">
@@ -269,70 +269,6 @@ export default function Login() {
                     {t('auth.login.google')}
                   </Button>
                 </div>
-
-                <Button
-                  type="button"
-                  variant="ghost"
-                  className="w-full mt-4"
-                  onClick={() => setShowDemo((v) => !v)}
-                >
-                  {showDemo
-                    ? 'Hide demo credentials'
-                    : 'Show demo credentials'}
-                </Button>
-
-                <AnimatePresence>
-                  {showDemo && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: 'auto', opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.25 }}
-                      className="overflow-hidden mt-4"
-                    >
-                      <Card className="bg-blue-50">
-                        <div className="p-4">
-                          <h3 className="text-sm font-semibold text-blue-900 mb-2">
-                            Demo Credentials
-                          </h3>
-                          <div className="text-xs text-blue-800 grid grid-cols-2 gap-x-6 gap-y-1">
-                            <p>
-                              <strong>Director:</strong>{' '}
-                              director@example.com
-                            </p>
-                            <p>
-                              <strong>Administrator:</strong>{' '}
-                              admin@example.com
-                            </p>
-                            <p>
-                              <strong>Manager:</strong>{' '}
-                              manager@example.com
-                            </p>
-                            <p>
-                              <strong>Finance Officer:</strong>{' '}
-                              finance@example.com
-                            </p>
-                            <p>
-                              <strong>Help Desk:</strong>{' '}
-                              help@example.com
-                            </p>
-                            <p>
-                              <strong>Teacher:</strong>{' '}
-                              teacher@example.com
-                            </p>
-                            <p>
-                              <strong>Student:</strong>{' '}
-                              student@example.com
-                            </p>
-                          </div>
-                          <p className="mt-3 text-xs text-blue-900">
-                            <em>Password: Any 8+ character password</em>
-                          </p>
-                        </div>
-                      </Card>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
 
                 <p className="mt-6 text-center text-sm text-gray-600">
                   Don’t have an account?{' '}
