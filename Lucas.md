@@ -131,3 +131,128 @@ Weekly Log – School Management System (9 December 2025)
 - Generates file automatically as: "Firstname-Lastname-Report.pdf"
 
 - Supports all browsers, no backend required
+
+10. Backend Migration – Real Authentication System ✔
+
+- We replaced the mock authentication with a full production-grade backend:
+
+-Created a dedicated Node.js + Express + MongoDB backend
+
+- Implemented secure JWT authentication
+
+- Connected frontend to backend via .env API URL
+
+- Added bcrypt password hashing (secure login)
+
+- Organized backend with models, controllers, and routes
+
+- This completes the foundation for real database-driven logic.
+
+11. Unified User Model + Role-Based Access (RBAC) ✔
+
+- Built a scalable system for 4 user types:
+
+- Director (maps to backend admin)
+
+- Administrator (maps to backend school_admin)
+
+- Teacher
+
+- Student
+
+- Features added:
+
+- New User model with name, email, passwordHash, role, createdBy
+
+- Role validation using ENUM to prevent invalid roles
+
+- Added schoolId field for future multi-school support
+
+- Enabled auto-tracking of createdAt and updatedAt
+
+- This structure supports future modules like Attendance, Payroll, Certification, etc.
+
+12. Auth Routes – Admin, School Admin, Teacher, Student Creation ✔
+
+- Added full backend capability to manage users:
+
+- Routes implemented:
+
+- /api/auth/register-admin → seed the first system admin
+
+- /api/auth/login → unified login for all roles
+
+- /api/users/create-school-admin → only Director
+
+- /api/users/create-teacher → Director or Administrator
+
+- /api/users/create-student → Director or Administrator
+
+- Each route includes:
+
+- Role validation
+
+- Input validation
+
+- Password hashing
+
+- Token-based identity
+
+- Now Directors can create school admins, and school admins can manage teachers & students.
+
+13. JWT Protection + Permission Middleware ✔
+
+- Implemented 2 essential middlewares:
+
+- requireAuth — verifies token, attaches user to req.user
+
+- requireRole(...) — checks if the user has one of the allowed roles
+
+- All sensitive endpoints (user creation, admin dashboard data, etc.) are now protected.
+
+- This brings real-world security into the system.
+
+14. Integrated Backend Login Into Frontend ✔
+
+- Replaced the old mock login inside:
+
+- /src/pages/system/auth/Login.tsx
+
+
+- with:
+
+- Live API call to backend /api/auth/login
+
+- Validation via Yup/Zod maintained
+
+- Mapped backend roles → frontend roles
+
+- admin → director
+
+- school_admin → administrator
+
+- Saved token + user in Zustand store
+
+- Redirected to correct dashboard based on role:
+
+- /admin/dashboard → Director / Administrator
+
+- /teacher/dashboard
+
+- /student/dashboard
+
+- The login flow is now fully functional across backend & frontend.
+
+15. Updated Protected Routes for New Auth System ✔
+
+- Adjusted App.tsx routing:
+
+- Added backend roles to ProtectedRoute
+
+- Ensured Director & Administrator both access /admin/*
+
+- Preserved Teacher → /teacher/* and Student → /student/*
+
+- Synced getDefaultRoute() with real backend roles
+
+- Now navigation behaves consistently across all browsers and platforms.
