@@ -139,7 +139,7 @@ export default function TeacherList() {
 
   return (
     <div className="space-y-6">
-      {/* Page header */}
+
       <div>
         <h1 className="text-3xl font-bold text-gray-900">Teachers Management</h1>
         <p className="mt-2 text-gray-600">
@@ -147,9 +147,7 @@ export default function TeacherList() {
         </p>
       </div>
 
-      {/* Main card */}
       <Card className="space-y-4 p-6">
-        {/* Top row: search + button */}
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <input
             type="text"
@@ -184,8 +182,6 @@ export default function TeacherList() {
                   className="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors"
                 >
                   <td className="py-3 pr-4 text-gray-700">{teacher.id}</td>
-
-                  {/* clickable name, opens details modal */}
                   <td
                     className="py-3 pr-4 text-gray-900 cursor-pointer hover:text-blue-600 hover:underline"
                     onClick={() => openViewModal(teacher)}
@@ -232,7 +228,6 @@ export default function TeacherList() {
         </div>
       </Card>
 
-      {/* Modal: Add / Edit / View teacher */}
       {isModalOpen && (
         <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/30">
           <div className="w-full max-w-xl rounded-2xl bg-white p-6 shadow-xl">
