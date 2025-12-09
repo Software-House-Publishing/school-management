@@ -188,3 +188,4 @@ systemd-private-*.service
 .Lucas.md
 
 backend/.env
+.vercel
