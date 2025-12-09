@@ -1,8 +1,9 @@
 // api/auth/login.js
 import { connectDB } from "../../lib/db.js";
 import { User } from "../../lib/models/User.js";
-import { generateToken } from "../../lib/auth.js";
+import { generateToken, getJsonBody } from "../../lib/auth.js";
 import bcrypt from "bcryptjs";
+
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
@@ -12,12 +13,7 @@ export default async function handler(req, res) {
   try {
     await connectDB();
 
-    // body can be string or object depending on runtime
-    const rawBody = req.body ?? {};
-    const { email, password } =
-      typeof rawBody === "string"
-        ? JSON.parse(rawBody || "{}")
-        : rawBody;
+    const { email, password } = await getJsonBody(req);
 
     if (!email || !password) {
       return res
@@ -44,7 +40,7 @@ export default async function handler(req, res) {
     return res.json({
       message: "Login successful",
       user: {
-        id: user._id.toString(),
+        id: user._id,
         name: user.name,
         email: user.email,
         role: user.role,
@@ -54,7 +50,26 @@ export default async function handler(req, res) {
   } catch (err) {
     console.error("Login error:", err);
     return res
-      .status(500)
+      .status(err.statusCode || 500)
       .json({ message: err.message || "Server error" });
   }
+  const accessToken = jwt.sign(
+    { id: user._id, role: user.role },
+    process.env.JWT_SECRET,
+    { expiresIn: "15m" }
+  );
+
+  const refreshToken = jwt.sign(
+    { id: user._id },
+    process.env.JWT_SECRET,
+    { expiresIn: "7d" }
+  );
+
+  // Send refresh token as HttpOnly cookie
+  res.setHeader("Set-Cookie", `refreshToken=${refreshToken}; HttpOnly; Path=/; Max-Age=604800; Secure; SameSite=Strict`);
+
+  return res.status(200).json({
+    token: accessToken,
+    user: { id: user._id, name: user.firstName },
+  });
 }
