@@ -975,7 +975,6 @@ export default function AdminExams() {
                 </div>
               </div>
 
-              {/* Question selection */}
               <div>
                 <p className="mb-2 text-sm font-medium text-gray-700">
                   Select Questions from Question Pool

@@ -53,7 +53,9 @@ import AdminReports from '@/pages/admin/reports/AdminReports';
 import AdminSettings from '@/pages/admin/settings/AdminSettings';
 import AdminStudents from '@/pages/admin/students/StudentList';
 import AdminTeachers from '@/pages/admin/teachers/TeacherList';
-
+import AdminStudentDetail from '@/pages/admin/students/StudentDetail';
+import AdminStudentCreate from '@/pages/admin/students/StudentCreate';
+import AdminStudentEdit from '@/pages/admin/students/StudentEdit';
 
 function App() {
   const { i18n } = useTranslation();
@@ -132,6 +134,9 @@ function App() {
             <Route path="reports" element={<AdminReports />} />
             <Route path="settings" element={<AdminSettings />} />
             <Route path="students" element={<AdminStudents />} />
+            <Route path="students/new" element={<AdminStudentCreate />} />
+            <Route path="students/:id" element={<AdminStudentDetail />} />
+            <Route path="students/:id/edit" element={<AdminStudentEdit />} />
             <Route path="teachers" element={<AdminTeachers />} />
             <Route path="announcements" element={<AdminAnnouncement />} />
             <Route path="exams" element={<AdminExams />} />
