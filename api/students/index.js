@@ -1,12 +1,110 @@
 import { connectDB } from "../../lib/db.js";
 import { Student } from "../../lib/models/Student.js";
 import { getUserFromRequest, assertRole, getJsonBody } from "../../lib/auth.js";
+import mongoose from "mongoose";
+
+// Counter schema for atomic ID generation
+const counterSchema = new mongoose.Schema({
+  _id: { type: String, required: true },
+  sequence: { type: Number, default: 0 }
+});
+
+const Counter = mongoose.models.Counter || mongoose.model("Counter", counterSchema);
+
+/**
+ * Initialize counter to match existing students
+ */
+async function initializeCounter() {
+  try {
+    // Check if counter already exists
+    const existingCounter = await Counter.findOne({ _id: "studentId" });
+    if (existingCounter) {
+      return; // Counter already initialized
+    }
+
+    // Find the highest existing student ID
+    const lastStudent = await Student.findOne()
+      .sort({ studentId: -1 })
+      .select("studentId")
+      .lean();
+
+    let startSequence = 0;
+    if (lastStudent && lastStudent.studentId) {
+      const match = lastStudent.studentId.match(/\d+/);
+      if (match) {
+        startSequence = parseInt(match[0], 10);
+      }
+    }
+
+    // Initialize counter with the highest existing value
+    await Counter.create({
+      _id: "studentId",
+      sequence: startSequence
+    });
+
+    console.log(`Counter initialized at ${startSequence}`);
+  } catch (err) {
+    // Counter might have been created by another request, which is fine
+    if (err.code !== 11000) {
+      console.error("Error initializing counter:", err);
+    }
+  }
+}
+
+/**
+ * Atomically generates next student ID using MongoDB counter
+ * @returns {Promise<string>} Next student ID (e.g., "STU001")
+ */
+async function getNextStudentId() {
+  const counter = await Counter.findOneAndUpdate(
+    { _id: "studentId" },
+    { $inc: { sequence: 1 } },
+    { 
+      new: true,
+      upsert: true,
+      returnDocument: 'after'
+    }
+  );
+  
+  return `STU${String(counter.sequence).padStart(3, "0")}`;
+}
+
+/**
+ * Ensures unique index on studentId field
+ */
+async function ensureStudentIdIndex() {
+  try {
+    await Student.collection.createIndex(
+      { studentId: 1 }, 
+      { unique: true, name: "studentId_unique" }
+    );
+  } catch (err) {
+    // Index may already exist, which is fine
+    if (err.code !== 85 && err.code !== 11000) {
+      console.error("Error creating studentId index:", err);
+    }
+  }
+}
+
+// Initialize once on module load
+let initPromise = null;
+
+async function ensureInitialized() {
+  if (!initPromise) {
+    initPromise = (async () => {
+      await ensureStudentIdIndex();
+      await initializeCounter();
+    })();
+  }
+  await initPromise;
+}
 
 export default async function handler(req, res) {
   try {
     await connectDB();
+    await ensureInitialized();
+    
     const currentUser = await getUserFromRequest(req);
-
     assertRole(currentUser, ["admin", "school_admin"]);
 
     if (req.method === "GET") {
@@ -51,7 +149,6 @@ async function getStudents(req, res) {
   // ⚡ Do count + data in parallel
   const [students, total] = await Promise.all([
     Student.find(filter)
-      // ⬇️ Only fields your list/detail actually needs
       .select(
         "studentId firstName lastName gender dateOfBirth photoUrl address phone email language guardians enrollment academics attendance activities health finance system documents"
       )
@@ -61,7 +158,7 @@ async function getStudents(req, res) {
       })
       .skip(skip)
       .limit(limitNum)
-      .lean(), // ⚡ plain JS objects (much cheaper than Mongoose docs)
+      .lean(),
     Student.countDocuments(filter),
   ]);
 
@@ -110,53 +207,70 @@ async function createStudent(req, res) {
       .json({ message: "firstName and lastName are required" });
   }
 
-  // 🔢 Auto-generate next studentId: STU001, STU002, ...
-  const lastStudent = await Student.findOne().sort({ studentId: -1 }).lean();
+  // 🔢 Atomic ID generation with retry loop
+  const MAX_RETRIES = 3;
+  let lastError = null;
 
-  let nextNumber = 1;
-  if (lastStudent && lastStudent.studentId) {
-    const match = lastStudent.studentId.match(/\d+/);
-    if (match) {
-      nextNumber = parseInt(match[0], 10) + 1;
+  for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+    try {
+      // Get next ID atomically
+      const newStudentId = await getNextStudentId();
+
+      // Attempt to create student
+      const student = await Student.create({
+        studentId: newStudentId,
+        firstName,
+        lastName,
+        gender,
+        dateOfBirth,
+        photoUrl,
+        address,
+        phone,
+        email,
+        language,
+        guardians: guardians || [],
+        enrollment: enrollment || {},
+        academics: academics || { currentSubjects: [] },
+        attendance: attendance || {},
+        activities: activities || {},
+        health: health || {},
+        finance: finance || {},
+        system: system || {},
+        documents: documents || [],
+      });
+
+      // Success!
+      return res.status(201).json({
+        message: "Student created successfully",
+        student: {
+          id: student._id.toString(),
+          ...student.toObject(),
+        },
+      });
+
+    } catch (err) {
+      lastError = err;
+      
+      // Check if it's a duplicate key error on studentId
+      if (err.code === 11000 && err.keyPattern?.studentId) {
+        console.warn(`Student ID collision on attempt ${attempt}/${MAX_RETRIES}, retrying...`);
+        
+        // If not last attempt, continue to retry
+        if (attempt < MAX_RETRIES) {
+          continue;
+        }
+      } else {
+        // Different error, throw immediately
+        console.error("Error creating student:", err);
+        throw err;
+      }
     }
   }
 
-  const newStudentId = `STU${String(nextNumber).padStart(3, "0")}`;
-
-  const existing = await Student.findOne({ studentId: newStudentId }).lean();
-  if (existing) {
-    return res.status(500).json({
-      message: "Generated student ID already exists, please retry.",
-    });
-  }
-
-  const student = await Student.create({
-    studentId: newStudentId,
-    firstName,
-    lastName,
-    gender,
-    dateOfBirth,
-    photoUrl,
-    address,
-    phone,
-    email,
-    language,
-    guardians: guardians || [],
-    enrollment: enrollment || {},
-    academics: academics || { currentSubjects: [] },
-    attendance: attendance || {},
-    activities: activities || {},
-    health: health || {},
-    finance: finance || {},
-    system: system || {},
-    documents: documents || [],
-  });
-
-  return res.status(201).json({
-    message: "Student created successfully",
-    student: {
-      id: student._id.toString(),
-      ...student.toObject(),
-    },
+  // All retries exhausted
+  console.error("Failed to create student after retries:", lastError);
+  return res.status(500).json({
+    message: "Unable to generate unique student ID after multiple attempts. Please try again.",
+    error: lastError.message
   });
 }
