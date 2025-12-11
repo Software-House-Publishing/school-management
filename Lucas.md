@@ -132,127 +132,158 @@ Weekly Log – School Management System (9 December 2025)
 
 - Supports all browsers, no backend required
 
-10. Backend Migration – Real Authentication System ✔
+10. Backend Structure Transition (Vercel Serverless API) ✔
 
-- We replaced the mock authentication with a full production-grade backend:
+Replaced mock backend with real Serverless API routes under /api/*
 
--Created a dedicated Node.js + Express + MongoDB backend
+No separate Node.js Express server — all backend logic runs inside Vercel endpoints
 
-- Implemented secure JWT authentication
+Added MongoDB connection via Mongoose
 
-- Connected frontend to backend via .env API URL
+Centralized models: User + Student
 
-- Added bcrypt password hashing (secure login)
+All CRUD operations now interact with the database instead of localStorage
 
-- Organized backend with models, controllers, and routes
+11. Unified User Model + RBAC ✔
 
-- This completes the foundation for real database-driven logic.
+Added User model with:
 
-11. Unified User Model + Role-Based Access (RBAC) ✔
+name
 
-- Built a scalable system for 4 user types:
+email
 
-- Director (maps to backend admin)
+passwordHash
 
-- Administrator (maps to backend school_admin)
+role (admin, school_admin, teacher, student)
 
-- Teacher
+createdBy
 
-- Student
+timestamps
 
-- Features added:
+Implemented role mapping to frontend:
 
-- New User model with name, email, passwordHash, role, createdBy
+admin → Director
 
-- Role validation using ENUM to prevent invalid roles
+school_admin → Administrator
 
-- Added schoolId field for future multi-school support
+teacher → Teacher
 
-- Enabled auto-tracking of createdAt and updatedAt
+student → Student
 
-- This structure supports future modules like Attendance, Payroll, Certification, etc.
+12. Authentication Routes (Serverless) ✔
 
-12. Auth Routes – Admin, School Admin, Teacher, Student Creation ✔
+Created API routes:
 
-- Added full backend capability to manage users:
+/api/auth/register-admin – only for first-time system setup
 
-- Routes implemented:
+/api/auth/login – unified login for all user types
 
-- /api/auth/register-admin → seed the first system admin
+/api/users/create-school-admin – Director only
 
-- /api/auth/login → unified login for all roles
+/api/users/create-teacher – Director or School Admin
 
-- /api/users/create-school-admin → only Director
+/api/users/create-student – Director or School Admin
 
-- /api/users/create-teacher → Director or Administrator
+Features included in these routes:
 
-- /api/users/create-student → Director or Administrator
+Input validation
 
-- Each route includes:
+Hashed passwords (bcrypt)
 
-- Role validation
+JWT issuance
 
-- Input validation
+All routes protected based on role permissions
 
-- Password hashing
+13. JWT Verification + Permissions ✔
 
-- Token-based identity
+Built getUserFromRequest() to decode JWT and attach user to request
 
-- Now Directors can create school admins, and school admins can manage teachers & students.
+Created assertRole() to protect sensitive endpoints
 
-13. JWT Protection + Permission Middleware ✔
+All student CRUD, user creation, and admin pages now require valid token
 
-- Implemented 2 essential middlewares:
+Proper 401 (unauthorized) & 403 (forbidden) error handling
 
-- requireAuth — verifies token, attaches user to req.user
+14. Integrated Login With Frontend ✔
 
-- requireRole(...) — checks if the user has one of the allowed roles
+Replaced old mock login with real API call
 
-- All sensitive endpoints (user creation, admin dashboard data, etc.) are now protected.
+Stored JWT + user in Zustand
 
-- This brings real-world security into the system.
+Implemented auto-redirect based on role:
 
-14. Integrated Backend Login Into Frontend ✔
+Director/Admin → /admin/dashboard
 
-- Replaced the old mock login inside:
+Teacher → /teacher/dashboard
 
-- /src/pages/system/auth/Login.tsx
+Student → /student/dashboard
 
+Added error messages for invalid credentials
 
-- with:
+15. Updated Protected Routes ✔
 
-- Live API call to backend /api/auth/login
+Updated <ProtectedRoute /> to check real backend roles
 
-- Validation via Yup/Zod maintained
+Ensured:
 
-- Mapped backend roles → frontend roles
+User Role	Allowed Pages
+Director (admin)	All /admin/* routes
+School Admin (school_admin)	All /admin/* routes
+Teacher	/teacher/* only
+Student	/student/* only
 
-- admin → director
+Synced frontend routing + backend RBAC perfectly
 
-- school_admin → administrator
+Weekly Log – School Management System (11 December 2025)
 
-- Saved token + user in Zustand store
+16. Security Hardening & Code Quality Improvements ✔
 
-- Redirected to correct dashboard based on role:
+- **Fixed Race Condition in Student ID Generation**
+  - Replaced "find last → increment → check duplicate → create" flow with atomic counter-based ID generator
+  - Implemented MongoDB `findOneAndUpdate` with `$inc` for atomic sequence generation
+  - Added unique index on `studentId` field for database-level enforcement
+  - Implemented retry loop (3 attempts) to handle edge cases
+  - Created `Counter` collection to track sequence numbers atomically
+  - Added counter initialization to sync with existing students
+  - Eliminated concurrent request collision issues
 
-- /admin/dashboard → Director / Administrator
+- **Removed Dead Code from Login Handler**
+  - Cleaned up unreachable refresh token code block (lines 52-75)
+  - Removed redundant JWT signing logic that was never executed
+  - Fixed variable scope and import issues in dead code
+  - Streamlined login flow to use single token generation method
 
-- /teacher/dashboard
+- **Secured Admin Registration Endpoint**
+  - Added safeguard to prevent multiple admin creation (one-time setup only)
+  - Implemented optional setup secret requirement via `ADMIN_SETUP_SECRET` env var
+  - Returns 403 Forbidden after first admin is created
+  - Added clear error messages for unauthorized registration attempts
+  - Created migration script for replacing mock admin with production credentials
 
-- /student/dashboard
+- **Implemented Password Strength Validation**
+  - Added server-side password validation with:
+    - Minimum 8 characters length requirement
+    - Must contain both letters and numbers
+    - Whitespace trimming and empty password rejection
+  - Built reusable `passwordValidator.js` utility with:
+    - Configurable validation rules (uppercase, lowercase, special chars)
+    - Custom regex pattern support
+    - Helper function for displaying requirements
+  - Returns clear 400 error messages for weak passwords
 
-- The login flow is now fully functional across backend & frontend.
+- **Fixed Mass Assignment Vulnerability in Student Updates**
+  - Implemented field whitelisting for PUT requests
+  - Created `sanitizer.js` utility with:
+    - `sanitizeFields()` - whitelist-based field filtering
+    - `ensureNoProtectedFields()` - blocks sensitive fields (_id, passwordHash, role)
+    - `pick()` and `omit()` helper functions
+    - Pre-defined whitelists for common entities
+  - Added `runValidators: true` to enforce schema validation on updates
+  - Prevents attackers from modifying protected fields like studentId, createdAt, role
+  - Returns 403 for protected field attempts, 400 for invalid fields
 
-15. Updated Protected Routes for New Auth System ✔
-
-- Adjusted App.tsx routing:
-
-- Added backend roles to ProtectedRoute
-
-- Ensured Director & Administrator both access /admin/*
-
-- Preserved Teacher → /teacher/* and Student → /student/*
-
-- Synced getDefaultRoute() with real backend roles
-
-- Now navigation behaves consistently across all browsers and platforms.
+- **Code Documentation & Testing Guide**
+  - Created comprehensive Thunder Client vs Postman testing guide
+  - Documented API endpoint testing procedures
+  - Added password validation test cases
+  - Provided examples for environment variable configuration
