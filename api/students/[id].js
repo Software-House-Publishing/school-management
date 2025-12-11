@@ -46,12 +46,13 @@ export default async function handler(req, res) {
       ensureNoProtectedFields(rawUpdates);
       
       // 🔒 Sanitize to only allowed fields
+      // Note: This properly handles arrays like guardians, documents, activities
       const sanitizedUpdates = sanitizeFields(
         rawUpdates,
         FIELD_WHITELISTS.student,
         {
           strict: true,        // Error if no valid fields
-          logRejected: true,   // Log rejected fields in development
+          logRejected: process.env.NODE_ENV === 'development', // Log only in dev
         }
       );
 
