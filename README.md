@@ -52,8 +52,8 @@ cd school-management
 # Install dependencies
 npm install
 
-# Start development server
-npm run dev
+# Start development server locally
+vercel dev 
 ```
 
 The application will be available at `http://localhost:5173`

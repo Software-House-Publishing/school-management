@@ -183,3 +183,9 @@ tsconfig.tsbuildinfo
 # Debug files
 debug.log
 systemd-private-*.service
+
+# weekly log
+.Lucas.md
+
+backend/.env
+.vercel
