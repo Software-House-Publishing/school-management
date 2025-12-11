@@ -6,6 +6,11 @@ import {
   assertRole,
   getJsonBody,
 } from '../../lib/auth.js';
+import {
+  sanitizeFields,
+  ensureNoProtectedFields,
+  FIELD_WHITELISTS,
+} from '../../lib/utils/sanitizer.js';
 
 export default async function handler(req, res) {
   const { id } = req.query || {};
@@ -35,11 +40,29 @@ export default async function handler(req, res) {
     }
 
     if (req.method === 'PUT') {
-      const updates = await getJsonBody(req);
+      const rawUpdates = await getJsonBody(req);
 
-      const student = await Student.findByIdAndUpdate(id, updates, {
-        new: true,
-      });
+      // 🔒 Security checks
+      ensureNoProtectedFields(rawUpdates);
+      
+      // 🔒 Sanitize to only allowed fields
+      const sanitizedUpdates = sanitizeFields(
+        rawUpdates,
+        FIELD_WHITELISTS.student,
+        {
+          strict: true,        // Error if no valid fields
+          logRejected: true,   // Log rejected fields in development
+        }
+      );
+
+      const student = await Student.findByIdAndUpdate(
+        id,
+        sanitizedUpdates,
+        {
+          new: true,
+          runValidators: true, // Run schema validators
+        }
+      );
 
       if (!student) {
         return res.status(404).json({ message: 'Student not found' });
