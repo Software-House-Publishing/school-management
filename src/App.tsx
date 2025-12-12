@@ -12,6 +12,14 @@ import SystemPricing from '@/pages/system/pricing/Pricing';
 import SystemLogin from '@/pages/system/auth/Login';
 import SystemRegister from '@/pages/system/auth/Register';
 import SystemForgotPassword from '@/pages/system/auth/ForgotPassword';
+import SystemDocs from '@/pages/system/docs/Docs';
+import SystemCommunity from '@/pages/system/community/Community';
+import SystemStatus from '@/pages/system/status/Status';
+import SystemHelp from '@/pages/system/help/HelpCenter';
+import SystemCareers from '@/pages/system/careers/Careers';
+import SystemPress from '@/pages/system/press/Press';
+import SystemCookies from '@/pages/system/cookies/Cookies';
+import SystemGDPR from '@/pages/system/gdpr/GDPR';
 
 // School-specific public pages
 import SchoolHome from '@/pages/school-public/home/SchoolHome';
@@ -74,6 +82,14 @@ function App() {
           <Route path="/login" element={<SystemLogin />} />
           <Route path="/register" element={<SystemRegister />} />
           <Route path="/forgot-password" element={<SystemForgotPassword />} />
+          <Route path="/docs" element={<SystemDocs />} />
+          <Route path="/community" element={<SystemCommunity />} />
+          <Route path="/status" element={<SystemStatus />} />
+          <Route path="/help" element={<SystemHelp />} />
+          <Route path="/careers" element={<SystemCareers />} />
+          <Route path="/press" element={<SystemPress />} />
+          <Route path="/cookies" element={<SystemCookies />} />
+          <Route path="/gdpr" element={<SystemGDPR />} />
 
           {/* School-specific public routes */}
           <Route path="/school/:schoolId" element={<SchoolHome />} />
