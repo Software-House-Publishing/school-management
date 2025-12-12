@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 :root {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+  font-family: "SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
   line-height: 1.5;
   font-weight: 400;
 
@@ -11,6 +11,11 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  
+  /* Natural Tone Background */
+  --bg-natural: #F5F5F7;
+  --glass-border: rgba(255, 255, 255, 0.5);
+  --glass-surface: rgba(255, 255, 255, 0.65);
 
   /* Sidebar design tokens */
   --sidebar-active-bg: #EEF2FF;     /* light indigo tint for active pill */
@@ -21,4 +26,30 @@
   --sidebar-shadow: 0 12px 32px rgba(16,24,40,0.08);
   --sidebar-gutter: 0.5rem; /* distance from screen edge */
   --content-gutter: 0.5rem;   /* extra space between sidebar and content */
+}
+
+body {
+  background-color: var(--bg-natural);
+  color: #1d1d1f;
+}
+
+.glass-panel {
+  background: var(--glass-surface);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 4px 24px -1px rgba(0, 0, 0, 0.05);
+}
+
+.glass-button {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-button:hover {
+  background: rgba(255, 255, 255, 0.95);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
 }

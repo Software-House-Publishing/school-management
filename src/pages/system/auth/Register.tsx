@@ -2,14 +2,11 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { z } from 'zod';
 import { useAuthStore } from '@/stores/authStore';
-import SystemHeader from '@/components/layouts/SystemHeader';
-import SystemFooter from '@/components/layouts/SystemFooter';
-import { Container } from '@/components/layouts/Container';
-import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { nameSchema, emailSchema, passwordSchema } from '@/utils/validators';
-import { LogIn, Mail, Lock, Building2, User } from 'lucide-react';
+import { Mail, Lock, Building2, User, ArrowRight } from 'lucide-react';
 import { getDefaultRoute } from '@/config/routes';
+import AuthLayout from '@/components/layouts/AuthLayout';
 
 const registerSchema = z.object({
   school: z.string().min(3, 'School name must be at least 3 characters'),
@@ -66,121 +63,128 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      <SystemHeader />
-      <Container size="full" className="py-16">
-        <div className="flex items-center justify-center">
-          <Card variant="glass" className="w-[26rem] max-w-none mx-auto">
-            <div className="p-6">
-              <div className="text-center mb-6">
-                <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 mx-auto mb-3">
-                  <LogIn className="w-6 h-6 text-white" />
-                </div>
-                <h2 className="text-xl font-bold text-gray-900">Get Started</h2>
-                <p className="text-gray-600 mt-1">Create your administrator account</p>
-              </div>
-
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                  <label htmlFor="school" className="block text-sm font-medium text-gray-700 mb-1">
-                    School Name
-                  </label>
-                  <div className="relative">
-                    <Building2 className="w-4 h-4 text-gray-400 absolute left-3 top-3" />
-                    <input
-                      id="school"
-                      name="school"
-                      type="text"
-                      value={formData.school}
-                      onChange={handleChange}
-                      className={`w-full pl-9 pr-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                        errors.school ? 'border-red-500' : 'border-gray-300'
-                      }`}
-                      placeholder="e.g., Lincoln High School"
-                    />
-                  </div>
-                  {errors.school && <p className="mt-1 text-sm text-red-600">{errors.school}</p>}
-                </div>
-
-                <div>
-                  <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-                    Full Name
-                  </label>
-                  <div className="relative">
-                    <User className="w-4 h-4 text-gray-400 absolute left-3 top-3" />
-                    <input
-                      id="name"
-                      name="name"
-                      type="text"
-                      value={formData.name}
-                      onChange={handleChange}
-                      className={`w-full pl-9 pr-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                        errors.name ? 'border-red-500' : 'border-gray-300'
-                      }`}
-                      placeholder="e.g., Sarah Johnson"
-                    />
-                  </div>
-                  {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name}</p>}
-                </div>
-
-                <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                    Email
-                  </label>
-                  <div className="relative">
-                    <Mail className="w-4 h-4 text-gray-400 absolute left-3 top-3" />
-                    <input
-                      id="email"
-                      name="email"
-                      type="email"
-                      value={formData.email}
-                      onChange={handleChange}
-                      className={`w-full pl-9 pr-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                        errors.email ? 'border-red-500' : 'border-gray-300'
-                      }`}
-                      placeholder="you@example.com"
-                    />
-                  </div>
-                  {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email}</p>}
-                </div>
-
-                <div>
-                  <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-                    Password
-                  </label>
-                  <div className="relative">
-                    <Lock className="w-4 h-4 text-gray-400 absolute left-3 top-3" />
-                    <input
-                      id="password"
-                      name="password"
-                      type="password"
-                      value={formData.password}
-                      onChange={handleChange}
-                      className={`w-full pl-9 pr-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                        errors.password ? 'border-red-500' : 'border-gray-300'
-                      }`}
-                      placeholder="••••••••"
-                    />
-                  </div>
-                  {errors.password && <p className="mt-1 text-sm text-red-600">{errors.password}</p>}
-                </div>
-
-                <Button type="submit" className="w-full" loading={isLoading}>
-                  Create account
-                </Button>
-              </form>
-
-              <p className="mt-6 text-center text-sm text-gray-600">
-                Already have an account?{' '}
-                <button type="button" onClick={() => navigate('/login')} className="text-blue-600 hover:underline">
-                  Sign in
-                </button>
-              </p>
-            </div>
-          </Card>
+    <AuthLayout
+      title="Start your free trial."
+      subtitle="No credit card required. Cancel anytime."
+      footer={
+        <p>
+          Already have an account?{' '}
+          <a href="/login" className="font-medium text-gray-900 hover:underline">
+            Sign in
+          </a>
+        </p>
+      }
+    >
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="space-y-2">
+          <label htmlFor="school" className="block text-sm font-medium text-gray-700 ml-1">
+            School Name
+          </label>
+          <div className="relative">
+            <Building2 className="w-5 h-5 text-gray-400 absolute left-4 top-3.5" />
+            <input
+              id="school"
+              name="school"
+              type="text"
+              value={formData.school}
+              onChange={handleChange}
+              className={`w-full pl-11 pr-4 py-3 bg-gray-50 border rounded-2xl focus:outline-none focus:ring-2 focus:ring-gray-900 focus:bg-white transition-all ${
+                errors.school ? 'border-red-500 bg-red-50/50' : 'border-transparent'
+              }`}
+              placeholder="e.g., Lincoln High School"
+            />
+          </div>
+          {errors.school && (
+            <p className="ml-1 text-sm text-red-600">
+              {errors.school}
+            </p>
+          )}
         </div>
-      </Container>
-      <SystemFooter />
-    </div>
+
+        <div className="space-y-2">
+          <label htmlFor="name" className="block text-sm font-medium text-gray-700 ml-1">
+            Full Name
+          </label>
+          <div className="relative">
+            <User className="w-5 h-5 text-gray-400 absolute left-4 top-3.5" />
+            <input
+              id="name"
+              name="name"
+              type="text"
+              value={formData.name}
+              onChange={handleChange}
+              className={`w-full pl-11 pr-4 py-3 bg-gray-50 border rounded-2xl focus:outline-none focus:ring-2 focus:ring-gray-900 focus:bg-white transition-all ${
+                errors.name ? 'border-red-500 bg-red-50/50' : 'border-transparent'
+              }`}
+              placeholder="John Doe"
+            />
+          </div>
+          {errors.name && (
+            <p className="ml-1 text-sm text-red-600">
+              {errors.name}
+            </p>
+          )}
+        </div>
+
+        <div className="space-y-2">
+          <label htmlFor="email" className="block text-sm font-medium text-gray-700 ml-1">
+            Email Address
+          </label>
+          <div className="relative">
+            <Mail className="w-5 h-5 text-gray-400 absolute left-4 top-3.5" />
+            <input
+              id="email"
+              name="email"
+              type="email"
+              value={formData.email}
+              onChange={handleChange}
+              className={`w-full pl-11 pr-4 py-3 bg-gray-50 border rounded-2xl focus:outline-none focus:ring-2 focus:ring-gray-900 focus:bg-white transition-all ${
+                errors.email ? 'border-red-500 bg-red-50/50' : 'border-transparent'
+              }`}
+              placeholder="name@school.com"
+            />
+          </div>
+          {errors.email && (
+            <p className="ml-1 text-sm text-red-600">
+              {errors.email}
+            </p>
+          )}
+        </div>
+
+        <div className="space-y-2">
+          <label htmlFor="password" className="block text-sm font-medium text-gray-700 ml-1">
+            Password
+          </label>
+          <div className="relative">
+            <Lock className="w-5 h-5 text-gray-400 absolute left-4 top-3.5" />
+            <input
+              id="password"
+              name="password"
+              type="password"
+              value={formData.password}
+              onChange={handleChange}
+              className={`w-full pl-11 pr-4 py-3 bg-gray-50 border rounded-2xl focus:outline-none focus:ring-2 focus:ring-gray-900 focus:bg-white transition-all ${
+                errors.password ? 'border-red-500 bg-red-50/50' : 'border-transparent'
+              }`}
+              placeholder="Create a password"
+            />
+          </div>
+          {errors.password && (
+            <p className="ml-1 text-sm text-red-600">
+              {errors.password}
+            </p>
+          )}
+        </div>
+
+        <Button
+          type="submit"
+          isLoading={isLoading}
+          className="w-full h-12 rounded-xl bg-gray-900 hover:bg-gray-800 text-white font-medium text-base shadow-lg hover:shadow-xl transition-all duration-300"
+        >
+          Create Account
+          {!isLoading && <ArrowRight className="ml-2 w-4 h-4" />}
+        </Button>
+      </form>
+    </AuthLayout>
   );
 }

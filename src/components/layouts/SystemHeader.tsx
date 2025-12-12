@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, Globe, Users, BookOpen, CreditCard, Info } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Menu, X, BookOpen, ChevronRight } from 'lucide-react';
+import { Button } from '@/components/ui/Button';
 
 export default function SystemHeader() {
   const { t } = useTranslation();
@@ -30,11 +31,10 @@ export default function SystemHeader() {
   }, [location.pathname]);
 
   const navigationItems = [
-    { id: 'home', label: t('navigation.home'), path: '/', icon: Globe },
-    { id: 'about', label: 'About Us', path: '/about', icon: Info },
-    { id: 'features', label: 'Features', path: '/#features', icon: BookOpen },
-    { id: 'pricing', label: 'Pricing', path: '/pricing', icon: CreditCard },
-    { id: 'contact', label: t('navigation.contact'), path: '/contact', icon: Users },
+    { id: 'home', label: t('navigation.home'), path: '/' },
+    { id: 'features', label: 'Features', path: '/#features' },
+    { id: 'pricing', label: 'Pricing', path: '/pricing' },
+    { id: 'about', label: 'About', path: '/about' },
   ];
 
   const handleNavigation = (path: string) => {
@@ -52,175 +52,110 @@ export default function SystemHeader() {
 
   return (
     <>
-      <header className={
-        'fixed top-0 left-0 right-0 z-50 transition-all duration-300 bg-white/95 backdrop-blur-xl shadow-lg border-b border-[#E5E5EA]/60'
-      }>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
+      <header 
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
+          isScrolled 
+            ? 'bg-white/80 backdrop-blur-xl shadow-[0_4px_30px_rgba(0,0,0,0.03)] border-b border-white/40' 
+            : 'bg-transparent'
+        }`}
+      >
+        <div className="max-w-7xl mx-auto px-6 lg:px-8">
+          <div className="flex items-center justify-between h-20">
             {/* Logo */}
             <motion.div 
-              className="flex items-center space-x-3 cursor-pointer"
+              className="flex items-center space-x-3 cursor-pointer group"
               onClick={() => navigate('/')}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
             >
-              <div className={
-                'w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 bg-gradient-to-br from-blue-500 to-purple-600 shadow-lg'
-              }>
-                <BookOpen className={`w-5 h-5 ${isScrolled ? 'text-white' : 'text-white'}`} />
+              <div className="w-10 h-10 rounded-xl bg-gray-900 flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300">
+                <BookOpen className="w-5 h-5 text-white" />
               </div>
-              <span className={'text-xl font-bold transition-colors duration-300 text-gray-900'}>
+              <span className="text-xl font-semibold tracking-tight text-gray-900">
                 {t('app.name')}
               </span>
             </motion.div>
 
-            {/* Desktop Navigation - Dynamic Island Style */}
-            <div className="hidden md:flex items-center">
-              <motion.nav 
-                className={'flex items-center space-x-1 rounded-full px-2 py-1 transition-all duration-300 bg-[#FBFBFD]/90 backdrop-blur-sm'}
-                initial={false}
-                animate={{ boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)' }}
-              >
-                {navigationItems.map((item) => {
-                  const Icon = item.icon;
-                  return (
-                    <motion.button
-                      key={item.id}
-                      onClick={() => handleNavigation(item.path)}
-                      className={`relative px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
-                        activeSection === item.id
-                          ? 'text-blue-600 bg-white shadow-md'
-                          : 'text-[#6e6e73] hover:text-[#1d1d1f] hover:bg-[#F2F2F7]'
-                      }`}
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                    >
-                      <div className="flex items-center space-x-2">
-                        <Icon className="w-4 h-4" />
-                        <span>{item.label}</span>
-                      </div>
-                      {activeSection === item.id && (
-                        <motion.div
-                          className="absolute inset-0 rounded-full bg-gradient-to-r from-blue-500/10 to-purple-600/10"
-                          layoutId="activeTab"
-                          transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                        />
-                      )}
-                    </motion.button>
-                  );
-                })}
-              </motion.nav>
+            {/* Desktop Navigation */}
+            <div className="hidden md:flex items-center bg-white/50 backdrop-blur-lg rounded-full px-2 py-1.5 border border-white/60 shadow-[0_2px_12px_rgba(0,0,0,0.02)]">
+              {navigationItems.map((item) => (
+                <button
+                  key={item.id}
+                  onClick={() => handleNavigation(item.path)}
+                  className={`relative px-5 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
+                    activeSection === item.id
+                      ? 'text-gray-900 bg-white shadow-[0_2px_8px_rgba(0,0,0,0.04)]'
+                      : 'text-gray-500 hover:text-gray-900 hover:bg-white/50'
+                  }`}
+                >
+                  {item.label}
+                </button>
+              ))}
+            </div>
 
-              {/* Auth Buttons */}
-              <div className="ml-6 flex items-center space-x-3">
-                <motion.button
-                  onClick={() => navigate('/login')}
-                  className={'px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 text-[#6e6e73] hover:text-[#1d1d1f] hover:bg-[#F2F2F7]'}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  {t('navigation.login')}
-                </motion.button>
-                <motion.button
-                  onClick={() => navigate('/register')}
-                  className="px-6 py-2 rounded-full text-sm font-medium bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg hover:shadow-xl transition-all duration-200"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  Get Started
-                </motion.button>
-              </div>
+            {/* Right Actions */}
+            <div className="hidden md:flex items-center space-x-4">
+              <button 
+                onClick={() => navigate('/login')}
+                className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
+              >
+                Log in
+              </button>
+              <Button 
+                onClick={() => navigate('/register')}
+                className="rounded-full bg-gray-900 hover:bg-gray-800 text-white shadow-lg hover:shadow-xl transition-all duration-300 px-6"
+              >
+                Get Started
+              </Button>
             </div>
 
             {/* Mobile Menu Button */}
-            <motion.button
-              className={'md:hidden p-2 rounded-full transition-colors duration-300 text-[#6e6e73] hover:bg-[#F2F2F7]'}
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              whileTap={{ scale: 0.95 }}
-            >
-              <AnimatePresence mode="wait">
-                {isMenuOpen ? (
-                  <motion.div
-                    key="close"
-                    initial={{ rotate: -90, opacity: 0 }}
-                    animate={{ rotate: 0, opacity: 1 }}
-                    exit={{ rotate: 90, opacity: 0 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <X className="w-6 h-6" />
-                  </motion.div>
-                ) : (
-                  <motion.div
-                    key="menu"
-                    initial={{ rotate: 90, opacity: 0 }}
-                    animate={{ rotate: 0, opacity: 1 }}
-                    exit={{ rotate: -90, opacity: 0 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <Menu className="w-6 h-6" />
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </motion.button>
+            <div className="md:hidden">
+              <button
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                className="p-2 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors"
+              >
+                {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              </button>
+            </div>
           </div>
         </div>
-
-        {/* Mobile Menu */}
-        <AnimatePresence>
-          {isMenuOpen && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.3, ease: 'easeInOut' }}
-              className="md:hidden bg-white/95 backdrop-blur-xl border-t border-gray-200/50"
-            >
-              <div className="px-4 py-4 space-y-2">
-                {navigationItems.map((item) => {
-                  const Icon = item.icon;
-                  return (
-                    <motion.button
-                      key={item.id}
-                      onClick={() => handleNavigation(item.path)}
-                      className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-left transition-all duration-200 ${
-                        activeSection === item.id
-                          ? 'text-blue-600 bg-blue-50'
-                          : 'text-gray-700 hover:bg-gray-50'
-                      }`}
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                    >
-                      <Icon className="w-5 h-5" />
-                      <span className="font-medium">{item.label}</span>
-                    </motion.button>
-                  );
-                })}
-                <div className="pt-4 border-t border-gray-200 space-y-2">
-                  <motion.button
-                    onClick={() => navigate('/login')}
-                    className="w-full px-4 py-3 rounded-xl text-gray-700 hover:bg-gray-50 font-medium transition-all duration-200"
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                  >
-                    {t('navigation.login')}
-                  </motion.button>
-                  <motion.button
-                    onClick={() => navigate('/register')}
-                    className="w-full px-4 py-3 rounded-xl bg-gradient-to-r from-blue-500 to-purple-600 text-white font-medium shadow-lg hover:shadow-xl transition-all duration-200"
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                  >
-                    Get Started
-                  </motion.button>
-                </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
       </header>
 
-      {/* Spacer to prevent content from being hidden behind fixed header */}
-      <div className="h-16" />
+      {/* Mobile Menu Overlay */}
+      <motion.div
+        initial={false}
+        animate={isMenuOpen ? { opacity: 1, pointerEvents: 'auto' } : { opacity: 0, pointerEvents: 'none' }}
+        className="fixed inset-0 z-40 bg-white/90 backdrop-blur-3xl md:hidden pt-24 px-6"
+      >
+        <div className="flex flex-col space-y-4">
+          {navigationItems.map((item) => (
+            <button
+              key={item.id}
+              onClick={() => handleNavigation(item.path)}
+              className="flex items-center justify-between w-full p-4 rounded-2xl bg-white/50 border border-white/60 text-left text-lg font-medium text-gray-900 hover:bg-white transition-all"
+            >
+              <span>{item.label}</span>
+              <ChevronRight className="w-5 h-5 text-gray-400" />
+            </button>
+          ))}
+          <div className="pt-8 flex flex-col space-y-4">
+            <Button 
+              onClick={() => navigate('/login')}
+              variant="outline"
+              className="w-full justify-center rounded-xl h-12 text-base"
+            >
+              Log in
+            </Button>
+            <Button 
+              onClick={() => navigate('/contact')}
+              className="w-full justify-center rounded-xl h-12 text-base bg-gray-900 text-white"
+            >
+              Get Started
+            </Button>
+          </div>
+        </div>
+      </motion.div>
     </>
   );
 }
