@@ -105,7 +105,7 @@ export default async function handler(req, res) {
     await ensureInitialized();
     
     const currentUser = await getUserFromRequest(req);
-    assertRole(currentUser, ["admin", "school_admin"]);
+    assertRole(currentUser, ["system_administrator", "school_administrator"]);
 
     if (req.method === "GET") {
       return getStudents(req, res);

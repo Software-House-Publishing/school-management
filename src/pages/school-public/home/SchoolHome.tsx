@@ -14,9 +14,7 @@ import {
   TrendingUp, 
   Zap,
   Star,
-  CheckCircle,
   Globe,
-  Clock,
   MapPin,
   Mail,
   Phone

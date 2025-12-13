@@ -1,4 +1,3 @@
-import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { Container } from '@/components/layouts/Container';
 import SystemHeader from '@/components/layouts/SystemHeader';
@@ -6,8 +5,6 @@ import SystemFooter from '@/components/layouts/SystemFooter';
 import { FileText, Book, Code, Terminal, Search } from 'lucide-react';
 
 export default function Docs() {
-  const { t } = useTranslation();
-
   const sections = [
     {
       title: 'Getting Started',

@@ -1,14 +1,12 @@
-import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Container } from '@/components/layouts/Container';
 import { Button } from '@/components/ui/Button';
 import SystemHeader from '@/components/layouts/SystemHeader';
 import SystemFooter from '@/components/layouts/SystemFooter';
-import { Check, CheckCircle, Zap, Star } from 'lucide-react';
+import { Check } from 'lucide-react';
 
 export default function Pricing() {
-  const { t } = useTranslation();
   const navigate = useNavigate();
 
   const plans = [

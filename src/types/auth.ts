@@ -11,8 +11,8 @@ export interface User {
 }
 
 export type UserRole = 
-  | 'director' 
-  | 'administrator' 
+  | 'system_administrator' 
+  | 'school_administrator' 
   | 'manager' 
   | 'finance_officer' 
   | 'help_desk' 

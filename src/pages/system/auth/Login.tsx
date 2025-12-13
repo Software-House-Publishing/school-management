@@ -7,6 +7,7 @@ import { loginSchema } from '@/utils/validators';
 import { getDefaultRoute } from '@/config/routes';
 import { Mail, Lock, ArrowRight } from 'lucide-react';
 import AuthLayout from '@/components/layouts/AuthLayout';
+import { UserRole } from '@/types/auth';
 
 // 🔑 Backend base URL (change VITE_API_URL in .env if you want)
 
@@ -20,7 +21,6 @@ export default function Login() {
     useAuthStore();
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [showDemo, setShowDemo] = useState(false);
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -63,16 +63,16 @@ export default function Login() {
       const apiUser = data.user;
 
       // map backend roles to frontend roles
-      let appRole: string;
+      let appRole: UserRole;
       switch (apiUser.role) {
         case 'admin':
-          appRole = 'director';     
+          appRole = 'system_administrator';     
           break;
         case 'school_admin':
-          appRole = 'administrator';   
+          appRole = 'school_administrator';   
           break;
         default:
-          appRole = apiUser.role;      
+          appRole = apiUser.role as UserRole;      
       }
 
       const [firstName, ...rest] = (apiUser.name || '').split(' ');
@@ -90,24 +90,22 @@ export default function Login() {
       };
 
       // ✅ save to global auth store (token + user)
-      login(mappedUser as any, data.token);
+      login(mappedUser, data.token);
 
       setLoading(false);
-    } catch (error: any) {
+    } catch (error: unknown) {
       setLoading(false);
 
       // Zod validation errors
-      if (error.errors) {
+      if (typeof error === 'object' && error !== null && 'errors' in error) {
         const newErrors: Record<string, string> = {};
-        error.errors.forEach((err: any) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (error as any).errors.forEach((err: any) => {
           newErrors[err.path[0]] = err.message;
         });
         setErrors(newErrors);
       } else {
-        setErrors((prev) => ({
-          ...prev,
-          general: 'Unexpected error, please try again.',
-        }));
+        console.error('Login error:', error);
       }
     }
   };
@@ -204,7 +202,7 @@ export default function Login() {
           isLoading={isLoading}
           className="w-full h-12 rounded-xl bg-gray-900 hover:bg-gray-800 text-white font-medium text-base shadow-lg hover:shadow-xl transition-all duration-300"
         >
-          Sign in
+          {isLoading ? t('auth.login.loading') : t('auth.login.submit')}
           {!isLoading && <ArrowRight className="ml-2 w-4 h-4" />}
         </Button>
       </form>

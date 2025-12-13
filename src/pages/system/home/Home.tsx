@@ -1,4 +1,3 @@
-import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Container } from '@/components/layouts/Container';
@@ -12,13 +11,11 @@ import {
   Shield, 
   TrendingUp, 
   Award, 
-  CheckCircle,
   ArrowRight,
   Star
 } from 'lucide-react';
 
 export default function Home() {
-  const { t } = useTranslation();
   const navigate = useNavigate();
 
   const features = [
@@ -103,8 +100,8 @@ export default function Home() {
                 <span className="flex w-2 h-2 bg-green-500 rounded-full mr-2" />
                 New: AI-Powered Analytics 2.0
               </span>
-              <h1 className="text-5xl lg:text-7xl font-semibold tracking-tight leading-[1.1] mb-8 bg-clip-text text-transparent bg-gradient-to-b from-gray-900 to-gray-600">
-                School management,<br />reimagined.
+              <h1 className="text-5xl lg:text-7xl font-semibold tracking-tight leading-[1.1] mb-10 bg-clip-text text-transparent bg-gradient-to-b from-gray-900 to-gray-600">
+                School Management,<br />Reimagined.
               </h1>
               <p className="text-xl lg:text-2xl text-gray-500 leading-relaxed mb-10 max-w-2xl mx-auto">
                 A powerful, intuitive platform designed to streamline administration, enhance learning, and connect your entire school community.

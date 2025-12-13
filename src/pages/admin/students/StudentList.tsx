@@ -39,8 +39,8 @@ export default function StudentList() {
         }
 
         setStudents(data.students || []);
-      } catch (err: any) {
-        setError(err.message || 'Failed to load students');
+      } catch (err: unknown) {
+        setError(err instanceof Error ? err.message : 'Failed to load students');
       } finally {
         setLoading(false);
       }
@@ -65,7 +65,7 @@ export default function StudentList() {
 
   // 👉 View details
   const handleView = (id: string) => {
-    navigate(`/admin/students/${id}`);
+    navigate(`/school-admin/students/${id}`);
   };
 
   // 👉 Delete student
@@ -87,8 +87,8 @@ export default function StudentList() {
       }
 
       setStudents((prev) => prev.filter((s) => s.id !== id));
-    } catch (err: any) {
-      alert(err.message || 'Failed to delete student');
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : 'Failed to delete student');
     }
   };
 
@@ -120,7 +120,7 @@ export default function StudentList() {
             Manage student information and enrollment.
           </p>
         </div>
-        <Button type="button" onClick={() => navigate('/admin/students/new')}>
+        <Button type="button" onClick={() => navigate('/school-admin/students/new')}>
           + Add Student
         </Button>
       </div>
@@ -196,7 +196,7 @@ export default function StudentList() {
                         type="button"
                         size="sm"
                         variant="outline"
-                        onClick={() => navigate(`/admin/students/${s.id}/edit`)}
+                        onClick={() => navigate(`/school-admin/students/${s.id}/edit`)}
                       >
                         Edit
                       </Button>

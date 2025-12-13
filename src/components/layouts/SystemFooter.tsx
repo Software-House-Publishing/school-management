@@ -3,11 +3,6 @@ import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { 
   BookOpen, 
-  Mail, 
-  Shield, 
-  FileText, 
-  Users, 
-  Globe,
   Github,
   Twitter,
   Linkedin,

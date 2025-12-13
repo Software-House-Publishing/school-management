@@ -17,7 +17,7 @@ export default async function handler(req, res) {
     await connectDB();
 
     const currentUser = await getUserFromRequest(req);
-    assertRole(currentUser, ["admin"]); // only top admin can create school_admin
+    assertRole(currentUser, ["system_administrator"]); // only top admin can create school_admin
 
     const { name, email, password } = await getJsonBody(req);
 
@@ -41,7 +41,7 @@ export default async function handler(req, res) {
       name,
       email,
       passwordHash,
-      role: "school_admin",
+      role: "school_administrator",
       createdBy: currentUser._id,
     });
 

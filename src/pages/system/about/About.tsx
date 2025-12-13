@@ -2,11 +2,10 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Container } from '@/components/layouts/Container';
-import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import SystemHeader from '@/components/layouts/SystemHeader';
 import SystemFooter from '@/components/layouts/SystemFooter';
-import { BookOpen, Users, Shield, Globe, Award, CheckCircle, Zap } from 'lucide-react';
+import { BookOpen, Users, Shield, Globe, Award } from 'lucide-react';
 
 export default function About() {
   const { t } = useTranslation();
@@ -77,7 +76,7 @@ export default function About() {
               transition={{ duration: 0.8, delay: 0.2 }}
               className="grid gap-4"
             >
-              {values.map((value, index) => {
+              {values.map((value) => {
                 const Icon = value.icon;
                 return (
                   <div key={value.title} className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm flex items-start space-x-5 hover:shadow-md transition-shadow">

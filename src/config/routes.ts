@@ -8,14 +8,14 @@ export interface RoutePermission {
 
 export const ROUTE_PERMISSIONS: RoutePermission[] = [
   // Public routes
-  { path: '/', roles: ['student', 'teacher', 'director', 'administrator', 'manager', 'finance_officer', 'help_desk'] },
-  { path: '/about', roles: ['student', 'teacher', 'director', 'administrator', 'manager', 'finance_officer', 'help_desk'] },
-  { path: '/pricing', roles: ['student', 'teacher', 'director', 'administrator', 'manager', 'finance_officer', 'help_desk'] },
-  { path: '/contact', roles: ['student', 'teacher', 'director', 'administrator', 'manager', 'finance_officer', 'help_desk'] },
-  { path: '/rules', roles: ['student', 'teacher', 'director', 'administrator', 'manager', 'finance_officer', 'help_desk'] },
-  { path: '/login', roles: ['student', 'teacher', 'director', 'administrator', 'manager', 'finance_officer', 'help_desk'] },
-  { path: '/register', roles: ['student', 'teacher', 'director', 'administrator', 'manager', 'finance_officer', 'help_desk'] },
-  { path: '/forgot-password', roles: ['student', 'teacher', 'director', 'administrator', 'manager', 'finance_officer', 'help_desk'] },
+  { path: '/', roles: ['student', 'teacher', 'system_administrator', 'school_administrator', 'manager', 'finance_officer', 'help_desk'] },
+  { path: '/about', roles: ['student', 'teacher', 'system_administrator', 'school_administrator', 'manager', 'finance_officer', 'help_desk'] },
+  { path: '/pricing', roles: ['student', 'teacher', 'system_administrator', 'school_administrator', 'manager', 'finance_officer', 'help_desk'] },
+  { path: '/contact', roles: ['student', 'teacher', 'system_administrator', 'school_administrator', 'manager', 'finance_officer', 'help_desk'] },
+  { path: '/rules', roles: ['student', 'teacher', 'system_administrator', 'school_administrator', 'manager', 'finance_officer', 'help_desk'] },
+  { path: '/login', roles: ['student', 'teacher', 'system_administrator', 'school_administrator', 'manager', 'finance_officer', 'help_desk'] },
+  { path: '/register', roles: ['student', 'teacher', 'system_administrator', 'school_administrator', 'manager', 'finance_officer', 'help_desk'] },
+  { path: '/forgot-password', roles: ['student', 'teacher', 'system_administrator', 'school_administrator', 'manager', 'finance_officer', 'help_desk'] },
   
   // Student portal
   { path: '/student/*', roles: ['student'] },
@@ -33,14 +33,27 @@ export const ROUTE_PERMISSIONS: RoutePermission[] = [
   { path: '/teacher/exams', roles: ['teacher'] },
   { path: '/teacher/announcements', roles: ['teacher'] },
   
-  // Admin portal - Director and Administrator
-  { path: '/admin/*', roles: ['director', 'administrator', 'manager', 'finance_officer', 'help_desk'] },
-  { path: '/admin/dashboard', roles: ['director', 'administrator', 'manager', 'finance_officer', 'help_desk'] },
-  { path: '/admin/users', roles: ['director', 'administrator', 'manager', 'help_desk'] },
-  { path: '/admin/courses', roles: ['director', 'administrator', 'manager', 'teacher'] },
-  { path: '/admin/finance', roles: ['director', 'administrator', 'finance_officer'] },
-  { path: '/admin/reports', roles: ['director', 'administrator', 'manager', 'finance_officer', 'help_desk'] },
-  { path: '/admin/settings', roles: ['director', 'administrator'] },
+  // School Admin portal - School Administrator, Manager, etc.
+  { path: '/school-admin/*', roles: ['school_administrator', 'manager', 'finance_officer', 'help_desk'] },
+  { path: '/school-admin/dashboard', roles: ['school_administrator', 'manager', 'finance_officer', 'help_desk'] },
+  { path: '/school-admin/students', roles: ['school_administrator', 'manager', 'help_desk'] },
+  { path: '/school-admin/teachers', roles: ['school_administrator', 'manager'] },
+  { path: '/school-admin/courses', roles: ['school_administrator', 'manager', 'teacher'] },
+  { path: '/school-admin/finance', roles: ['school_administrator', 'finance_officer'] },
+  { path: '/school-admin/reports', roles: ['school_administrator', 'manager', 'finance_officer', 'help_desk'] },
+  { path: '/school-admin/settings', roles: ['school_administrator'] },
+  { path: '/school-admin/invoices', roles: ['school_administrator', 'finance_officer'] },
+  { path: '/school-admin/exams', roles: ['school_administrator', 'manager'] },
+  { path: '/school-admin/announcements', roles: ['school_administrator', 'manager'] },
+
+  // System Admin portal - System Administrator
+  { path: '/system-admin/*', roles: ['system_administrator'] },
+  { path: '/system-admin/dashboard', roles: ['system_administrator'] },
+  { path: '/system-admin/users', roles: ['system_administrator'] },
+  { path: '/system-admin/courses', roles: ['system_administrator'] },
+  { path: '/system-admin/finance', roles: ['system_administrator'] },
+  { path: '/system-admin/reports', roles: ['system_administrator'] },
+  { path: '/system-admin/settings', roles: ['system_administrator'] },
 ];
 
 export const getDefaultRoute = (role: UserRole): string => {
@@ -49,12 +62,13 @@ export const getDefaultRoute = (role: UserRole): string => {
       return '/student/dashboard';
     case 'teacher':
       return '/teacher/dashboard';
-    case 'director':
-    case 'administrator':
+    case 'system_administrator':
+      return '/system-admin/dashboard';
+    case 'school_administrator':
     case 'manager':
     case 'finance_officer':
     case 'help_desk':
-      return '/admin/dashboard';
+      return '/school-admin/dashboard';
     default:
       return '/';
   }

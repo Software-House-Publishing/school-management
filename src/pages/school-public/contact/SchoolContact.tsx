@@ -3,7 +3,6 @@ import { useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Container } from '@/components/layouts/Container';
 import { Card } from '@/components/ui/Card';
-import { Button } from '@/components/ui/Button';
 import SchoolHeader from '@/components/layouts/SchoolHeader';
 import SchoolFooter from '@/components/layouts/SchoolFooter';
 import { 
@@ -13,11 +12,7 @@ import {
   Clock, 
   Send,
   User,
-  MessageSquare,
-  Globe,
-  Facebook,
-  Twitter,
-  Instagram
+  MessageSquare
 } from 'lucide-react';
 
 interface SchoolContactData {
