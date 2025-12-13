@@ -1,19 +1,13 @@
-import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { Container } from '@/components/layouts/Container';
 import SystemHeader from '@/components/layouts/SystemHeader';
 import SystemFooter from '@/components/layouts/SystemFooter';
 import { ArrowRight, Briefcase, MapPin, Clock } from 'lucide-react';
+import { jobOpenings } from '@/data/system-content';
 
 export default function Careers() {
-  const { t } = useTranslation();
-
-  const openings = [
-    { title: 'Senior Frontend Engineer', department: 'Engineering', location: 'Remote', type: 'Full-time' },
-    { title: 'Product Designer', department: 'Design', location: 'New York, NY', type: 'Full-time' },
-    { title: 'Customer Success Manager', department: 'Sales', location: 'London, UK', type: 'Full-time' },
-    { title: 'DevOps Engineer', department: 'Engineering', location: 'Remote', type: 'Contract' },
-  ];
+  const navigate = useNavigate();
 
   return (
     <div className="min-h-screen bg-[#F5F5F7] text-[#1d1d1f]">
@@ -38,13 +32,14 @@ export default function Careers() {
       <section className="pb-32">
         <Container>
           <div className="max-w-4xl mx-auto space-y-6">
-            {openings.map((job, index) => (
+            {jobOpenings.map((job, index) => (
               <motion.div
-                key={job.title}
+                key={job.id}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}
+                onClick={() => navigate(`/careers/${job.slug}`)}
                 className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm hover:shadow-lg transition-all cursor-pointer group flex items-center justify-between"
               >
                 <div>

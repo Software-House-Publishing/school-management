@@ -1,13 +1,10 @@
-import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { Container } from '@/components/layouts/Container';
 import SystemHeader from '@/components/layouts/SystemHeader';
 import SystemFooter from '@/components/layouts/SystemFooter';
-import { CheckCircle, AlertTriangle, XCircle, Activity } from 'lucide-react';
+import { CheckCircle } from 'lucide-react';
 
 export default function Status() {
-  const { t } = useTranslation();
-
   const services = [
     { name: 'API', status: 'operational' },
     { name: 'Dashboard', status: 'operational' },

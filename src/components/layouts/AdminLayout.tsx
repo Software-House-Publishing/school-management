@@ -1,5 +1,4 @@
 import { Outlet } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { Container } from '@/components/layouts/Container';
 
@@ -8,7 +7,6 @@ import Sidebar, { UserInfo } from '@/components/shared/Sidebar';
 import { adminNavItems, directorNavItems } from '@/config/navigation.tsx';
 
 export default function AdminLayout() {
-  const { t } = useTranslation();
   const navigate = useNavigate();
   const { logout, user } = useAuthStore();
 
@@ -18,7 +16,7 @@ export default function AdminLayout() {
   };
 
   // pick sidebar items based on role
-  const navItems = user?.role === 'director'
+  const navItems = user?.role === 'system_administrator'
     ? directorNavItems // used by us
     : adminNavItems; // used by administrator + manager
 

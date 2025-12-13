@@ -9,7 +9,6 @@ import {
   BarChart3,
   BellPlus,
   UserCog,
-  LogOut,
   BookCheck
 } from 'lucide-react';
 import { NavItem } from '@/components/shared/Sidebar';
@@ -19,70 +18,70 @@ export const adminNavItems: NavItem[] = [
   {
     id: 'dashboard',
     label: 'Dashboard',
-    href: '/admin/dashboard',
+    href: '/school-admin/dashboard',
     icon: <Home size={18} />,
     section: 'primary',
   },
   {
     id: 'students',
     label: 'Students',
-    href: '/admin/students',
+    href: '/school-admin/students',
     icon: <Users size={18} />,
     section: 'primary',
   },
   {
     id: 'teachers',
     label: 'Teachers',
-    href: '/admin/teachers',
+    href: '/school-admin/teachers',
     icon: <UserCog size={18} />,
     section: 'primary',
   },
   {
     id: 'courses',
     label: 'Courses',
-    href: '/admin/courses',
+    href: '/school-admin/courses',
     icon: <BookOpen size={18} />,
     section: 'primary',
   },
   {
     id: 'announcements',
     label: 'Announcements',
-    href: '/admin/announcements',
+    href: '/school-admin/announcements',
     icon: <BellPlus size={18} />,
     section: 'primary',
   },
   {
     id: 'exams',
     label: 'Exams/Quizzes',
-    href: '/admin/exams',
+    href: '/school-admin/exams',
     icon: <BookCheck size={18} />,
     section: 'primary',
   },
   {
     id: 'finance',
     label: 'Finance',
-    href: '/admin/finance',
+    href: '/school-admin/finance',
     icon: <Wallet size={18} />,
     section: 'primary'
   },
   {
     id: 'invoices',
     label: 'Invoices',
-    href: '/admin/invoices',
+    href: '/school-admin/invoices',
     icon: <FileText size={18} />,
     section: 'primary',
   },
   {
     id: 'reports',
     label: 'Reports',
-    href: '/admin/reports',
+    href: '/school-admin/reports',
     icon: <BarChart3 size={18} />,
     section: 'primary',
   },
   {
     id: 'settings',
     label: 'Settings',
-    href: '/admin/settings',
+    href: '/school-admin/settings',
     icon: <Settings size={18} />,
     section: 'secondary'
   },
@@ -96,42 +95,42 @@ export const directorNavItems: NavItem[] = [
   {
     id: 'dashboard',
     label: 'Dashboard',
-    href: '/admin/dashboard',
+    href: '/system-admin/dashboard',
     icon: <Home size={18} />,
     section: 'primary'
   },
   {
     id: 'users',
     label: 'Users',
-    href: '/admin/users',
+    href: '/system-admin/users',
     icon: <Users size={18} />,
     section: 'primary'
   },
   {
     id: 'courses',
     label: 'Courses',
-    href: '/admin/courses',
+    href: '/system-admin/courses',
     icon: <BookOpen size={18} />,
     section: 'primary'
   },
   {
     id: 'finance',
     label: 'Finance',
-    href: '/admin/finance',
+    href: '/system-admin/finance',
     icon: <Wallet size={18} />,
     section: 'primary'
   },
   {
     id: 'reports',
     label: 'Reports',
-    href: '/admin/reports',
+    href: '/system-admin/reports',
     icon: <BarChart3 size={18} />,
     section: 'primary'
   },
   {
     id: 'settings',
     label: 'Settings',
-    href: '/admin/settings',
+    href: '/system-admin/settings',
     icon: <Settings size={18} />,
     section: 'secondary'
   }

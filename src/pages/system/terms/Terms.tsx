@@ -1,14 +1,10 @@
-import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { Container } from '@/components/layouts/Container';
-import { Card } from '@/components/ui/Card';
 import SystemHeader from '@/components/layouts/SystemHeader';
 import SystemFooter from '@/components/layouts/SystemFooter';
-import { Shield, FileText, Users, CreditCard, AlertTriangle, CheckCircle } from 'lucide-react';
+import { Shield, FileText, Users, CreditCard, CheckCircle } from 'lucide-react';
 
 export default function Terms() {
-  const { t } = useTranslation();
-
   const sections = [
     {
       title: 'Service Description',

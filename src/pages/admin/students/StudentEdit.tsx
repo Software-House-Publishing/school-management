@@ -169,9 +169,9 @@ export default function StudentEdit() {
         setPortalUsername(s.system?.portalUsername ?? '');
         setPortalActive(s.system?.portalActive ?? true);
         setRfidCardId(s.system?.rfidCardId ?? '');
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error(err);
-        setError(err.message || 'Failed to load student');
+        setError(err instanceof Error ? err.message : 'Failed to load student');
       } finally {
         setLoading(false);
       }
@@ -292,10 +292,10 @@ export default function StudentEdit() {
         throw new Error(data.message || 'Failed to update student');
       }
 
-      navigate(`/admin/students/${student.id}`);
-    } catch (err: any) {
+      navigate(`/school-admin/students/${student.id}`);
+    } catch (err: unknown) {
       console.error(err);
-      alert(err.message || 'Failed to update student');
+      alert(err instanceof Error ? err.message : 'Failed to update student');
     }
   }
 
@@ -306,7 +306,7 @@ export default function StudentEdit() {
         <Button
           type="button"
           variant="outline"
-          onClick={() => navigate('/admin/students')}
+          onClick={() => navigate('/school-admin/students')}
         >
           ← Back to Students
         </Button>
@@ -323,7 +323,7 @@ export default function StudentEdit() {
         <Button
           type="button"
           variant="outline"
-          onClick={() => navigate('/admin/students')}
+          onClick={() => navigate('/school-admin/students')}
         >
           ← Back to Students
         </Button>
@@ -343,7 +343,7 @@ export default function StudentEdit() {
         <Button
           type="button"
           variant="outline"
-          onClick={() => navigate(`/admin/students/${student.id}`)}
+          onClick={() => navigate(`/school-admin/students/${student.id}`)}
         >
           ← Back to Student Detail
         </Button>

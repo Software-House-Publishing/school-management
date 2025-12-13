@@ -17,7 +17,7 @@ export default async function handler(req, res) {
     await connectDB();
 
     const currentUser = await getUserFromRequest(req);
-    assertRole(currentUser, ["admin", "school_admin"]);
+    assertRole(currentUser, ["system_administrator", "school_administrator"]);
 
     const { name, email, password } = await getJsonBody(req);
 

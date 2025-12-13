@@ -7,6 +7,7 @@ import { nameSchema, emailSchema, passwordSchema } from '@/utils/validators';
 import { Mail, Lock, Building2, User, ArrowRight } from 'lucide-react';
 import { getDefaultRoute } from '@/config/routes';
 import AuthLayout from '@/components/layouts/AuthLayout';
+import { UserRole } from '@/types/auth';
 
 const registerSchema = z.object({
   school: z.string().min(3, 'School name must be at least 3 characters'),
@@ -39,7 +40,7 @@ export default function Register() {
         const mockUser = {
           id: 'new-1',
           email: formData.email,
-          role: 'administrator' as any,
+          role: 'school_administrator' as UserRole,
           firstName,
           lastName,
           isActive: true,
@@ -50,11 +51,12 @@ export default function Register() {
         navigate(getDefaultRoute(mockUser.role));
         setLoading(false);
       }, 1000);
-    } catch (error: any) {
+    } catch (error: unknown) {
       setLoading(false);
-      if (error.errors) {
+      if (typeof error === 'object' && error !== null && 'errors' in error) {
         const newErrors: Record<string, string> = {};
-        error.errors.forEach((err: any) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (error as any).errors.forEach((err: any) => {
           newErrors[err.path[0]] = err.message;
         });
         setErrors(newErrors);

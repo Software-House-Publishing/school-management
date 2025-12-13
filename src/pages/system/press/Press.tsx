@@ -1,18 +1,13 @@
-import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { Container } from '@/components/layouts/Container';
 import SystemHeader from '@/components/layouts/SystemHeader';
 import SystemFooter from '@/components/layouts/SystemFooter';
 import { Download } from 'lucide-react';
+import { pressItems } from '@/data/system-content';
 
 export default function Press() {
-  const { t } = useTranslation();
-
-  const news = [
-    { date: 'Oct 24, 2023', title: 'AcademiaOS Raises Series B Funding to Expand Global Reach', source: 'TechCrunch' },
-    { date: 'Sep 15, 2023', title: 'New AI Features Launch to Help Teachers Save Time', source: 'EdSurge' },
-    { date: 'Aug 01, 2023', title: 'AcademiaOS Named Best School Management System of 2023', source: 'Education Week' },
-  ];
+  const navigate = useNavigate();
 
   return (
     <div className="min-h-screen bg-[#F5F5F7] text-[#1d1d1f]">
@@ -39,20 +34,21 @@ export default function Press() {
           <div className="grid md:grid-cols-3 gap-12">
             <div className="md:col-span-2 space-y-8">
               <h2 className="text-2xl font-semibold text-gray-900">Recent News</h2>
-              {news.map((item, index) => (
+              {pressItems.map((item, index) => (
                 <motion.div
-                  key={index}
+                  key={item.id}
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: index * 0.1 }}
-                  className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm"
+                  onClick={() => navigate(`/press/${item.slug}`)}
+                  className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm cursor-pointer group hover:shadow-lg transition-all"
                 >
                   <div className="flex items-center justify-between mb-4">
                     <span className="text-sm font-medium text-gray-400">{item.date}</span>
                     <span className="text-sm font-medium text-blue-600 bg-blue-50 px-3 py-1 rounded-full">{item.source}</span>
                   </div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2 hover:text-blue-600 cursor-pointer transition-colors">{item.title}</h3>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">{item.title}</h3>
                 </motion.div>
               ))}
             </div>

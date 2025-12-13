@@ -1,8 +1,5 @@
-import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { Container } from '@/components/layouts/Container';
-import { Card } from '@/components/ui/Card';
-import { Button } from '@/components/ui/Button';
 import SystemHeader from '@/components/layouts/SystemHeader';
 import SystemFooter from '@/components/layouts/SystemFooter';
 import { 
@@ -13,8 +10,6 @@ import {
 } from 'lucide-react';
 
 export default function Contact() {
-  const { t } = useTranslation();
-
   const contactInfo = [
     {
       icon: Mail,

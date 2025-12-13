@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/Button';
 import { emailSchema } from '@/utils/validators';
-import { Mail, ArrowRight, KeyRound } from 'lucide-react';
+import { Mail, ArrowRight } from 'lucide-react';
 import AuthLayout from '@/components/layouts/AuthLayout';
 
 export default function ForgotPassword() {
@@ -22,8 +22,9 @@ export default function ForgotPassword() {
         setSubmitting(false);
         setSubmitted(true);
       }, 1000);
-    } catch (err: any) {
-      setError(err.message || 'Invalid email');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Invalid email';
+      setError(message);
     }
   };
 

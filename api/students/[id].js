@@ -22,8 +22,8 @@ export default async function handler(req, res) {
   try {
     await connectDB();
     const currentUser = await getUserFromRequest(req);
-    // Only admin & school_admin can manage students
-    assertRole(currentUser, ['admin', 'school_admin']);
+    // Only system_administrator & school_administrator can manage students
+    assertRole(currentUser, ['system_administrator', 'school_administrator']);
 
     if (req.method === 'GET') {
       const student = await Student.findById(id);

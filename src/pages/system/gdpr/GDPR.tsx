@@ -1,4 +1,3 @@
-import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { Container } from '@/components/layouts/Container';
 import SystemHeader from '@/components/layouts/SystemHeader';
@@ -6,8 +5,6 @@ import SystemFooter from '@/components/layouts/SystemFooter';
 import { ShieldCheck, Lock, Globe } from 'lucide-react';
 
 export default function GDPR() {
-  const { t } = useTranslation();
-
   return (
     <div className="min-h-screen bg-[#F5F5F7] text-[#1d1d1f]">
       <SystemHeader />

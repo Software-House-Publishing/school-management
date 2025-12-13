@@ -1,13 +1,10 @@
-import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { Container } from '@/components/layouts/Container';
 import SystemHeader from '@/components/layouts/SystemHeader';
 import SystemFooter from '@/components/layouts/SystemFooter';
-import { Search, BookOpen, MessageCircle, FileQuestion, LifeBuoy, Users, CreditCard } from 'lucide-react';
+import { Search, BookOpen, FileQuestion, LifeBuoy, Users, CreditCard } from 'lucide-react';
 
 export default function HelpCenter() {
-  const { t } = useTranslation();
-
   const categories = [
     { title: 'Getting Started', icon: BookOpen, count: 12 },
     { title: 'Account Management', icon: Users, count: 8 },

@@ -60,9 +60,9 @@ export default function StudentDetail() {
         }
 
         setStudent(data.student);
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error(err);
-        setError(err.message || 'Failed to load student');
+        setError(err instanceof Error ? err.message : 'Failed to load student');
       } finally {
         setLoading(false);
       }
@@ -90,10 +90,10 @@ export default function StudentDetail() {
         throw new Error(data.message || 'Failed to delete student');
       }
 
-      navigate('/admin/students');
-    } catch (err: any) {
+      navigate('/school-admin/students');
+    } catch (err: unknown) {
       console.error(err);
-      alert(err.message || 'Failed to delete student');
+      alert(err instanceof Error ? err.message : 'Failed to delete student');
     }
   };
 
@@ -144,7 +144,7 @@ export default function StudentDetail() {
         <Button
           type="button"
           variant="outline"
-          onClick={() => navigate('/admin/students')}
+          onClick={() => navigate('/school-admin/students')}
         >
           ← Back to Students
         </Button>
@@ -161,7 +161,7 @@ export default function StudentDetail() {
         <Button
           type="button"
           variant="outline"
-          onClick={() => navigate('/admin/students')}
+          onClick={() => navigate('/school-admin/students')}
         >
           ← Back to Students
         </Button>
@@ -193,7 +193,7 @@ export default function StudentDetail() {
         <Button
           type="button"
           variant="outline"
-          onClick={() => navigate('/admin/students')}
+          onClick={() => navigate('/school-admin/students')}
         >
           ← Back to Students
         </Button>
@@ -202,7 +202,7 @@ export default function StudentDetail() {
             type="button"
             size="sm"
             variant="outline"
-            onClick={() => id && navigate(`/admin/students/${id}/edit`)}
+            onClick={() => id && navigate(`/school-admin/students/${id}/edit`)}
           >
             Edit
           </Button>

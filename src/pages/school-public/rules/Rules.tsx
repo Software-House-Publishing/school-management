@@ -1,9 +1,7 @@
-import { useTranslation } from 'react-i18next';
 import { Container } from '@/components/layouts/Container';
 import { Card } from '@/components/ui/Card';
 
 export default function Rules() {
-  const { t } = useTranslation();
 
   return (
     <div className="min-h-screen bg-gray-50 py-12">

@@ -33,7 +33,7 @@ export default async function handler(req, res) {
     
     const validatedPassword = passwordValidation.trimmedPassword;
 
-    const existingAdmin = await User.findOne({ role: "admin" });
+    const existingAdmin = await User.findOne({ role: "system_administrator" });
     if (existingAdmin) {
       return res.status(403).json({
         message: "Admin user already exists. Admin registration is disabled after first setup.",
@@ -64,7 +64,7 @@ export default async function handler(req, res) {
         .json({ message: "User with this email already exists" });
     }
 
-    // Create admin user
+    // Create system administrator user
     const salt = await bcrypt.genSalt(10);
     const passwordHash = await bcrypt.hash(validatedPassword, salt);
 
@@ -72,7 +72,7 @@ export default async function handler(req, res) {
       name,
       email,
       passwordHash,
-      role: "admin",
+      role: "system_administrator",
     });
 
     const token = generateToken(user._id);

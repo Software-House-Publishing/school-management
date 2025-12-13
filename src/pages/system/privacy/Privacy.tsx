@@ -1,14 +1,10 @@
-import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { Container } from '@/components/layouts/Container';
-import { Card } from '@/components/ui/Card';
 import SystemHeader from '@/components/layouts/SystemHeader';
 import SystemFooter from '@/components/layouts/SystemFooter';
-import { Shield, Lock, Eye, Database, Users, AlertTriangle, CheckCircle, Mail } from 'lucide-react';
+import { Shield, Lock, Eye, Database, Users, CheckCircle } from 'lucide-react';
 
 export default function Privacy() {
-  const { t } = useTranslation();
-
   const dataTypes = [
     {
       category: 'Student Information',

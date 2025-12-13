@@ -2,18 +2,7 @@ import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  Home, 
-  Users, 
-  BookOpen, 
-  ClipboardList, 
-  Wallet, 
-  Megaphone, 
-  UserCircle, 
   LogOut,
-  Settings,
-  BarChart3,
-  FileText,
-  Calendar
 } from 'lucide-react';
 
 export interface NavItem {
@@ -48,7 +37,6 @@ export function Sidebar({
   user,
   items,
   collapsed = false,
-  width = 260,
   onSignOut,
   className = '',
 }: SidebarProps) {
