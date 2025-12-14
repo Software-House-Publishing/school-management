@@ -1,14 +1,14 @@
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
-import { 
-  BookOpen, 
+import {
   Github,
   Twitter,
   Linkedin,
   Instagram,
   ArrowUp
 } from 'lucide-react';
+import Logo from '@/assets/Logo.png';
 
 export default function SystemFooter() {
   const { t } = useTranslation();
@@ -77,20 +77,18 @@ export default function SystemFooter() {
   };
 
   return (
-    <footer className="bg-white border-t border-gray-100 pt-20 pb-10">
+    <footer className="bg-white/50 backdrop-blur-md border-t border-white/60 pt-20 pb-10 mt-auto">
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-12 mb-16">
           {/* Brand Section */}
           <div className="lg:col-span-2 space-y-6">
-            <motion.div 
+            <motion.div
               className="flex items-center space-x-3 cursor-pointer"
               onClick={() => navigate('/')}
               whileHover={{ scale: 1.02 }}
             >
-              <div className="w-10 h-10 rounded-xl bg-gray-900 flex items-center justify-center shadow-lg">
-                <BookOpen className="w-5 h-5 text-white" />
-              </div>
-              <span className="text-xl font-semibold tracking-tight text-gray-900">
+              <img src={Logo} alt="Classivo Logo" className="w-10 h-10 object-contain" />
+              <span className="text-xl font-semibold tracking-tight text-classivo-black font-display">
                 {t('app.name')}
               </span>
             </motion.div>
@@ -104,7 +102,7 @@ export default function SystemFooter() {
                   href={social.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-gray-500 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+                  className="w-10 h-10 rounded-full bg-white flex items-center justify-center text-gray-400 hover:text-classivo-blue hover:shadow-md transition-all border border-gray-100"
                 >
                   <social.icon className="w-5 h-5" />
                 </a>
@@ -115,13 +113,13 @@ export default function SystemFooter() {
           {/* Links Sections */}
           {footerSections.map((section) => (
             <div key={section.title} className="lg:col-span-1">
-              <h3 className="text-sm font-semibold text-gray-900 mb-4 tracking-wide">{section.title}</h3>
+              <h3 className="text-sm font-semibold text-gray-900 mb-4 tracking-wide font-display">{section.title}</h3>
               <ul className="space-y-3">
                 {section.links.map((link) => (
                   <li key={link.label}>
                     <button
                       onClick={() => handleNavigation(link.path)}
-                      className="text-sm text-gray-500 hover:text-gray-900 transition-colors"
+                      className="text-sm text-gray-500 hover:text-classivo-blue transition-colors"
                     >
                       {link.label}
                     </button>
@@ -133,21 +131,21 @@ export default function SystemFooter() {
         </div>
 
         {/* Bottom Section */}
-        <div className="pt-8 border-t border-gray-100 flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-sm text-gray-500">
+        <div className="pt-8 border-t border-gray-200/50 flex flex-col md:flex-row justify-between items-center gap-4">
+          <p className="text-sm text-gray-400">
             &copy; {new Date().getFullYear()} {t('app.name')}. All rights reserved.
           </p>
           <div className="flex items-center space-x-6">
-             <div className="flex items-center space-x-2 text-sm text-gray-500">
-                <span className="w-2 h-2 rounded-full bg-green-500"></span>
-                <span>System Operational</span>
-             </div>
-             <button 
-                onClick={scrollToTop}
-                className="p-2 rounded-full bg-gray-50 hover:bg-gray-100 text-gray-500 transition-colors"
-             >
-                <ArrowUp className="w-4 h-4" />
-             </button>
+            <div className="flex items-center space-x-2 text-sm text-gray-500">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+              <span>System Operational</span>
+            </div>
+            <button
+              onClick={scrollToTop}
+              className="p-2 rounded-full bg-white hover:bg-gray-50 text-gray-400 hover:text-classivo-blue transition-all shadow-sm border border-gray-100"
+            >
+              <ArrowUp className="w-4 h-4" />
+            </button>
           </div>
         </div>
       </div>

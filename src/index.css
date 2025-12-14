@@ -12,44 +12,68 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   
-  /* Natural Tone Background */
-  --bg-natural: #F5F5F7;
-  --glass-border: rgba(255, 255, 255, 0.5);
+  /* Classivo Palette */
+  --classivo-cream: 239 236 227;
+  --classivo-lightblue: 143 171 212;
+  --classivo-blue: 74 112 169;
+  --classivo-black: 0 0 0;
+
+  /* Natural Tone Background - Mapped to Cream */
+  --bg-natural: rgb(var(--classivo-cream));
+  --glass-border: rgba(255, 255, 255, 0.4);
   --glass-surface: rgba(255, 255, 255, 0.65);
+  --glass-highlight: rgba(255, 255, 255, 0.9);
 
   /* Sidebar design tokens */
-  --sidebar-active-bg: #EEF2FF;     /* light indigo tint for active pill */
-  --sidebar-active-fg: #1F2937;     /* graphite text */
-  --sidebar-active-icon: #2563EB;   /* blue icon color */
+  --sidebar-active-bg: rgb(var(--classivo-lightblue));     
+  --sidebar-active-fg: rgb(var(--classivo-black));     
+  --sidebar-active-icon: rgb(var(--classivo-blue));   
   --sidebar-width: 280px;
-  --sidebar-radius: 16px;
-  --sidebar-shadow: 0 12px 32px rgba(16,24,40,0.08);
-  --sidebar-gutter: 0.5rem; /* distance from screen edge */
-  --content-gutter: 0.5rem;   /* extra space between sidebar and content */
+  --sidebar-radius: 20px;
+  --sidebar-shadow: 0 20px 40px rgba(0,0,0,0.08);
+  --sidebar-gutter: 0.75rem; 
+  --content-gutter: 0.75rem;   
 }
 
 body {
   background-color: var(--bg-natural);
-  color: #1d1d1f;
+  color: rgb(var(--classivo-black));
 }
 
 .glass-panel {
   background: var(--glass-surface);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(25px) saturate(180%);
+  -webkit-backdrop-filter: blur(25px) saturate(180%);
   border: 1px solid var(--glass-border);
-  box-shadow: 0 4px 24px -1px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 8px 32px 0 rgba(74, 112, 169, 0.15); /* Tinted shadow */
 }
 
 .glass-button {
-  background: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.6);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: var(--glass-highlight);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  color: rgb(var(--classivo-blue));
+  font-weight: 500;
+  transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 .glass-button:hover {
-  background: rgba(255, 255, 255, 0.95);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  background: #ffffff;
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 10px 25px -5px rgba(74, 112, 169, 0.3);
+}
+
+.glass-input {
+  background: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--glass-border);
+  transition: all 0.3s ease;
+}
+
+.glass-input:focus {
+  background: rgba(255, 255, 255, 0.8);
+  border-color: rgb(var(--classivo-blue));
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(74, 112, 169, 0.2);
 }

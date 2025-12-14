@@ -71,13 +71,13 @@ export default function Register() {
       footer={
         <p>
           Already have an account?{' '}
-          <a href="/login" className="font-medium text-gray-900 hover:underline">
+          <a href="/login" className="font-medium text-classivo-blue hover:text-classivo-blue/80 hover:underline transition-colors">
             Sign in
           </a>
         </p>
       }
     >
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-5">
         <div className="space-y-2">
           <label htmlFor="school" className="block text-sm font-medium text-gray-700 ml-1">
             School Name
@@ -90,9 +90,8 @@ export default function Register() {
               type="text"
               value={formData.school}
               onChange={handleChange}
-              className={`w-full pl-11 pr-4 py-3 bg-gray-50 border rounded-2xl focus:outline-none focus:ring-2 focus:ring-gray-900 focus:bg-white transition-all ${
-                errors.school ? 'border-red-500 bg-red-50/50' : 'border-transparent'
-              }`}
+              className={`w-full pl-11 pr-4 py-3 rounded-2xl glass-input placeholder:text-gray-400 focus:ring-0 ${errors.school ? 'border-red-400 bg-red-50/30' : ''
+                }`}
               placeholder="e.g., Lincoln High School"
             />
           </div>
@@ -115,9 +114,8 @@ export default function Register() {
               type="text"
               value={formData.name}
               onChange={handleChange}
-              className={`w-full pl-11 pr-4 py-3 bg-gray-50 border rounded-2xl focus:outline-none focus:ring-2 focus:ring-gray-900 focus:bg-white transition-all ${
-                errors.name ? 'border-red-500 bg-red-50/50' : 'border-transparent'
-              }`}
+              className={`w-full pl-11 pr-4 py-3 rounded-2xl glass-input placeholder:text-gray-400 focus:ring-0 ${errors.name ? 'border-red-400 bg-red-50/30' : ''
+                }`}
               placeholder="John Doe"
             />
           </div>
@@ -140,9 +138,8 @@ export default function Register() {
               type="email"
               value={formData.email}
               onChange={handleChange}
-              className={`w-full pl-11 pr-4 py-3 bg-gray-50 border rounded-2xl focus:outline-none focus:ring-2 focus:ring-gray-900 focus:bg-white transition-all ${
-                errors.email ? 'border-red-500 bg-red-50/50' : 'border-transparent'
-              }`}
+              className={`w-full pl-11 pr-4 py-3 rounded-2xl glass-input placeholder:text-gray-400 focus:ring-0 ${errors.email ? 'border-red-400 bg-red-50/30' : ''
+                }`}
               placeholder="name@school.com"
             />
           </div>
@@ -165,9 +162,8 @@ export default function Register() {
               type="password"
               value={formData.password}
               onChange={handleChange}
-              className={`w-full pl-11 pr-4 py-3 bg-gray-50 border rounded-2xl focus:outline-none focus:ring-2 focus:ring-gray-900 focus:bg-white transition-all ${
-                errors.password ? 'border-red-500 bg-red-50/50' : 'border-transparent'
-              }`}
+              className={`w-full pl-11 pr-4 py-3 rounded-2xl glass-input placeholder:text-gray-400 focus:ring-0 ${errors.password ? 'border-red-400 bg-red-50/30' : ''
+                }`}
               placeholder="Create a password"
             />
           </div>
@@ -181,7 +177,7 @@ export default function Register() {
         <Button
           type="submit"
           isLoading={isLoading}
-          className="w-full h-12 rounded-xl bg-gray-900 hover:bg-gray-800 text-white font-medium text-base shadow-lg hover:shadow-xl transition-all duration-300"
+          className="w-full h-12 rounded-xl bg-classivo-blue hover:bg-classivo-blue/90 text-white font-medium text-base shadow-lg hover:shadow-xl transition-all duration-300 mt-2"
         >
           Create Account
           {!isLoading && <ArrowRight className="ml-2 w-4 h-4" />}

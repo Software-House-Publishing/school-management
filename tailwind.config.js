@@ -6,8 +6,21 @@ export default {
   theme: {
     container: {
       center: true,
+      padding: "2rem",
+      screens: {
+        "2xl": "1400px",
+      },
     },
-    extend: {},
+    extend: {
+      colors: {
+        classivo: {
+          cream: "rgb(var(--classivo-cream) / <alpha-value>)",
+          lightblue: "rgb(var(--classivo-lightblue) / <alpha-value>)",
+          blue: "rgb(var(--classivo-blue) / <alpha-value>)",
+          black: "rgb(var(--classivo-black) / <alpha-value>)",
+        },
+      },
+    },
   },
   plugins: [],
 };

@@ -1,6 +1,6 @@
 {
   "app": {
-    "name": "School Management System",
+    "name": "Classivo",
     "tagline": "Empowering Education Through Technology"
   },
   "navigation": {
@@ -33,7 +33,7 @@
     },
     "roles": {
       "director": "Director",
-      "administrator": "Administrator", 
+      "administrator": "Administrator",
       "manager": "Manager",
       "finance_officer": "Finance Officer",
       "help_desk": "Help Desk",
