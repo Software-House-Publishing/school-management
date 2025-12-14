@@ -82,7 +82,7 @@ export default function SystemHeader() {
                 onClick={() => handleNavigation(item.path)}
                 className={`relative px-6 py-2 rounded-full text-sm font-medium transition-all duration-500 ease-out ${activeSection === item.id
                     ? 'text-classivo-blue bg-white shadow-sm'
-                    : 'text-gray-600 hover:text-classivo-blue hover:bg-white/40'
+                    : 'text-classivo-black/60 hover:text-classivo-blue hover:bg-white/40'
                   }`}
               >
                 {item.label}
@@ -94,7 +94,7 @@ export default function SystemHeader() {
           <div className="hidden md:flex items-center space-x-4">
             <button
               onClick={() => navigate('/login')}
-              className="text-sm font-medium text-gray-600 hover:text-classivo-blue transition-colors px-4 py-2"
+              className="text-sm font-medium text-classivo-black/60 hover:text-classivo-blue transition-colors px-4 py-2"
             >
               Log in
             </button>

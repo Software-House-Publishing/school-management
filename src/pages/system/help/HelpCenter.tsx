@@ -13,7 +13,13 @@ export default function HelpCenter() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#F5F5F7] text-[#1d1d1f]">
+    <div className="min-h-screen bg-classivo-cream text-classivo-black relative overflow-hidden">
+      {/* Dynamic Background */}
+      <div className="fixed inset-0 pointer-events-none -z-10">
+        <div className="absolute top-[10%] right-[10%] w-[40%] h-[40%] bg-classivo-lightblue/30 blur-[120px] rounded-full mix-blend-multiply opacity-70 animate-blob" />
+        <div className="absolute bottom-[10%] left-[10%] w-[40%] h-[40%] bg-classivo-blue/20 blur-[120px] rounded-full mix-blend-multiply opacity-70 animate-blob animation-delay-2000" />
+      </div>
+
       <SystemHeader />
       
       <section className="pt-40 pb-20">
@@ -24,14 +30,14 @@ export default function HelpCenter() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
           >
-            <h1 className="text-5xl md:text-6xl font-semibold tracking-tight mb-8 text-gray-900">How can we help?</h1>
+            <h1 className="text-5xl md:text-6xl font-semibold tracking-tight mb-8 text-classivo-black font-display">How can we help?</h1>
             
             <div className="relative max-w-2xl mx-auto mb-12">
-              <Search className="absolute left-6 top-5 w-6 h-6 text-gray-400" />
+              <Search className="absolute left-6 top-5 w-6 h-6 text-classivo-black/40" />
               <input 
                 type="text" 
                 placeholder="Search for answers..." 
-                className="w-full pl-16 pr-6 py-5 rounded-3xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-lg shadow-gray-100 text-lg"
+                className="w-full pl-16 pr-6 py-5 rounded-3xl border border-white/20 bg-white/40 backdrop-blur-md focus:outline-none focus:ring-2 focus:ring-classivo-blue shadow-lg shadow-classivo-blue/5 text-lg placeholder:text-classivo-black/40 text-classivo-black"
               />
             </div>
           </motion.div>
@@ -50,25 +56,25 @@ export default function HelpCenter() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: index * 0.1 }}
-                  className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+                  className="glass-panel p-8 rounded-3xl hover:bg-white/40 transition-shadow cursor-pointer"
                 >
-                  <div className="w-12 h-12 rounded-xl bg-gray-50 flex items-center justify-center mb-6">
-                    <Icon className="w-6 h-6 text-gray-900" />
+                  <div className="w-12 h-12 rounded-xl bg-white/50 flex items-center justify-center mb-6 shadow-sm">
+                    <Icon className="w-6 h-6 text-classivo-blue" />
                   </div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">{cat.title}</h3>
-                  <p className="text-gray-500 text-sm">{cat.count} articles</p>
+                  <h3 className="text-lg font-semibold text-classivo-black mb-2">{cat.title}</h3>
+                  <p className="text-classivo-black/60 text-sm">{cat.count} articles</p>
                 </motion.div>
               );
             })}
           </div>
 
           <div className="max-w-4xl mx-auto">
-             <h2 className="text-2xl font-semibold text-gray-900 mb-8">Popular Articles</h2>
-             <div className="bg-white rounded-3xl border border-gray-100 shadow-sm divide-y divide-gray-100">
+             <h2 className="text-2xl font-semibold text-classivo-black mb-8">Popular Articles</h2>
+             <div className="glass-panel rounded-3xl divide-y divide-classivo-black/5">
                 {[1, 2, 3, 4].map((i) => (
-                  <a key={i} href="#" className="block p-6 hover:bg-gray-50 transition-colors flex items-center justify-between group">
-                    <span className="text-gray-600 group-hover:text-gray-900 font-medium">How to reset your password</span>
-                    <FileQuestion className="w-5 h-5 text-gray-400 group-hover:text-blue-500" />
+                  <a key={i} href="#" className="block p-6 hover:bg-white/40 transition-colors flex items-center justify-between group">
+                    <span className="text-classivo-black/80 group-hover:text-classivo-black font-medium">How to reset your password</span>
+                    <FileQuestion className="w-5 h-5 text-classivo-black/40 group-hover:text-classivo-blue" />
                   </a>
                 ))}
              </div>

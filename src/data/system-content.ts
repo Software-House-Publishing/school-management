@@ -85,7 +85,7 @@ export const jobOpenings: JobOpening[] = [
 export const pressItems: PressItem[] = [
   {
     id: '1',
-    slug: 'academiaos-raises-series-b',
+    slug: 'classivo-raises-series-b',
     date: 'Oct 24, 2023',
     title: 'Classivo Raises Series B Funding to Expand Global Reach',
     source: 'TechCrunch',
