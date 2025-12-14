@@ -66,13 +66,13 @@ export default function Login() {
       let appRole: UserRole;
       switch (apiUser.role) {
         case 'admin':
-          appRole = 'system_administrator';     
+          appRole = 'system_administrator';
           break;
         case 'school_admin':
-          appRole = 'school_administrator';   
+          appRole = 'school_administrator';
           break;
         default:
-          appRole = apiUser.role as UserRole;      
+          appRole = apiUser.role as UserRole;
       }
 
       const [firstName, ...rest] = (apiUser.name || '').split(' ');
@@ -122,16 +122,16 @@ export default function Login() {
       footer={
         <p>
           Don't have an account?{' '}
-          <a href="/register" className="font-medium text-gray-900 hover:underline">
+          <a href="/register" className="font-medium text-classivo-blue hover:text-classivo-blue/80 hover:underline transition-colors">
             Start a free trial
           </a>
         </p>
       }
     >
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-5">
         {/* optional general error */}
         {errors.general && (
-          <div className="p-3 rounded-xl bg-red-50 border border-red-100 text-sm text-red-600 text-center">
+          <div className="p-3 rounded-xl bg-red-50/80 border border-red-100 text-sm text-red-600 text-center backdrop-blur-sm">
             {errors.general}
           </div>
         )}
@@ -151,9 +151,8 @@ export default function Login() {
               type="email"
               value={formData.email}
               onChange={handleChange}
-              className={`w-full pl-11 pr-4 py-3 bg-gray-50 border rounded-2xl focus:outline-none focus:ring-2 focus:ring-gray-900 focus:bg-white transition-all ${
-                errors.email ? 'border-red-500 bg-red-50/50' : 'border-transparent'
-              }`}
+              className={`w-full pl-11 pr-4 py-3 rounded-2xl glass-input placeholder:text-gray-400 focus:ring-0 ${errors.email ? 'border-red-400 bg-red-50/30' : ''
+                }`}
               placeholder="name@school.com"
             />
           </div>
@@ -172,7 +171,7 @@ export default function Login() {
             >
               {t('auth.login.password')}
             </label>
-            <a href="/forgot-password" className="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors">
+            <a href="/forgot-password" className="text-sm font-medium text-gray-500 hover:text-classivo-blue transition-colors">
               Forgot password?
             </a>
           </div>
@@ -184,9 +183,8 @@ export default function Login() {
               type="password"
               value={formData.password}
               onChange={handleChange}
-              className={`w-full pl-11 pr-4 py-3 bg-gray-50 border rounded-2xl focus:outline-none focus:ring-2 focus:ring-gray-900 focus:bg-white transition-all ${
-                errors.password ? 'border-red-500 bg-red-50/50' : 'border-transparent'
-              }`}
+              className={`w-full pl-11 pr-4 py-3 rounded-2xl glass-input placeholder:text-gray-400 focus:ring-0 ${errors.password ? 'border-red-400 bg-red-50/30' : ''
+                }`}
               placeholder="••••••••"
             />
           </div>
@@ -200,7 +198,7 @@ export default function Login() {
         <Button
           type="submit"
           isLoading={isLoading}
-          className="w-full h-12 rounded-xl bg-gray-900 hover:bg-gray-800 text-white font-medium text-base shadow-lg hover:shadow-xl transition-all duration-300"
+          className="w-full h-12 rounded-xl bg-classivo-blue hover:bg-classivo-blue/90 text-white font-medium text-base shadow-lg hover:shadow-xl transition-all duration-300 mt-2"
         >
           {isLoading ? t('auth.login.loading') : t('auth.login.submit')}
           {!isLoading && <ArrowRight className="ml-2 w-4 h-4" />}
