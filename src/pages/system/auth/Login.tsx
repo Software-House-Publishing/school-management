@@ -102,16 +102,49 @@ export default function Login() {
         // Simulate network delay
         await new Promise(resolve => setTimeout(resolve, 800));
 
+        let mockRole: UserRole = 'system_administrator';
+        let mockFirstName = 'System';
+        let mockLastName = 'Admin';
+
+        const emailLower = formData.email.toLowerCase();
+
+        if (emailLower.includes('school')) {
+          mockRole = 'school_administrator';
+          mockFirstName = 'School';
+          mockLastName = 'Admin';
+        } else if (emailLower.includes('teacher')) {
+          mockRole = 'teacher';
+          mockFirstName = 'John';
+          mockLastName = 'Doe';
+        } else if (emailLower.includes('student')) {
+          mockRole = 'student';
+          mockFirstName = 'Sarah';
+          mockLastName = 'Connor';
+        } else if (emailLower.includes('manager')) {
+          mockRole = 'manager';
+          mockFirstName = 'Michael';
+          mockLastName = 'Scott';
+        } else if (emailLower.includes('finance')) {
+          mockRole = 'finance_officer';
+          mockFirstName = 'Angela';
+          mockLastName = 'Martin';
+        } else if (emailLower.includes('help')) {
+          mockRole = 'help_desk';
+          mockFirstName = 'Help';
+          mockLastName = 'Desk';
+        }
+        // Default to system admin if 'admin' or any other
+
         const mockUser = {
-          id: 'SYS-ADMIN-001',
+          id: `MOCK-${mockRole.toUpperCase()}-001`,
           email: formData.email,
-          role: 'system_administrator' as UserRole,
-          firstName: 'System',
-          lastName: 'Admin',
+          role: mockRole,
+          firstName: mockFirstName,
+          lastName: mockLastName,
           isActive: true,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
-          schoolName: 'Central Administration'
+          schoolName: mockRole === 'system_administrator' ? 'Central Administration' : 'St. Mary’s High School'
         };
 
         login(mockUser, 'mock-token-12345');
@@ -235,12 +268,17 @@ export default function Login() {
 
         {/* Demo Credentials Hint */}
         <div className="mt-6 p-4 bg-classivo-lightblue/10 rounded-xl border border-classivo-lightblue/20">
-          <h3 className="text-sm font-semibold text-classivo-blue mb-2">Demo Access</h3>
-          <p className="text-xs text-gray-600 mb-2">
-            Since the backend is currently offline, any login attempt will automatically grant access as a <strong>System Administrator</strong> for demonstration purposes.
+          <h3 className="text-sm font-semibold text-classivo-blue mb-2">Demo Access (No Backend)</h3>
+          <p className="text-xs text-gray-600 mb-3">
+            Use any password. The role is determined by keywords in the email address:
           </p>
-          <div className="text-xs text-gray-500">
-            Recommended: <code>admin@classivo.edu</code> / <code>password</code>
+          <div className="grid grid-cols-2 gap-2 text-xs text-gray-500">
+            <div>• <code>admin@...</code> (System Admin)</div>
+            <div>• <code>school@...</code> (School Admin)</div>
+            <div>• <code>teacher@...</code> (Teacher)</div>
+            <div>• <code>student@...</code> (Student)</div>
+            <div>• <code>manager@...</code> (Manager)</div>
+            <div>• <code>finance@...</code> (Finance)</div>
           </div>
         </div>
       </form>
