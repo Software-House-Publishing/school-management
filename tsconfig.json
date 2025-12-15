@@ -30,7 +30,6 @@
     }
   },
   "include": [
-    "src",
-    "api"
-, "backend/src/config/db.js"  ]
+    "src"
+  ]
 }
