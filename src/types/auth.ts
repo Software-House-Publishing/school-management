@@ -8,15 +8,16 @@ export interface User {
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
+  schoolName?: string;
 }
 
-export type UserRole = 
-  | 'system_administrator' 
-  | 'school_administrator' 
-  | 'manager' 
-  | 'finance_officer' 
-  | 'help_desk' 
-  | 'teacher' 
+export type UserRole =
+  | 'system_administrator'
+  | 'school_administrator'
+  | 'manager'
+  | 'finance_officer'
+  | 'help_desk'
+  | 'teacher'
   | 'student';
 
 export interface AuthState {
