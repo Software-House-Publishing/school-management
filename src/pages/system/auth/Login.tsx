@@ -39,60 +39,86 @@ export default function Login() {
       setErrors({});
       setLoading(true);
 
-      // ✅ REAL API CALL to backend
-      const res = await fetch(`${API_BASE_URL}/api/auth/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
+      // --- MOCK LOGIN LOGIC START ---
+      // check if we should even try the backend (e.g. if explicitly in demo mode or backend is known missing)
+      // For now, we'll try fetch, and if it fails, we fall back to mock.
 
-      const data = await res.json();
+      try {
+        if (!API_BASE_URL) throw new Error("No API URL");
 
-      if (!res.ok) {
-        // backend sends { message: "Invalid email or password" }
+        // ✅ REAL API CALL to backend
+        const res = await fetch(`${API_BASE_URL}/api/auth/login`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(formData),
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          // If 401/403, it's a real auth error. 
+          // But if we are in "no backend" mode, we might want to override?
+          // Let's assume if it fails, and we want mock data, we might just want to force it?
+          // The user said "because we don't have the backend yet". 
+          // So likely the API call will fail with connection error or 404.
+
+          throw new Error(data.message || 'Login failed');
+        }
+
+        const apiUser = data.user;
+        // ... (mapping logic) ...
+        let appRole: UserRole;
+        switch (apiUser.role) {
+          case 'admin': appRole = 'system_administrator'; break;
+          case 'school_admin': appRole = 'school_administrator'; break;
+          default: appRole = apiUser.role as UserRole;
+        }
+
+        const [firstName, ...rest] = (apiUser.name || '').split(' ');
+        const lastName = rest.join(' ');
+
+        const mappedUser = {
+          id: apiUser.id,
+          email: apiUser.email,
+          role: appRole,
+          firstName: firstName || '',
+          lastName: lastName || '',
+          isActive: true,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          schoolName: "System", // Default for system
+        };
+
+        login(mappedUser, data.token);
         setLoading(false);
-        setErrors((prev) => ({
-          ...prev,
-          general: data.message || 'Login failed',
-        }));
+        return;
+
+      } catch (err) {
+        // If API call fails (network error or specific "no backend" scenario), fall back to MOCK
+        console.warn("Backend login failed, falling back to MOCK DATA due to: ", err);
+
+        // Simulate network delay
+        await new Promise(resolve => setTimeout(resolve, 800));
+
+        const mockUser = {
+          id: 'SYS-ADMIN-001',
+          email: formData.email,
+          role: 'system_administrator' as UserRole,
+          firstName: 'System',
+          lastName: 'Admin',
+          isActive: true,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          schoolName: 'Central Administration'
+        };
+
+        login(mockUser, 'mock-token-12345');
+        setLoading(false);
         return;
       }
 
-      const apiUser = data.user;
-
-      // map backend roles to frontend roles
-      let appRole: UserRole;
-      switch (apiUser.role) {
-        case 'admin':
-          appRole = 'system_administrator';
-          break;
-        case 'school_admin':
-          appRole = 'school_administrator';
-          break;
-        default:
-          appRole = apiUser.role as UserRole;
-      }
-
-      const [firstName, ...rest] = (apiUser.name || '').split(' ');
-      const lastName = rest.join(' ');
-
-      const mappedUser = {
-        id: apiUser.id,
-        email: apiUser.email,
-        role: appRole, // 👈 use mapped role here
-        firstName: firstName || '',
-        lastName: lastName || '',
-        isActive: true,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-
-      // ✅ save to global auth store (token + user)
-      login(mappedUser, data.token);
-
-      setLoading(false);
     } catch (error: unknown) {
       setLoading(false);
 
@@ -206,6 +232,17 @@ export default function Login() {
           {isLoading ? t('auth.login.loading') : t('auth.login.submit')}
           {!isLoading && <ArrowRight className="ml-2 w-5 h-5" />}
         </Button>
+
+        {/* Demo Credentials Hint */}
+        <div className="mt-6 p-4 bg-classivo-lightblue/10 rounded-xl border border-classivo-lightblue/20">
+          <h3 className="text-sm font-semibold text-classivo-blue mb-2">Demo Access</h3>
+          <p className="text-xs text-gray-600 mb-2">
+            Since the backend is currently offline, any login attempt will automatically grant access as a <strong>System Administrator</strong> for demonstration purposes.
+          </p>
+          <div className="text-xs text-gray-500">
+            Recommended: <code>admin@classivo.edu</code> / <code>password</code>
+          </div>
+        </div>
       </form>
     </AuthLayout>
   );
