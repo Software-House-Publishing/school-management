@@ -14,9 +14,11 @@ export default function AuthLayout({ children, title, subtitle, footer }: AuthLa
   return (
     <div className="min-h-screen bg-classivo-cream text-classivo-black relative overflow-hidden">
       {/* Dynamic Background */}
-      <div className="fixed inset-0 pointer-events-none -z-10">
-        <div className="absolute top-[-10%] right-[-5%] w-[50%] h-[50%] bg-classivo-lightblue/30 blur-[120px] rounded-full mix-blend-multiply opacity-70 animate-blob" />
-        <div className="absolute bottom-[-10%] left-[-5%] w-[50%] h-[50%] bg-classivo-blue/20 blur-[120px] rounded-full mix-blend-multiply opacity-70 animate-blob animation-delay-2000" />
+      {/* Dynamic Background */}
+      <div className="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
+        <div className="absolute top-[-10%] right-[-5%] w-[60%] h-[60%] bg-classivo-lightblue/30 blur-[150px] rounded-full mix-blend-multiply opacity-70 animate-blob" />
+        <div className="absolute bottom-[-10%] left-[-5%] w-[60%] h-[60%] bg-classivo-blue/20 blur-[150px] rounded-full mix-blend-multiply opacity-70 animate-blob animation-delay-2000" />
+        <div className="absolute top-[40%] left-[30%] w-[40%] h-[40%] bg-purple-200/20 blur-[150px] rounded-full mix-blend-multiply opacity-50 animate-blob animation-delay-4000" />
       </div>
 
       <SystemHeader />

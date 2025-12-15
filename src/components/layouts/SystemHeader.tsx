@@ -54,9 +54,9 @@ export default function SystemHeader() {
   return (
     <>
       <header
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${isScrolled
-            ? 'glass-panel m-4 mt-4 rounded-2xl'
-            : 'bg-transparent pt-4'
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ease-[cubic-bezier(0.2,0.8,0.2,1)] ${isScrolled
+          ? 'glass-panel m-4 mt-4 rounded-2xl border-white/40'
+          : 'bg-transparent pt-6 border-transparent'
           }`}
         style={isScrolled ? { width: 'calc(100% - 2rem)', left: '1rem' } : {}}
       >
@@ -68,23 +68,33 @@ export default function SystemHeader() {
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
           >
-            <img src={Logo} alt="Classivo Logo" className="w-10 h-10 object-contain drop-shadow-md" />
-            <span className="text-xl font-semibold tracking-tight text-classivo-black font-display">
+            <div className="relative">
+              <div className="absolute inset-0 bg-classivo-blue/20 blur-lg rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <img src={Logo} alt="Classivo Logo" className="w-10 h-10 object-contain drop-shadow-md relative z-10" />
+            </div>
+            <span className="text-xl font-bold tracking-tight text-classivo-black font-display">
               {t('app.name')}
             </span>
           </motion.div>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center bg-white/30 backdrop-blur-md rounded-full px-1.5 py-1.5 border border-white/40 shadow-sm">
+          <div className="hidden md:flex items-center bg-white/30 backdrop-blur-md rounded-full px-1.5 py-1.5 border border-white/40 shadow-inner">
             {navigationItems.map((item) => (
               <button
                 key={item.id}
                 onClick={() => handleNavigation(item.path)}
                 className={`relative px-6 py-2 rounded-full text-sm font-medium transition-all duration-500 ease-out ${activeSection === item.id
-                    ? 'text-classivo-blue bg-white shadow-sm'
-                    : 'text-classivo-black/60 hover:text-classivo-blue hover:bg-white/40'
+                  ? 'text-classivo-blue bg-white shadow-sm'
+                  : 'text-classivo-black/70 hover:text-classivo-blue hover:bg-white/40'
                   }`}
               >
+                {activeSection === item.id && (
+                  <motion.div
+                    layoutId="pill-tab"
+                    className="absolute inset-0 bg-white rounded-full shadow-sm z-[-1]"
+                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                  />
+                )}
                 {item.label}
               </button>
             ))}
@@ -94,13 +104,14 @@ export default function SystemHeader() {
           <div className="hidden md:flex items-center space-x-4">
             <button
               onClick={() => navigate('/login')}
-              className="text-sm font-medium text-classivo-black/60 hover:text-classivo-blue transition-colors px-4 py-2"
+              className="text-sm font-medium text-classivo-black/70 hover:text-classivo-blue transition-colors px-4 py-2"
             >
               Log in
             </button>
             <Button
               onClick={() => navigate('/register')}
-              className="glass-button rounded-full text-classivo-blue hover:text-classivo-blue px-8 shadow-lg"
+              variant="default"
+              size="sm"
             >
               Get Started
             </Button>
@@ -110,7 +121,7 @@ export default function SystemHeader() {
           <div className="md:hidden">
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="p-2 rounded-lg text-gray-600 hover:bg-white/50 transition-colors"
+              className="p-2 rounded-xl bg-white/40 backdrop-blur-md text-classivo-black hover:bg-white/60 transition-colors border border-white/40"
             >
               {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
@@ -122,38 +133,55 @@ export default function SystemHeader() {
       <AnimatePresence>
         {isMenuOpen && (
           <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="fixed inset-0 z-40 bg-white/80 backdrop-blur-3xl md:hidden pt-28 px-6"
+            initial={{ opacity: 0, y: -20, filter: 'blur(10px)' }}
+            animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+            exit={{ opacity: 0, y: -20, filter: 'blur(10px)' }}
+            transition={{ duration: 0.4, ease: "easeOut" }}
+            className="fixed inset-0 z-40 bg-white/80 backdrop-blur-3xl md:hidden pt-32 px-6 pb-10 flex flex-col"
           >
-            <div className="flex flex-col space-y-4">
-              {navigationItems.map((item) => (
-                <button
+            {/* Background Blobs for Mobile Menu */}
+            <div className="absolute inset-0 overflow-hidden pointer-events-none -z-10">
+              <div className="absolute top-[-20%] right-[-20%] w-[80%] h-[60%] bg-classivo-lightblue/30 blur-[100px] rounded-full mix-blend-multiply opacity-50" />
+              <div className="absolute bottom-[-10%] left-[-10%] w-[80%] h-[60%] bg-classivo-blue/20 blur-[100px] rounded-full mix-blend-multiply opacity-50" />
+            </div>
+
+            <div className="flex flex-col space-y-4 flex-1">
+              {navigationItems.map((item, i) => (
+                <motion.button
                   key={item.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1 + i * 0.1 }}
                   onClick={() => handleNavigation(item.path)}
-                  className="flex items-center justify-between w-full p-4 rounded-2xl bg-white/40 border border-white/60 text-left text-lg font-medium text-gray-900 hover:bg-white transition-all shadow-sm"
+                  className="flex items-center justify-between w-full p-5 rounded-2xl bg-white/40 border border-white/60 text-left text-lg font-medium text-classivo-black hover:bg-white transition-all shadow-sm active:scale-[0.98]"
                 >
                   <span>{item.label}</span>
-                  <ChevronRight className="w-5 h-5 text-gray-400" />
-                </button>
+                  <ChevronRight className="w-5 h-5 text-classivo-black/40" />
+                </motion.button>
               ))}
-              <div className="pt-8 flex flex-col space-y-4">
-                <Button
-                  onClick={() => navigate('/login')}
-                  variant="outline"
-                  className="w-full justify-center rounded-xl h-12 text-base border-white/60 bg-white/40 backdrop-blur-md"
-                >
-                  Log in
-                </Button>
-                <Button
-                  onClick={() => navigate('/register')}
-                  className="w-full justify-center rounded-xl h-12 text-base glass-button text-classivo-blue"
-                >
-                  Get Started
-                </Button>
-              </div>
             </div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 }}
+              className="mt-auto pt-8 flex flex-col space-y-4"
+            >
+              <Button
+                onClick={() => navigate('/login')}
+                variant="outline"
+                className="w-full justify-center h-14 text-base"
+              >
+                Log in
+              </Button>
+              <Button
+                onClick={() => navigate('/register')}
+                variant="default"
+                className="w-full justify-center h-14 text-base"
+              >
+                Get Started
+              </Button>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
