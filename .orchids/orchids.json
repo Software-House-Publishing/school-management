@@ -1,7 +1,0 @@
-{
-  "projectId": "31bac8ec-d6e4-4fb8-b5c0-5b05292aa4ff",
-  "createdAt": 1765740330825,
-  "startupCommands": [
-    "npm install; vercel dev"
-  ]
-}

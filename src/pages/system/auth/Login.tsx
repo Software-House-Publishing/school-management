@@ -128,7 +128,7 @@ export default function Login() {
         </p>
       }
     >
-      <form onSubmit={handleSubmit} className="space-y-5">
+      <form onSubmit={handleSubmit} className="space-y-6">
         {/* optional general error */}
         {errors.general && (
           <div className="p-3 rounded-xl bg-red-50/80 border border-red-100 text-sm text-red-600 text-center backdrop-blur-sm">
@@ -136,72 +136,75 @@ export default function Login() {
           </div>
         )}
 
-        <div className="space-y-2">
-          <label
-            htmlFor="email"
-            className="block text-sm font-medium text-gray-700 ml-1"
-          >
-            {t('auth.login.email')}
-          </label>
-          <div className="relative">
-            <Mail className="w-5 h-5 text-gray-400 absolute left-4 top-3.5" />
-            <input
-              id="email"
-              name="email"
-              type="email"
-              value={formData.email}
-              onChange={handleChange}
-              className={`w-full pl-11 pr-4 py-3 rounded-2xl glass-input placeholder:text-gray-400 focus:ring-0 ${errors.email ? 'border-red-400 bg-red-50/30' : ''
-                }`}
-              placeholder="name@school.com"
-            />
-          </div>
-          {errors.email && (
-            <p className="ml-1 text-sm text-red-600">
-              {errors.email}
-            </p>
-          )}
-        </div>
-
-        <div className="space-y-2">
-          <div className="flex items-center justify-between ml-1">
+        <div className="space-y-4">
+          <div>
             <label
-              htmlFor="password"
-              className="block text-sm font-medium text-gray-700"
+              htmlFor="email"
+              className="block text-sm font-medium text-gray-700 ml-1 mb-1.5"
             >
-              {t('auth.login.password')}
+              {t('auth.login.email')}
             </label>
-            <a href="/forgot-password" className="text-sm font-medium text-gray-500 hover:text-classivo-blue transition-colors">
-              Forgot password?
-            </a>
+            <div className="relative">
+              <Mail className="w-5 h-5 text-classivo-black/40 absolute left-4 top-3.5" />
+              <input
+                id="email"
+                name="email"
+                type="email"
+                value={formData.email}
+                onChange={handleChange}
+                className={`w-full pl-11 pr-4 py-3 rounded-2xl glass-input placeholder:text-gray-400 focus:ring-0 ${errors.email ? 'border-red-400 bg-red-50/30' : ''
+                  }`}
+                placeholder="name@school.com"
+              />
+            </div>
+            {errors.email && (
+              <p className="ml-1 mt-1 text-sm text-red-500 font-medium">
+                {errors.email}
+              </p>
+            )}
           </div>
-          <div className="relative">
-            <Lock className="w-5 h-5 text-gray-400 absolute left-4 top-3.5" />
-            <input
-              id="password"
-              name="password"
-              type="password"
-              value={formData.password}
-              onChange={handleChange}
-              className={`w-full pl-11 pr-4 py-3 rounded-2xl glass-input placeholder:text-gray-400 focus:ring-0 ${errors.password ? 'border-red-400 bg-red-50/30' : ''
-                }`}
-              placeholder="••••••••"
-            />
+
+          <div>
+            <div className="flex items-center justify-between ml-1 mb-1.5">
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-gray-700"
+              >
+                {t('auth.login.password')}
+              </label>
+              <a href="/forgot-password" className="text-sm font-medium text-gray-500 hover:text-classivo-blue transition-colors">
+                Forgot password?
+              </a>
+            </div>
+            <div className="relative">
+              <Lock className="w-5 h-5 text-classivo-black/40 absolute left-4 top-3.5" />
+              <input
+                id="password"
+                name="password"
+                type="password"
+                value={formData.password}
+                onChange={handleChange}
+                className={`w-full pl-11 pr-4 py-3 rounded-2xl glass-input placeholder:text-gray-400 focus:ring-0 ${errors.password ? 'border-red-400 bg-red-50/30' : ''
+                  }`}
+                placeholder="••••••••"
+              />
+            </div>
+            {errors.password && (
+              <p className="ml-1 mt-1 text-sm text-red-500 font-medium">
+                {errors.password}
+              </p>
+            )}
           </div>
-          {errors.password && (
-            <p className="ml-1 text-sm text-red-600">
-              {errors.password}
-            </p>
-          )}
         </div>
 
         <Button
           type="submit"
+          variant="default"
           isLoading={isLoading}
-          className="w-full h-12 rounded-xl bg-classivo-blue hover:bg-classivo-blue/90 text-white font-medium text-base shadow-lg hover:shadow-xl transition-all duration-300 mt-2"
+          className="w-full h-14 rounded-2xl text-lg shadow-xl"
         >
           {isLoading ? t('auth.login.loading') : t('auth.login.submit')}
-          {!isLoading && <ArrowRight className="ml-2 w-4 h-4" />}
+          {!isLoading && <ArrowRight className="ml-2 w-5 h-5" />}
         </Button>
       </form>
     </AuthLayout>

@@ -67,120 +67,123 @@ export default function Register() {
   return (
     <AuthLayout
       title="Start your free trial."
-      subtitle="No credit card required. Cancel anytime."
+      subtitle="Join thousands of schools transforming education everyday."
       footer={
         <p>
           Already have an account?{' '}
           <a href="/login" className="font-medium text-classivo-blue hover:text-classivo-blue/80 hover:underline transition-colors">
-            Sign in
+            Sign in here
           </a>
         </p>
       }
     >
-      <form onSubmit={handleSubmit} className="space-y-5">
-        <div className="space-y-2">
-          <label htmlFor="school" className="block text-sm font-medium text-gray-700 ml-1">
-            School Name
-          </label>
-          <div className="relative">
-            <Building2 className="w-5 h-5 text-gray-400 absolute left-4 top-3.5" />
-            <input
-              id="school"
-              name="school"
-              type="text"
-              value={formData.school}
-              onChange={handleChange}
-              className={`w-full pl-11 pr-4 py-3 rounded-2xl glass-input placeholder:text-gray-400 focus:ring-0 ${errors.school ? 'border-red-400 bg-red-50/30' : ''
-                }`}
-              placeholder="e.g., Lincoln High School"
-            />
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="space-y-4">
+          <div>
+            <label htmlFor="school" className="block text-sm font-medium text-gray-700 ml-1 mb-1.5">
+              School Name
+            </label>
+            <div className="relative">
+              <Building2 className="w-5 h-5 text-classivo-black/40 absolute left-4 top-3.5" />
+              <input
+                id="school"
+                name="school"
+                type="text"
+                value={formData.school}
+                onChange={handleChange}
+                className={`w-full pl-11 pr-4 py-3 rounded-2xl glass-input placeholder:text-gray-400 focus:ring-0 ${errors.school ? 'border-red-400 bg-red-50/30' : ''
+                  }`}
+                placeholder="Lincoln High School"
+              />
+            </div>
+            {errors.school && (
+              <p className="ml-1 mt-1 text-sm text-red-500 font-medium">
+                {errors.school}
+              </p>
+            )}
           </div>
-          {errors.school && (
-            <p className="ml-1 text-sm text-red-600">
-              {errors.school}
-            </p>
-          )}
-        </div>
 
-        <div className="space-y-2">
-          <label htmlFor="name" className="block text-sm font-medium text-gray-700 ml-1">
-            Full Name
-          </label>
-          <div className="relative">
-            <User className="w-5 h-5 text-gray-400 absolute left-4 top-3.5" />
-            <input
-              id="name"
-              name="name"
-              type="text"
-              value={formData.name}
-              onChange={handleChange}
-              className={`w-full pl-11 pr-4 py-3 rounded-2xl glass-input placeholder:text-gray-400 focus:ring-0 ${errors.name ? 'border-red-400 bg-red-50/30' : ''
-                }`}
-              placeholder="John Doe"
-            />
+          <div>
+            <label htmlFor="name" className="block text-sm font-medium text-gray-700 ml-1 mb-1.5">
+              Full Name
+            </label>
+            <div className="relative">
+              <User className="w-5 h-5 text-classivo-black/40 absolute left-4 top-3.5" />
+              <input
+                id="name"
+                name="name"
+                type="text"
+                value={formData.name}
+                onChange={handleChange}
+                className={`w-full pl-11 pr-4 py-3 rounded-2xl glass-input placeholder:text-gray-400 focus:ring-0 ${errors.name ? 'border-red-400 bg-red-50/30' : ''
+                  }`}
+                placeholder="John Doe"
+              />
+            </div>
+            {errors.name && (
+              <p className="ml-1 mt-1 text-sm text-red-500 font-medium">
+                {errors.name}
+              </p>
+            )}
           </div>
-          {errors.name && (
-            <p className="ml-1 text-sm text-red-600">
-              {errors.name}
-            </p>
-          )}
-        </div>
 
-        <div className="space-y-2">
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700 ml-1">
-            Email Address
-          </label>
-          <div className="relative">
-            <Mail className="w-5 h-5 text-gray-400 absolute left-4 top-3.5" />
-            <input
-              id="email"
-              name="email"
-              type="email"
-              value={formData.email}
-              onChange={handleChange}
-              className={`w-full pl-11 pr-4 py-3 rounded-2xl glass-input placeholder:text-gray-400 focus:ring-0 ${errors.email ? 'border-red-400 bg-red-50/30' : ''
-                }`}
-              placeholder="name@school.com"
-            />
+          <div>
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700 ml-1 mb-1.5">
+              Email Address
+            </label>
+            <div className="relative">
+              <Mail className="w-5 h-5 text-classivo-black/40 absolute left-4 top-3.5" />
+              <input
+                id="email"
+                name="email"
+                type="email"
+                value={formData.email}
+                onChange={handleChange}
+                className={`w-full pl-11 pr-4 py-3 rounded-2xl glass-input placeholder:text-gray-400 focus:ring-0 ${errors.email ? 'border-red-400 bg-red-50/30' : ''
+                  }`}
+                placeholder="name@school.com"
+              />
+            </div>
+            {errors.email && (
+              <p className="ml-1 mt-1 text-sm text-red-500 font-medium">
+                {errors.email}
+              </p>
+            )}
           </div>
-          {errors.email && (
-            <p className="ml-1 text-sm text-red-600">
-              {errors.email}
-            </p>
-          )}
-        </div>
 
-        <div className="space-y-2">
-          <label htmlFor="password" className="block text-sm font-medium text-gray-700 ml-1">
-            Password
-          </label>
-          <div className="relative">
-            <Lock className="w-5 h-5 text-gray-400 absolute left-4 top-3.5" />
-            <input
-              id="password"
-              name="password"
-              type="password"
-              value={formData.password}
-              onChange={handleChange}
-              className={`w-full pl-11 pr-4 py-3 rounded-2xl glass-input placeholder:text-gray-400 focus:ring-0 ${errors.password ? 'border-red-400 bg-red-50/30' : ''
-                }`}
-              placeholder="Create a password"
-            />
+          <div>
+            <label htmlFor="password" className="block text-sm font-medium text-gray-700 ml-1 mb-1.5">
+              Password
+            </label>
+            <div className="relative">
+              <Lock className="w-5 h-5 text-classivo-black/40 absolute left-4 top-3.5" />
+              <input
+                id="password"
+                name="password"
+                type="password"
+                value={formData.password}
+                onChange={handleChange}
+                className={`w-full pl-11 pr-4 py-3 rounded-2xl glass-input placeholder:text-gray-400 focus:ring-0 ${errors.password ? 'border-red-400 bg-red-50/30' : ''
+                  }`}
+                placeholder="••••••••"
+              />
+            </div>
+            {errors.password && (
+              <p className="ml-1 mt-1 text-sm text-red-500 font-medium">
+                {errors.password}
+              </p>
+            )}
           </div>
-          {errors.password && (
-            <p className="ml-1 text-sm text-red-600">
-              {errors.password}
-            </p>
-          )}
         </div>
 
         <Button
           type="submit"
+          variant="default"
           isLoading={isLoading}
-          className="w-full h-12 rounded-xl bg-classivo-blue hover:bg-classivo-blue/90 text-white font-medium text-base shadow-lg hover:shadow-xl transition-all duration-300 mt-2"
+          className="w-full h-14 rounded-2xl text-lg shadow-xl"
         >
           Create Account
-          {!isLoading && <ArrowRight className="ml-2 w-4 h-4" />}
+          {!isLoading && <ArrowRight className="ml-2 w-5 h-5" />}
         </Button>
       </form>
     </AuthLayout>
