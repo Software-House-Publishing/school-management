@@ -2,7 +2,9 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, Globe, Users, BookOpen, CreditCard, Info } from 'lucide-react';
+import { Menu, X, ChevronRight } from 'lucide-react';
+import { Button } from '@/components/ui/Button';
+import Logo from '@/assets/Logo.png';
 
 export default function SystemHeader() {
   const { t } = useTranslation();
@@ -30,11 +32,10 @@ export default function SystemHeader() {
   }, [location.pathname]);
 
   const navigationItems = [
-    { id: 'home', label: t('navigation.home'), path: '/', icon: Globe },
-    { id: 'about', label: 'About Us', path: '/about', icon: Info },
-    { id: 'features', label: 'Features', path: '/#features', icon: BookOpen },
-    { id: 'pricing', label: 'Pricing', path: '/pricing', icon: CreditCard },
-    { id: 'contact', label: t('navigation.contact'), path: '/contact', icon: Users },
+    { id: 'home', label: t('navigation.home'), path: '/' },
+    { id: 'features', label: 'Features', path: '/#features' },
+    { id: 'pricing', label: 'Pricing', path: '/pricing' },
+    { id: 'about', label: 'About', path: '/about' },
   ];
 
   const handleNavigation = (path: string) => {
@@ -52,175 +53,138 @@ export default function SystemHeader() {
 
   return (
     <>
-      <header className={
-        'fixed top-0 left-0 right-0 z-50 transition-all duration-300 bg-white/95 backdrop-blur-xl shadow-lg border-b border-[#E5E5EA]/60'
-      }>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            {/* Logo */}
-            <motion.div 
-              className="flex items-center space-x-3 cursor-pointer"
-              onClick={() => navigate('/')}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <div className={
-                'w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 bg-gradient-to-br from-blue-500 to-purple-600 shadow-lg'
-              }>
-                <BookOpen className={`w-5 h-5 ${isScrolled ? 'text-white' : 'text-white'}`} />
-              </div>
-              <span className={'text-xl font-bold transition-colors duration-300 text-gray-900'}>
-                {t('app.name')}
-              </span>
-            </motion.div>
-
-            {/* Desktop Navigation - Dynamic Island Style */}
-            <div className="hidden md:flex items-center">
-              <motion.nav 
-                className={'flex items-center space-x-1 rounded-full px-2 py-1 transition-all duration-300 bg-[#FBFBFD]/90 backdrop-blur-sm'}
-                initial={false}
-                animate={{ boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)' }}
-              >
-                {navigationItems.map((item) => {
-                  const Icon = item.icon;
-                  return (
-                    <motion.button
-                      key={item.id}
-                      onClick={() => handleNavigation(item.path)}
-                      className={`relative px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
-                        activeSection === item.id
-                          ? 'text-blue-600 bg-white shadow-md'
-                          : 'text-[#6e6e73] hover:text-[#1d1d1f] hover:bg-[#F2F2F7]'
-                      }`}
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                    >
-                      <div className="flex items-center space-x-2">
-                        <Icon className="w-4 h-4" />
-                        <span>{item.label}</span>
-                      </div>
-                      {activeSection === item.id && (
-                        <motion.div
-                          className="absolute inset-0 rounded-full bg-gradient-to-r from-blue-500/10 to-purple-600/10"
-                          layoutId="activeTab"
-                          transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                        />
-                      )}
-                    </motion.button>
-                  );
-                })}
-              </motion.nav>
-
-              {/* Auth Buttons */}
-              <div className="ml-6 flex items-center space-x-3">
-                <motion.button
-                  onClick={() => navigate('/login')}
-                  className={'px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 text-[#6e6e73] hover:text-[#1d1d1f] hover:bg-[#F2F2F7]'}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  {t('navigation.login')}
-                </motion.button>
-                <motion.button
-                  onClick={() => navigate('/register')}
-                  className="px-6 py-2 rounded-full text-sm font-medium bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg hover:shadow-xl transition-all duration-200"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  Get Started
-                </motion.button>
-              </div>
+      <header
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ease-[cubic-bezier(0.2,0.8,0.2,1)] ${isScrolled
+          ? 'glass-panel m-4 mt-4 rounded-2xl border-white/40'
+          : 'bg-transparent pt-6 border-transparent'
+          }`}
+        style={isScrolled ? { width: 'calc(100% - 2rem)', left: '1rem' } : {}}
+      >
+        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+          {/* Logo */}
+          <motion.div
+            className="flex items-center space-x-3 cursor-pointer group"
+            onClick={() => navigate('/')}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            <div className="relative">
+              <div className="absolute inset-0 bg-classivo-blue/20 blur-lg rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <img src={Logo} alt="Classivo Logo" className="w-10 h-10 object-contain drop-shadow-md relative z-10" />
             </div>
+            <span className="text-xl font-bold tracking-tight text-classivo-black font-display">
+              {t('app.name')}
+            </span>
+          </motion.div>
 
-            {/* Mobile Menu Button */}
-            <motion.button
-              className={'md:hidden p-2 rounded-full transition-colors duration-300 text-[#6e6e73] hover:bg-[#F2F2F7]'}
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              whileTap={{ scale: 0.95 }}
-            >
-              <AnimatePresence mode="wait">
-                {isMenuOpen ? (
+          {/* Desktop Navigation */}
+          <div className="hidden md:flex items-center bg-white/30 backdrop-blur-md rounded-full px-1.5 py-1.5 border border-white/40 shadow-inner">
+            {navigationItems.map((item) => (
+              <button
+                key={item.id}
+                onClick={() => handleNavigation(item.path)}
+                className={`relative px-6 py-2 rounded-full text-sm font-medium transition-all duration-500 ease-out ${activeSection === item.id
+                  ? 'text-classivo-blue bg-white shadow-sm'
+                  : 'text-classivo-black/70 hover:text-classivo-blue hover:bg-white/40'
+                  }`}
+              >
+                {activeSection === item.id && (
                   <motion.div
-                    key="close"
-                    initial={{ rotate: -90, opacity: 0 }}
-                    animate={{ rotate: 0, opacity: 1 }}
-                    exit={{ rotate: 90, opacity: 0 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <X className="w-6 h-6" />
-                  </motion.div>
-                ) : (
-                  <motion.div
-                    key="menu"
-                    initial={{ rotate: 90, opacity: 0 }}
-                    animate={{ rotate: 0, opacity: 1 }}
-                    exit={{ rotate: -90, opacity: 0 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <Menu className="w-6 h-6" />
-                  </motion.div>
+                    layoutId="pill-tab"
+                    className="absolute inset-0 bg-white rounded-full shadow-sm z-[-1]"
+                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                  />
                 )}
-              </AnimatePresence>
-            </motion.button>
+                {item.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Right Actions */}
+          <div className="hidden md:flex items-center space-x-4">
+            <button
+              onClick={() => navigate('/login')}
+              className="text-sm font-medium text-classivo-black/70 hover:text-classivo-blue transition-colors px-4 py-2"
+            >
+              Log in
+            </button>
+            <Button
+              onClick={() => navigate('/register')}
+              variant="default"
+              size="sm"
+            >
+              Get Started
+            </Button>
+          </div>
+
+          {/* Mobile Menu Button */}
+          <div className="md:hidden">
+            <button
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className="p-2 rounded-xl bg-white/40 backdrop-blur-md text-classivo-black hover:bg-white/60 transition-colors border border-white/40"
+            >
+              {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            </button>
           </div>
         </div>
-
-        {/* Mobile Menu */}
-        <AnimatePresence>
-          {isMenuOpen && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.3, ease: 'easeInOut' }}
-              className="md:hidden bg-white/95 backdrop-blur-xl border-t border-gray-200/50"
-            >
-              <div className="px-4 py-4 space-y-2">
-                {navigationItems.map((item) => {
-                  const Icon = item.icon;
-                  return (
-                    <motion.button
-                      key={item.id}
-                      onClick={() => handleNavigation(item.path)}
-                      className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-left transition-all duration-200 ${
-                        activeSection === item.id
-                          ? 'text-blue-600 bg-blue-50'
-                          : 'text-gray-700 hover:bg-gray-50'
-                      }`}
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                    >
-                      <Icon className="w-5 h-5" />
-                      <span className="font-medium">{item.label}</span>
-                    </motion.button>
-                  );
-                })}
-                <div className="pt-4 border-t border-gray-200 space-y-2">
-                  <motion.button
-                    onClick={() => navigate('/login')}
-                    className="w-full px-4 py-3 rounded-xl text-gray-700 hover:bg-gray-50 font-medium transition-all duration-200"
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                  >
-                    {t('navigation.login')}
-                  </motion.button>
-                  <motion.button
-                    onClick={() => navigate('/register')}
-                    className="w-full px-4 py-3 rounded-xl bg-gradient-to-r from-blue-500 to-purple-600 text-white font-medium shadow-lg hover:shadow-xl transition-all duration-200"
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                  >
-                    Get Started
-                  </motion.button>
-                </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
       </header>
 
-      {/* Spacer to prevent content from being hidden behind fixed header */}
-      <div className="h-16" />
+      {/* Mobile Menu Overlay */}
+      <AnimatePresence>
+        {isMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -20, filter: 'blur(10px)' }}
+            animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+            exit={{ opacity: 0, y: -20, filter: 'blur(10px)' }}
+            transition={{ duration: 0.4, ease: "easeOut" }}
+            className="fixed inset-0 z-40 bg-white/80 backdrop-blur-3xl md:hidden pt-32 px-6 pb-10 flex flex-col"
+          >
+            {/* Background Blobs for Mobile Menu */}
+            <div className="absolute inset-0 overflow-hidden pointer-events-none -z-10">
+              <div className="absolute top-[-20%] right-[-20%] w-[80%] h-[60%] bg-classivo-lightblue/30 blur-[100px] rounded-full mix-blend-multiply opacity-50" />
+              <div className="absolute bottom-[-10%] left-[-10%] w-[80%] h-[60%] bg-classivo-blue/20 blur-[100px] rounded-full mix-blend-multiply opacity-50" />
+            </div>
+
+            <div className="flex flex-col space-y-4 flex-1">
+              {navigationItems.map((item, i) => (
+                <motion.button
+                  key={item.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1 + i * 0.1 }}
+                  onClick={() => handleNavigation(item.path)}
+                  className="flex items-center justify-between w-full p-5 rounded-2xl bg-white/40 border border-white/60 text-left text-lg font-medium text-classivo-black hover:bg-white transition-all shadow-sm active:scale-[0.98]"
+                >
+                  <span>{item.label}</span>
+                  <ChevronRight className="w-5 h-5 text-classivo-black/40" />
+                </motion.button>
+              ))}
+            </div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 }}
+              className="mt-auto pt-8 flex flex-col space-y-4"
+            >
+              <Button
+                onClick={() => navigate('/login')}
+                variant="outline"
+                className="w-full justify-center h-14 text-base"
+              >
+                Log in
+              </Button>
+              <Button
+                onClick={() => navigate('/register')}
+                variant="default"
+                className="w-full justify-center h-14 text-base"
+              >
+                Get Started
+              </Button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   );
 }

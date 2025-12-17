@@ -159,11 +159,12 @@ export default function StudentCreate() {
         throw new Error(data.message || 'Failed to create student');
       }
 
-      navigate('/admin/students');
-    } catch (err: any) {
+      navigate('/school-admin/students');
+    } catch (err: unknown) {
       console.error(err);
-      setError(err.message || 'Failed to create student');
-      alert(err.message || 'Failed to create student');
+      const message = err instanceof Error ? err.message : 'Failed to create student';
+      setError(message);
+      alert(message);
     } finally {
       setLoading(false);
     }
@@ -175,7 +176,7 @@ export default function StudentCreate() {
         <Button
           type="button"
           variant="outline"
-          onClick={() => navigate('/admin/students')}
+          onClick={() => navigate('/school-admin/students')}
         >
           ← Back to Students
         </Button>

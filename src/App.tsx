@@ -12,6 +12,16 @@ import SystemPricing from '@/pages/system/pricing/Pricing';
 import SystemLogin from '@/pages/system/auth/Login';
 import SystemRegister from '@/pages/system/auth/Register';
 import SystemForgotPassword from '@/pages/system/auth/ForgotPassword';
+import SystemDocs from '@/pages/system/docs/Docs';
+import SystemCommunity from '@/pages/system/community/Community';
+import SystemStatus from '@/pages/system/status/Status';
+import SystemHelp from '@/pages/system/help/HelpCenter';
+import SystemCareers from '@/pages/system/careers/Careers';
+import SystemCareerDetail from '@/pages/system/careers/CareerDetail';
+import SystemPress from '@/pages/system/press/Press';
+import SystemPressDetail from '@/pages/system/press/PressDetail';
+import SystemCookies from '@/pages/system/cookies/Cookies';
+import SystemGDPR from '@/pages/system/gdpr/GDPR';
 
 // School-specific public pages
 import SchoolHome from '@/pages/school-public/home/SchoolHome';
@@ -44,7 +54,7 @@ import TeacherAnnouncements from '@/pages/teacher/announcements/TeacherAnnouncem
 // Admin portal pages
 import AdminAnnouncement from '@/pages/admin/announcement/AdminAnnouncement';
 import AdminDashboard from '@/pages/admin/dashboard/AdminDashboard';
-// import AdminUsers from '@/pages/admin/users/AdminUsers';
+import AdminUsers from '@/pages/admin/users/AdminUsers';
 import AdminCourses from '@/pages/admin/courses/AdminCourses';
 import AdminExams from '@/pages/admin/exams/AdminExams';
 import AdminFinance from '@/pages/admin/finance/AdminFinance';
@@ -59,6 +69,17 @@ import AdminStudentEdit from '@/pages/admin/students/StudentEdit';
 
 function App() {
   const { i18n } = useTranslation();
+  // const { user, updateUser } = useAuthStore();
+
+  // useEffect(() => {
+  //   if (user) {
+  //     if (user.role === 'director' as any) {
+  //       updateUser({ role: 'system_administrator' });
+  //     } else if (user.role === 'administrator' as any) {
+  //       updateUser({ role: 'school_administrator' });
+  //     }
+  //   }
+  // }, [user, updateUser]);
 
   return (
     <div dir={i18n.language === 'my' ? 'rtl' : 'ltr'}>
@@ -74,6 +95,16 @@ function App() {
           <Route path="/login" element={<SystemLogin />} />
           <Route path="/register" element={<SystemRegister />} />
           <Route path="/forgot-password" element={<SystemForgotPassword />} />
+          <Route path="/docs" element={<SystemDocs />} />
+          <Route path="/community" element={<SystemCommunity />} />
+          <Route path="/status" element={<SystemStatus />} />
+          <Route path="/help" element={<SystemHelp />} />
+          <Route path="/careers" element={<SystemCareers />} />
+          <Route path="/careers/:slug" element={<SystemCareerDetail />} />
+          <Route path="/press" element={<SystemPress />} />
+          <Route path="/press/:slug" element={<SystemPressDetail />} />
+          <Route path="/cookies" element={<SystemCookies />} />
+          <Route path="/gdpr" element={<SystemGDPR />} />
 
           {/* School-specific public routes */}
           <Route path="/school/:schoolId" element={<SchoolHome />} />
@@ -117,30 +148,47 @@ function App() {
             <Route path="announcements" element={<TeacherAnnouncements />} />
           </Route>
 
-          {/* Admin portal */}
+          {/* School Admin portal */}
           <Route
-            path="/admin/*"
+            path="/school-admin/*"
             element={
-              <ProtectedRoute allowedRoles={['director', 'administrator', 'manager', 'finance_officer', 'help_desk']}>
+              <ProtectedRoute allowedRoles={['school_administrator', 'manager', 'finance_officer', 'help_desk']}>
                 <AdminLayout />
               </ProtectedRoute>
             }
           >
-            <Route index element={<Navigate to="/admin/dashboard" replace />} />
+            <Route index element={<Navigate to="/school-admin/dashboard" replace />} />
             <Route path="dashboard" element={<AdminDashboard />} />
-            {/* <Route path="users" element={<AdminUsers />} /> */}
-            <Route path="courses" element={<AdminCourses />} />
-            <Route path="finance" element={<AdminFinance />} />
-            <Route path="reports" element={<AdminReports />} />
-            <Route path="settings" element={<AdminSettings />} />
             <Route path="students" element={<AdminStudents />} />
             <Route path="students/new" element={<AdminStudentCreate />} />
             <Route path="students/:id" element={<AdminStudentDetail />} />
             <Route path="students/:id/edit" element={<AdminStudentEdit />} />
             <Route path="teachers" element={<AdminTeachers />} />
+            <Route path="courses" element={<AdminCourses />} />
             <Route path="announcements" element={<AdminAnnouncement />} />
             <Route path="exams" element={<AdminExams />} />
+            <Route path="finance" element={<AdminFinance />} />
             <Route path="invoices" element={<AdminInvoices />} />
+            <Route path="reports" element={<AdminReports />} />
+            <Route path="settings" element={<AdminSettings />} />
+          </Route>
+
+          {/* System Admin portal */}
+          <Route
+            path="/system-admin/*"
+            element={
+              <ProtectedRoute allowedRoles={['system_administrator']}>
+                <AdminLayout />
+              </ProtectedRoute>
+            }
+          >
+            <Route index element={<Navigate to="/system-admin/dashboard" replace />} />
+            <Route path="dashboard" element={<AdminDashboard />} />
+            <Route path="users" element={<AdminUsers />} />
+            <Route path="courses" element={<AdminCourses />} />
+            <Route path="finance" element={<AdminFinance />} />
+            <Route path="reports" element={<AdminReports />} />
+            <Route path="settings" element={<AdminSettings />} />
           </Route>
 
           {/* Catch all route */}

@@ -1,4 +1,3 @@
-import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Container } from '@/components/layouts/Container';
@@ -6,7 +5,7 @@ import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import SchoolHeader from '@/components/layouts/SchoolHeader';
 import SchoolFooter from '@/components/layouts/SchoolFooter';
-import { CheckCircle, Zap, Star, BookOpen, Users, Award, Heart } from 'lucide-react';
+import { CheckCircle, Star, BookOpen, Users, Award, Heart } from 'lucide-react';
 
 interface SchoolPricingData {
   schoolName: string;
@@ -86,7 +85,6 @@ const mockSchoolData: SchoolPricingData = {
 };
 
 export default function SchoolPricing() {
-  const { t } = useTranslation();
   const navigate = useNavigate();
   const { schoolId } = useParams<{ schoolId: string }>();
 

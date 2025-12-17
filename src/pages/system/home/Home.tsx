@@ -1,339 +1,430 @@
-import { useTranslation } from 'react-i18next';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import {
+  motion,
+  useScroll,
+  useTransform,
+  useSpring,
+  useMotionValue,
+  useMotionTemplate
+} from 'framer-motion';
 import { Container } from '@/components/layouts/Container';
-import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import SystemHeader from '@/components/layouts/SystemHeader';
 import SystemFooter from '@/components/layouts/SystemFooter';
-import { 
-  BookOpen, 
-  Users, 
-  CreditCard, 
-  Shield, 
-  TrendingUp, 
-  Award, 
-  Globe, 
+import {
+  Users,
+  CreditCard,
+  Shield,
+  TrendingUp,
+  ArrowRight,
+  Activity,
   Zap,
-  Star,
-  CheckCircle
+  Layout,
+  Globe,
+  LucideIcon,
+  Star
 } from 'lucide-react';
 
+// --- Components ---
+
+const Hero3DCard = () => {
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const { left, top, width, height } = e.currentTarget.getBoundingClientRect();
+    const x = (e.clientX - left) / width - 0.5;
+    const y = (e.clientY - top) / height - 0.5;
+
+    mouseX.set(x);
+    mouseY.set(y);
+  };
+
+  const handleMouseLeave = () => {
+    mouseX.set(0);
+    mouseY.set(0);
+  };
+
+  const rotateX = useSpring(useTransform(mouseY, [-0.5, 0.5], [15, -15]), { stiffness: 150, damping: 20 });
+  const rotateY = useSpring(useTransform(mouseX, [-0.5, 0.5], [-15, 15]), { stiffness: 150, damping: 20 });
+  const sheenGradient = useMotionTemplate`linear-gradient(${useTransform(mouseX, [-0.5, 0.5], [110, 250])}deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.5) 50%, rgba(255,255,255,0) 100%)`;
+
+  return (
+    <motion.div
+      style={{ perspective: 1000 }}
+      className="relative w-full max-w-4xl mx-auto mt-16 lg:mt-24"
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+    >
+      <motion.div
+        style={{ rotateX, rotateY }}
+        className="w-full aspect-[16/10] rounded-3xl bg-white/10 backdrop-blur-xl border border-white/40 shadow-2xl overflow-hidden relative group"
+      >
+        {/* Glossy Sheen Overlay */}
+        <motion.div
+          style={{ background: sheenGradient }}
+          className="absolute inset-0 z-20 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500 will-change-[opacity]"
+        />
+
+        {/* Abstract UI Content */}
+        <div className="absolute inset-0 p-8 flex flex-col">
+          {/* Header Bar */}
+          <div className="h-14 w-full rounded-2xl bg-white/20 backdrop-blur-md flex items-center px-6 justify-between mb-8 border border-white/30">
+            <div className="flex space-x-2">
+              <div className="w-3 h-3 rounded-full bg-[#E58383]" />
+              <div className="w-3 h-3 rounded-full bg-[#E5C083]" />
+              <div className="w-3 h-3 rounded-full bg-[#83E59D]" />
+            </div>
+            <div className="h-2 w-32 bg-white/30 rounded-full" />
+          </div>
+
+          <div className="flex-1 flex gap-6">
+            {/* Sidebar */}
+            <div className="w-64 hidden md:flex flex-col gap-4">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="h-12 w-full rounded-xl bg-white/10 border border-white/20 hover:bg-white/20 transition-colors" />
+              ))}
+              <div className="flex-1" />
+              <div className="h-32 w-full rounded-xl bg-gradient-to-br from-classivo-blue/20 to-classivo-lightblue/20 border border-white/20 p-4">
+                <div className="w-8 h-8 rounded-lg bg-classivo-blue mb-2" />
+                <div className="h-2 w-16 bg-white/30 rounded-full mb-2" />
+                <div className="h-2 w-10 bg-white/20 rounded-full" />
+              </div>
+            </div>
+
+            {/* Main Content Area */}
+            <div className="flex-1 flex flex-col gap-6">
+              <div className="grid grid-cols-3 gap-6">
+                <div className="h-32 rounded-2xl bg-gradient-to-br from-white/20 to-white/5 border border-white/30 p-5 backdrop-blur-sm relative overflow-hidden">
+                  <div className="absolute -right-4 -bottom-4 w-20 h-20 bg-classivo-blue/20 rounded-full blur-xl" />
+                  <Activity className="text-classivo-black mb-4 w-6 h-6" />
+                  <div className="text-2xl font-bold text-classivo-black">98%</div>
+                  <div className="text-xs text-black/60 font-medium">Attendance Rate</div>
+                </div>
+                <div className="h-32 rounded-2xl bg-gradient-to-br from-white/20 to-white/5 border border-white/30 p-5 backdrop-blur-sm relative overflow-hidden">
+                  <div className="absolute -right-4 -bottom-4 w-20 h-20 bg-classivo-lightblue/30 rounded-full blur-xl" />
+                  <Users className="text-classivo-black mb-4 w-6 h-6" />
+                  <div className="text-2xl font-bold text-classivo-black">1.2k</div>
+                  <div className="text-xs text-black/60 font-medium">Students Active</div>
+                </div>
+                <div className="h-32 rounded-2xl bg-gradient-to-br from-white/20 to-white/5 border border-white/30 p-5 backdrop-blur-sm relative overflow-hidden">
+                  <div className="absolute -right-4 -bottom-4 w-20 h-20 bg-[#E58383]/20 rounded-full blur-xl" />
+                  <TrendingUp className="text-classivo-black mb-4 w-6 h-6" />
+                  <div className="text-2xl font-bold text-classivo-black">+15%</div>
+                  <div className="text-xs text-black/60 font-medium">Performance</div>
+                </div>
+              </div>
+
+              <div className="flex-1 rounded-2xl bg-white/10 border border-white/20 p-6 backdrop-blur-sm">
+                <div className="flex items-center justify-between mb-6">
+                  <div className="h-4 w-32 bg-white/30 rounded-full" />
+                  <div className="h-8 w-8 rounded-full bg-white/20" />
+                </div>
+                <div className="space-y-3">
+                  {[1, 2, 3].map(i => (
+                    <div key={i} className="flex items-center gap-4">
+                      <div className="h-10 w-10 rounded-full bg-white/20" />
+                      <div className="flex-1 h-10 rounded-lg bg-white/5" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Floating Icons/Badges */}
+        <motion.div
+          animate={{ y: [0, -10, 0] }}
+          transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute -left-8 top-1/2 w-16 h-16 rounded-2xl bg-white shadow-xl flex items-center justify-center z-30"
+        >
+          <Zap className="text-yellow-500 fill-current" />
+        </motion.div>
+
+        <motion.div
+          animate={{ y: [0, 10, 0] }}
+          transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+          className="absolute -right-6 bottom-20 px-6 py-3 rounded-xl bg-classivo-black text-white shadow-xl z-30 flex items-center gap-3"
+        >
+          <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+          <span className="text-sm font-medium">System Optimal</span>
+        </motion.div>
+
+      </motion.div>
+    </motion.div>
+  );
+};
+
+interface FeatureCardProps {
+  icon: LucideIcon;
+  title: string;
+  description: string;
+  index: number;
+}
+
+const FeatureCard = ({ icon: Icon, title, description, index }: FeatureCardProps) => {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 50 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, delay: index * 0.1 }}
+      viewport={{ once: true }}
+      className="group relative"
+    >
+      <div className="absolute inset-0 bg-gradient-to-br from-classivo-lightblue/30 to-classivo-blue/10 rounded-3xl transform group-hover:scale-105 transition-transform duration-500" />
+      <div className="relative p-8 rounded-3xl bg-white/40 backdrop-blur-md border border-white/60 shadow-lg hover:shadow-2xl transition-all duration-300 h-full flex flex-col overflow-hidden">
+
+        <div className="absolute top-0 right-0 w-32 h-32 bg-classivo-blue/10 rounded-full blur-2xl -mr-10 -mt-10 transition-all duration-500 group-hover:bg-classivo-blue/20" />
+
+        <div className="w-14 h-14 rounded-2xl bg-white flex items-center justify-center mb-6 text-classivo-blue shadow-md group-hover:scale-110 transition-transform duration-300 relative z-10">
+          <Icon className="w-7 h-7" />
+        </div>
+
+        <h3 className="text-xl font-bold text-classivo-black mb-3 relative z-10">{title}</h3>
+        <p className="text-gray-600 leading-relaxed relative z-10">
+          {description}
+        </p>
+
+        <div className="mt-auto pt-6 flex items-center text-classivo-blue font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300 transform translate-x-[-10px] group-hover:translate-x-0">
+          Learn more <ArrowRight className="w-4 h-4 ml-2" />
+        </div>
+      </div>
+    </motion.div>
+  );
+};
+
 export default function Home() {
-  const { t } = useTranslation();
   const navigate = useNavigate();
+  const { scrollYProgress } = useScroll();
+  const backgroundY = useTransform(scrollYProgress, [0, 1], ['0%', '20%']);
 
   const features = [
     {
-      icon: BookOpen,
-      title: 'Learning Management',
-      description: 'Comprehensive course management, student tracking, and academic tools.',
-      color: 'from-blue-500 to-blue-600'
+      icon: Layout,
+      title: 'Modern Dashboard',
+      description: 'A liquid-smooth interface that gives you a bird\'s eye view of your entire institution.',
     },
     {
       icon: Users,
-      title: 'Multi-Portal Access',
-      description: 'Dedicated portals for students, teachers, and administrators.',
-      color: 'from-green-500 to-green-600'
+      title: 'Student & Staff Portal',
+      description: 'Dedicated spaces for everyone. Connect students, teachers, and parents in one unified hub.',
     },
     {
-      icon: CreditCard,
-      title: 'Financial Management',
-      description: 'Fee management, salary processing, and financial reporting.',
-      color: 'from-purple-500 to-purple-600'
+      icon: Globe,
+      title: 'LMS Connect',
+      description: 'Seamlessly integrated learning management tools for the modern digital classroom.',
     },
     {
       icon: Shield,
-      title: 'Security & Compliance',
-      description: 'Enterprise-grade security with GDPR and privacy compliance.',
-      color: 'from-red-500 to-red-600'
+      title: 'Ironclad Security',
+      description: 'Enterprise-grade encryption and privacy compliance keeping your sensitive data safe.',
     },
     {
       icon: TrendingUp,
-      title: 'Analytics & Reports',
-      description: 'Real-time insights and comprehensive reporting tools.',
-      color: 'from-orange-500 to-orange-600'
+      title: 'Smart Analytics',
+      description: 'AI-driven insights that help you make data-backed decisions for better outcomes.',
     },
     {
-      icon: Award,
-      title: 'Performance Tracking',
-      description: 'Student performance monitoring and achievement recognition.',
-      color: 'from-yellow-500 to-yellow-600'
-    }
-  ];
-
-  const stats = [
-    { number: '10K+', label: 'Active Schools' },
-    { number: '1M+', label: 'Students Managed' },
-    { number: '50K+', label: 'Teachers Supported' },
-    { number: '99.9%', label: 'Uptime Guarantee' }
-  ];
-
-  const testimonials = [
-    {
-      name: 'Dr. Sarah Johnson',
-      role: 'Principal, Lincoln High School',
-      content: 'This system has transformed how we manage our school. The intuitive interface and comprehensive features make daily operations seamless.',
-      rating: 5
-    },
-    {
-      name: 'Michael Chen',
-      role: 'IT Director, Riverside District',
-      content: 'The multi-tenant architecture and security features give us confidence in managing multiple schools efficiently.',
-      rating: 5
-    },
-    {
-      name: 'Emily Rodriguez',
-      role: 'Teacher, Oakwood Elementary',
-      content: 'I love how easy it is to track student progress and communicate with parents. It has made my job so much easier.',
-      rating: 5
+      icon: CreditCard,
+      title: 'Finance & Fees',
+      description: 'Automated fee collection and financial reporting that saves you hours every week.',
     }
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-classivo-cream text-classivo-black relative overflow-x-hidden selection:bg-classivo-lightblue selection:text-classivo-black">
+
+      {/* --- Liquid Background --- */}
+      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+        <motion.div
+          style={{ y: backgroundY }}
+          className="absolute inset-0"
+        >
+          <div className="absolute top-[-10%] left-[-10%] w-[70vw] h-[70vw] bg-classivo-lightblue/20 rounded-full blur-[100px] mix-blend-multiply animate-blob" />
+          <div className="absolute top-[20%] right-[-20%] w-[60vw] h-[60vw] bg-purple-200/30 rounded-full blur-[120px] mix-blend-multiply animate-blob animation-delay-2000" />
+          <div className="absolute bottom-[-20%] left-[20%] w-[50vw] h-[50vw] bg-classivo-blue/10 rounded-full blur-[100px] mix-blend-multiply animate-blob animation-delay-4000" />
+        </motion.div>
+
+        {/* Grain overlay for texture */}
+        <div className="absolute inset-0 opacity-[0.03] bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
+      </div>
+
       <SystemHeader />
-      
-      {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-blue-600 via-blue-700 to-purple-800 text-white overflow-hidden">
-        <div className="absolute inset-0 bg-black/20" />
-        <div className="absolute inset-0">
-          <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-transparent via-slate-900/10 to-transparent" />
-        </div>
-        
-        <Container className="relative z-10 py-32">
-          <motion.div 
-            className="text-center max-w-4xl mx-auto"
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-          >
+
+      <main className="relative z-10 pt-32 pb-20">
+
+        {/* --- Hero Section --- */}
+        <Container className="mb-32">
+          <div className="text-center max-w-5xl mx-auto">
             <motion.div
-              initial={{ opacity: 0, scale: 0.8 }}
+              initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.2, duration: 0.6 }}
-              className="mb-6"
+              transition={{ duration: 0.8 }}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/40 border border-white/60 backdrop-blur-md mb-8 shadow-sm"
             >
-              <div className="inline-flex items-center space-x-2 bg-white/20 backdrop-blur-sm rounded-full px-6 py-2 mb-8">
-                <Zap className="w-5 h-5" />
-                <span className="text-sm font-medium">Trusted by 10,000+ Schools Worldwide</span>
-              </div>
+              <div className="w-2 h-2 rounded-full bg-classivo-blue animate-pulse" />
+              <span className="text-sm font-medium text-classivo-black/70 tracking-wide uppercase">Introducing Classivo 2.0</span>
             </motion.div>
-            
-            <motion.h1 
-              className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight"
-              initial={{ opacity: 0, y: 20 }}
+
+            <motion.h1
+              initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4, duration: 0.8 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              className="text-6xl md:text-8xl font-semibold tracking-tight leading-[1.1] mb-8 font-display"
             >
-              Transform Your School with
-              <span className="bg-gradient-to-r from-yellow-300 to-orange-300 bg-clip-text text-transparent">
-                {t('app.name')}
+              <span className="bg-clip-text text-transparent bg-gradient-to-b from-classivo-black to-classivo-black/70">
+                Manage your school
+              </span>
+              <br />
+              <span className="text-classivo-blue italic relative inline-block">
+                fluidly.
+                <svg className="absolute w-full h-3 -bottom-1 left-0 text-classivo-lightblue/40" viewBox="0 0 200 9" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2.00025 6.99996C20.6715 3.39003 52.8876 1.8383 198.001 2.00003" stroke="currentColor" strokeWidth="3" strokeLinecap="round" /></svg>
               </span>
             </motion.h1>
-            
-            <motion.p 
-              className="text-xl md:text-2xl mb-12 opacity-90 max-w-2xl mx-auto leading-relaxed"
+
+            <motion.p
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.6, duration: 0.8 }}
+              transition={{ duration: 0.8, delay: 0.4 }}
+              className="text-xl text-gray-600 mb-12 max-w-2xl mx-auto leading-relaxed"
             >
-              {t('app.tagline')}
+              Experience the future of education management. A system so intuitive, it feels like it reads your mind.
+              Beautiful, powerful, and built for everyone.
             </motion.p>
-            
-            <motion.div 
-              className="flex flex-col sm:flex-row gap-4 justify-center items-center"
+
+            <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.8, duration: 0.8 }}
+              transition={{ duration: 0.8, delay: 0.5 }}
+              className="flex flex-col sm:flex-row items-center justify-center gap-4"
             >
-              <Button 
-                size="lg" 
-                className="bg-white text-blue-600 hover:bg-gray-100 px-8 py-4 text-lg font-semibold shadow-xl hover:shadow-2xl transition-all duration-200"
+              <Button
                 onClick={() => navigate('/register')}
+                className="h-14 px-8 rounded-full bg-classivo-black text-white hover:bg-gray-800 text-lg shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 w-full sm:w-auto"
               >
-                Start Free Trial
+                Get Started for Free
               </Button>
-              <button 
-                onClick={() => navigate('/demo')}
-                className="px-8 py-4 text-lg font-semibold border-2 border-white text-white hover:bg-white hover:text-blue-600 rounded-lg backdrop-blur-sm transition-all duration-200 shadow-lg"
+              <Button
+                onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
+                variant="outline"
+                className="h-14 px-8 rounded-full border-2 border-white/50 bg-white/30 backdrop-blur-md text-classivo-black hover:bg-white/60 text-lg w-full sm:w-auto"
               >
-                Watch Demo
-              </button>
+                Live Demo
+              </Button>
             </motion.div>
-          </motion.div>
-        </Container>
-      </section>
-
-      {/* Stats Section */}
-      <section className="py-16 bg-white">
-        <Container>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
-            {stats.map((stat, index) => (
-              <motion.div
-                key={stat.label}
-                className="text-center"
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1, duration: 0.6 }}
-              >
-                <div className="text-3xl md:text-4xl font-bold text-blue-600 mb-2">{stat.number}</div>
-                <div className="text-gray-600 font-medium">{stat.label}</div>
-              </motion.div>
-            ))}
           </div>
-        </Container>
-      </section>
 
-      {/* Features Section */}
-      <section id="features" className="py-20 bg-gradient-to-br from-gray-50 to-blue-50">
-        <Container>
-          <motion.div 
-            className="text-center mb-16"
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8 }}
-          >
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Everything You Need to 
-              <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                Manage Your School
-              </span>
-            </h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Powerful tools designed specifically for educational institutions to streamline operations and enhance learning.
-            </p>
-          </motion.div>
-          
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {features.map((feature, index) => {
-              const Icon = feature.icon;
-              return (
-                <motion.div
-                  key={feature.title}
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: index * 0.1, duration: 0.6 }}
-                >
-                  <Card className="h-full hover:shadow-xl transition-all duration-300 hover:-translate-y-1 group">
-                    <div className="text-center p-8">
-                      <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${feature.color} flex items-center justify-center mx-auto mb-6 shadow-lg group-hover:scale-110 transition-transform duration-300`}>
-                        <Icon className="w-8 h-8 text-white" />
-                      </div>
-                      <h3 className="text-xl font-semibold text-gray-900 mb-4">{feature.title}</h3>
-                      <p className="text-gray-600 leading-relaxed">{feature.description}</p>
-                    </div>
-                  </Card>
-                </motion.div>
-              );
-            })}
-          </div>
+          <Hero3DCard />
         </Container>
-      </section>
 
-      {/* Testimonials Section */}
-      <section className="py-20 bg-white">
-        <Container>
-          <motion.div 
-            className="text-center mb-16"
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8 }}
-          >
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Loved by Schools
-              <span className="bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
-                Worldwide
-              </span>
-            </h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              See what educators and administrators are saying about our platform.
-            </p>
-          </motion.div>
-          
-          <div className="grid md:grid-cols-3 gap-8">
-            {testimonials.map((testimonial, index) => (
-              <motion.div
-                key={testimonial.name}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.2, duration: 0.6 }}
-              >
-                <Card className="h-full hover:shadow-lg transition-all duration-300">
-                  <div className="p-8">
-                    <div className="flex mb-4">
-                      {[...Array(testimonial.rating)].map((_, i) => (
-                        <Star key={i} className="w-5 h-5 text-yellow-400 fill-current" />
-                      ))}
-                    </div>
-                    <p className="text-gray-700 mb-6 leading-relaxed italic">
-                      "{testimonial.content}"
-                    </p>
-                    <div className="border-t pt-4">
-                      <div className="font-semibold text-gray-900">{testimonial.name}</div>
-                      <div className="text-sm text-gray-600">{testimonial.role}</div>
-                    </div>
+
+        {/* --- Stats Banner --- */}
+        <div className="w-full border-y border-classivo-black/5 bg-white/20 backdrop-blur-sm py-12 mb-32 overflow-hidden">
+          <Container>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+              {[
+                { label: 'Active Learners', value: '1.2M+' },
+                { label: 'Institutions', value: '4,000+' },
+                { label: 'Daily Activities', value: '15M+' },
+                { label: 'Uptime', value: '99.99%' },
+              ].map((stat, i) => (
+                <div key={i} className="text-center relative">
+                  <div className="text-4xl md:text-5xl font-bold text-classivo-blue mb-2 tracking-tight">{stat.value}</div>
+                  <div className="text-sm font-medium text-gray-500 uppercase tracking-widest">{stat.label}</div>
+                  {i !== 3 && <div className="hidden md:block absolute right-0 top-1/2 -translate-y-1/2 w-[1px] h-12 bg-classivo-black/10" />}
+                </div>
+              ))}
+            </div>
+          </Container>
+        </div>
+
+
+        {/* --- Features --- */}
+        <section id="features" className="mb-32">
+          <Container>
+            <div className="text-center max-w-3xl mx-auto mb-20">
+              <h2 className="text-4xl md:text-5xl font-semibold mb-6">Designed for <span className="text-classivo-blue">everything</span> you do.</h2>
+              <p className="text-xl text-gray-600">Complex problems solved with simple, elegant solutions.</p>
+            </div>
+
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+              {features.map((feature, i) => (
+                <FeatureCard key={i} {...feature} index={i} />
+              ))}
+            </div>
+          </Container>
+        </section>
+
+
+        {/* --- Testimonial / Trust --- */}
+        <Container className="mb-32">
+          <div className="relative rounded-[3rem] overflow-hidden bg-classivo-black text-white p-12 lg:p-24">
+            <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-classivo-blue/30 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2" />
+            <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-classivo-lightblue/20 rounded-full blur-[100px] translate-y-1/2 -translate-x-1/2" />
+
+            <div className="relative z-10 flex flex-col lg:flex-row items-center gap-16">
+              <div className="lg:w-1/2">
+                <div className="flex gap-2 mb-8">
+                  {[1, 2, 3, 4, 5].map(i => <Star key={i} className="w-6 h-6 fill-yellow-400 text-yellow-400" />)}
+                </div>
+                <blockquote className="text-3xl md:text-4xl font-medium leading-[1.3] mb-8">
+                  "Classivo didn't just digitize our school; it gave us back the time to focus on what matters most — our students."
+                </blockquote>
+                <div>
+                  <div className="text-xl font-bold">Sarah Jenkins</div>
+                  <div className="text-gray-400">Principal, Westover Academy</div>
+                </div>
+              </div>
+
+              <div className="lg:w-1/2 w-full">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="bg-white/10 backdrop-blur-md p-6 rounded-2xl border border-white/10">
+                    <div className="text-3xl font-bold mb-1">40%</div>
+                    <div className="text-sm text-gray-400">Admin time saved</div>
                   </div>
-                </Card>
-              </motion.div>
-            ))}
+                  <div className="bg-white/10 backdrop-blur-md p-6 rounded-2xl border border-white/10 translate-y-8">
+                    <div className="text-3xl font-bold mb-1">Zero</div>
+                    <div className="text-sm text-gray-400">Paper usage</div>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-md p-6 rounded-2xl border border-white/10">
+                    <div className="text-3xl font-bold mb-1">24/7</div>
+                    <div className="text-sm text-gray-400">Support access</div>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-md p-6 rounded-2xl border border-white/10 translate-y-8">
+                    <div className="text-3xl font-bold mb-1">100%</div>
+                    <div className="text-sm text-gray-400">Compliance</div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </Container>
-      </section>
 
-      {/* CTA Section */}
-      <section className="py-20 bg-gradient-to-r from-blue-600 to-purple-800 text-white">
+        {/* --- Call to Action --- */}
         <Container>
-          <motion.div 
-            className="text-center max-w-3xl mx-auto"
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8 }}
-          >
-            <h2 className="text-3xl md:text-4xl font-bold mb-6">
-              Ready to Transform Your School?
+          <div className="text-center py-20 relative">
+            <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-[300px] bg-gradient-to-r from-transparent via-classivo-blue/10 to-transparent blur-3xl pointer-events-none" />
+
+            <h2 className="text-5xl md:text-7xl font-bold mb-8 relative z-10">
+              Ready to <span className="text-classivo-blue">dive in?</span>
             </h2>
-            <p className="text-xl mb-8 opacity-90">
-              Join thousands of schools already using our platform to enhance education and streamline operations.
+            <p className="text-xl text-gray-600 mb-10 max-w-xl mx-auto relative z-10">
+              Join thousands of forward-thinking institutions. Start your 14-day free trial today.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button 
-                size="lg"
-                className="bg-white text-blue-600 hover:bg-gray-100 px-8 py-4 text-lg font-semibold shadow-xl hover:shadow-2xl transition-all duration-200"
+            <div className="relative z-10">
+              <Button
                 onClick={() => navigate('/register')}
+                className="h-16 px-12 rounded-full bg-classivo-blue text-white text-xl font-medium shadow-2xl hover:bg-classivo-blue/90 hover:scale-105 transition-all duration-300"
               >
-                Start Your Free Trial
+                Get Started Now
               </Button>
-              <button 
-                onClick={() => navigate('/schedule-demo')}
-                className="px-8 py-4 text-lg font-semibold border-2 border-white text-white hover:bg-white hover:text-blue-600 rounded-lg backdrop-blur-sm transition-all duration-200"
-              >
-                Schedule a Demo
-              </button>
             </div>
-            
-            <div className="mt-8 flex flex-col sm:flex-row items-center justify-center space-y-2 sm:space-y-0 sm:space-x-6 text-sm">
-              <div className="flex items-center space-x-2">
-                <CheckCircle className="w-4 h-4" />
-                <span>No credit card required</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <CheckCircle className="w-4 h-4" />
-                <span>30-day free trial</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <CheckCircle className="w-4 h-4" />
-                <span>Cancel anytime</span>
-              </div>
-            </div>
-          </motion.div>
+          </div>
         </Container>
-      </section>
+
+      </main>
 
       <SystemFooter />
     </div>

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation, useParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, Globe, Users, BookOpen, Phone, Info } from 'lucide-react';
+import { Menu, X, Globe, BookOpen, Phone, Info } from 'lucide-react';
 
 interface SchoolHeaderData {
   schoolName: string;
@@ -14,19 +14,9 @@ export default function SchoolHeader() {
   const navigate = useNavigate();
   const location = useLocation();
   const { schoolId } = useParams<{ schoolId: string }>();
-  const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('home');
   const [schoolData, setSchoolData] = useState<SchoolHeaderData | null>(null);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
 
   useEffect(() => {
     const path = location.pathname;

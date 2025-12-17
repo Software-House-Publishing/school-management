@@ -1,7 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '@/stores/authStore';
 import { Card } from '@/components/ui/Card';
-import { Container } from '@/components/layouts/Container';
 
 export default function StudentDashboard() {
   const { t } = useTranslation();

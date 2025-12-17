@@ -1,7 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '@/stores/authStore';
 import { Card } from '@/components/ui/Card';
-import { Button } from '@/components/ui/Button';
 import {
   ResponsiveContainer,
   BarChart,
