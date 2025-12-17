@@ -1,5 +1,4 @@
 import { Outlet } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { Container } from '@/components/layouts/Container';
 import { useAuthStore } from '@/stores/authStore';
@@ -7,7 +6,6 @@ import Sidebar, { UserInfo } from '@/components/shared/Sidebar';
 import { teacherNavItems } from '@/config/navigation.tsx';
 
 export default function TeacherLayout() {
-  const { t } = useTranslation();
   const navigate = useNavigate();
   const { logout, user } = useAuthStore();
 

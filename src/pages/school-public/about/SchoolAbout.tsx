@@ -12,7 +12,6 @@ import {
   Shield, 
   Globe, 
   Zap,
-  CheckCircle,
   Star
 } from 'lucide-react';
 

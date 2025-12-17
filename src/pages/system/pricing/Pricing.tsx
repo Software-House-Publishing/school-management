@@ -1,22 +1,21 @@
-import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Container } from '@/components/layouts/Container';
-import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import SystemHeader from '@/components/layouts/SystemHeader';
 import SystemFooter from '@/components/layouts/SystemFooter';
-import { CheckCircle, Zap, Star } from 'lucide-react';
+import { Check, Star, Shield, Zap } from 'lucide-react';
 
 export default function Pricing() {
-  const { t } = useTranslation();
   const navigate = useNavigate();
 
   const plans = [
     {
       name: 'Starter',
-      price: '$49/mo',
+      price: '$49',
+      period: '/mo',
       highlight: 'Best for small schools',
+      icon: Star,
       features: [
         'Up to 300 students',
         'Core LMS features',
@@ -24,84 +23,80 @@ export default function Pricing() {
         'Email support'
       ],
       popular: false,
-      gradient: 'from-blue-500 to-blue-600'
+      color: 'bg-white/40'
     },
     {
       name: 'Professional',
-      price: '$99/mo',
+      price: '$99',
+      period: '/mo',
       highlight: 'Most popular',
+      icon: Zap,
       features: [
         'Up to 2,000 students',
         'All LMS features',
         'Advanced analytics',
-        'Priority support'
+        'Priority support',
+        'Custom branding'
       ],
       popular: true,
-      gradient: 'from-purple-500 to-purple-600'
+      color: 'bg-white/60'
     },
     {
       name: 'Enterprise',
       price: 'Custom',
+      period: '',
       highlight: 'For districts and chains',
+      icon: Shield,
       features: [
         'Unlimited students',
         'Multi-tenant setup',
         'SSO & compliance',
-        'Dedicated success manager'
+        'Dedicated success manager',
+        '24/7 Phone support'
       ],
       popular: false,
-      gradient: 'from-indigo-500 to-indigo-600'
+      color: 'bg-white/40'
     }
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-classivo-cream text-classivo-black relative overflow-hidden">
+      {/* Dynamic Background */}
+      <div className="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
+        <div className="absolute top-[-20%] left-[-10%] w-[70vw] h-[70vw] bg-classivo-lightblue/30 blur-[150px] rounded-full mix-blend-multiply opacity-70 animate-blob" />
+        <div className="absolute bottom-[-20%] right-[-10%] w-[60vw] h-[60vw] bg-classivo-blue/20 blur-[150px] rounded-full mix-blend-multiply opacity-70 animate-blob animation-delay-2000" />
+      </div>
+
       <SystemHeader />
 
-      <section className="relative bg-gradient-to-br from-blue-600 via-blue-700 to-purple-800 text-white overflow-hidden">
-        <div className="absolute inset-0 bg-black/20 pointer-events-none" />
-        <Container className="relative z-10 py-24">
+      {/* Hero Section */}
+      <section className="pt-40 pb-20">
+        <Container>
           <motion.div
             className="text-center max-w-4xl mx-auto"
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
           >
-            <div className="inline-flex items-center space-x-2 bg-white/20 backdrop-blur-sm rounded-full px-6 py-2 mb-6">
-              <Zap className="w-5 h-5" />
-              <span className="text-sm font-medium">Flexible pricing for every school</span>
+            <div className="inline-flex items-center px-4 py-1.5 rounded-full font-medium text-sm bg-white/40 backdrop-blur-md border border-white/60 text-classivo-blue mb-8 shadow-sm">
+              <span className="w-2 h-2 rounded-full bg-classivo-blue mr-2 animate-pulse" />
+              Simple, transparent pricing
             </div>
-            <h1 className="text-4xl md:text-5xl font-bold mb-4">Simple, Transparent Pricing</h1>
-            <p className="text-lg md:text-xl opacity-90 max-w-2xl mx-auto">
-              Choose a plan that fits your institution. Scale seamlessly as you grow.
+            <h1 className="text-5xl md:text-7xl font-semibold tracking-tight mb-8 text-classivo-black font-display">
+              Investment in your <br />
+              <span className="text-classivo-blue">future.</span>
+            </h1>
+            <p className="text-xl md:text-2xl text-classivo-black/60 leading-relaxed max-w-2xl mx-auto font-light">
+              Choose a plan that fits your institution today, and scale seamlessly as you grow tomorrow.
             </p>
-            <div className="mt-8">
-              <Button 
-                size="lg"
-                className="bg-white text-blue-600 hover:bg-gray-100 px-8 py-4 text-lg font-semibold shadow-xl hover:shadow-2xl transition-all duration-200"
-                onClick={() => navigate('/register')}
-              >
-                Start Free Trial
-              </Button>
-            </div>
           </motion.div>
         </Container>
       </section>
 
-      <section className="py-20 bg-white">
+      {/* Pricing Cards */}
+      <section className="pb-32">
         <Container>
-          <motion.div 
-            className="text-center mb-12"
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8 }}
-          >
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Plans</h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">No hidden fees. Cancel anytime.</p>
-          </motion.div>
-
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-3 gap-8 max-w-7xl mx-auto items-start">
             {plans.map((plan, index) => (
               <motion.div
                 key={plan.name}
@@ -109,70 +104,83 @@ export default function Pricing() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1, duration: 0.6 }}
+                className="relative group perspective"
               >
-                <Card className={`h-full hover:shadow-xl transition-all duration-300 hover:-translate-y-1 ${plan.popular ? 'ring-2 ring-purple-500' : ''}`}>
-                  <div className="p-8">
-                    <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${plan.gradient} flex items-center justify-center mb-6 shadow-lg`}>
-                      <Star className="w-7 h-7 text-white" />
+                <div
+                  className={`relative h-full p-8 rounded-[2rem] transition-all duration-500 flex flex-col border border-white/60 backdrop-blur-xl ${plan.popular
+                      ? 'shadow-2xl z-10 scale-105 bg-white/70'
+                      : 'hover:bg-white/60 hover:-translate-y-2 shadow-lg bg-white/40' // Using explicit bg colors from plan object was option, but logic here is cleaner
+                    }`}
+                >
+                  {plan.popular && (
+                    <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 bg-classivo-black text-white text-sm font-medium rounded-full shadow-lg">
+                      Most Popular
                     </div>
-                    <div className="flex items-baseline justify-between mb-2">
-                      <h3 className="text-2xl font-semibold text-gray-900">{plan.name}</h3>
-                      <div className="text-xl font-bold text-blue-600">{plan.price}</div>
+                  )}
+
+                  <div className="mb-8">
+                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-6 shadow-sm ${plan.popular ? 'bg-classivo-blue text-white' : 'bg-white text-classivo-blue'}`}>
+                      <plan.icon className="w-6 h-6" />
                     </div>
-                    <div className="text-sm text-gray-600 mb-6">{plan.highlight}</div>
-                    <ul className="space-y-3 mb-8">
-                      {plan.features.map((feature) => (
-                        <li key={feature} className="flex items-center space-x-3 text-gray-700">
-                          <CheckCircle className="w-5 h-5 text-green-500" />
-                          <span>{feature}</span>
-                        </li>
-                      ))}
-                    </ul>
-                    <Button 
-                      className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:opacity-90"
-                      onClick={() => navigate('/register')}
-                    >
-                      Choose Plan
-                    </Button>
+                    <h3 className="text-xl font-bold text-classivo-black mb-2">{plan.name}</h3>
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-5xl font-bold text-classivo-black tracking-tight">{plan.price}</span>
+                      <span className="text-classivo-black/50 font-medium">{plan.period}</span>
+                    </div>
+                    <p className="text-sm text-classivo-black/50 mt-4 font-medium">{plan.highlight}</p>
                   </div>
-                </Card>
+
+                  <div className="w-full h-px bg-classivo-black/5 mb-8" />
+
+                  <ul className="space-y-4 mb-8 flex-1">
+                    {plan.features.map((feature) => (
+                      <li key={feature} className="flex items-center gap-3">
+                        <div className="w-5 h-5 rounded-full bg-green-100 flex items-center justify-center shrink-0">
+                          <Check className="w-3 h-3 text-green-600" />
+                        </div>
+                        <span className="text-classivo-black/70 text-sm font-medium">{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+
+                  <Button
+                    variant={plan.popular ? 'default' : 'outline'}
+                    className={`w-full rounded-xl py-6 font-medium text-base shadow-lg transition-all duration-300 ${plan.popular ? 'hover:scale-105' : ''}`}
+                    onClick={() => navigate('/register')}
+                  >
+                    Get Started
+                  </Button>
+                </div>
               </motion.div>
             ))}
           </div>
         </Container>
       </section>
 
-      <section className="py-20 bg-gradient-to-r from-blue-50 to-purple-50">
+      <section className="pb-32">
         <Container>
-          <Card>
-            <div className="p-8 md:p-12">
-              <div className="grid md:grid-cols-3 gap-8">
-                <div>
-                  <div className="text-2xl font-bold text-gray-900 mb-2">All plans include</div>
-                  <p className="text-gray-600">Core LMS, secure hosting, updates, and support.</p>
-                </div>
-                <div className="space-y-2 text-gray-700">
-                  <div className="flex items-center space-x-2"><CheckCircle className="w-5 h-5 text-green-500" /><span>Student and teacher portals</span></div>
-                  <div className="flex items-center space-x-2"><CheckCircle className="w-5 h-5 text-green-500" /><span>Communication tools</span></div>
-                  <div className="flex items-center space-x-2"><CheckCircle className="w-5 h-5 text-green-500" /><span>Basic analytics</span></div>
-                </div>
-                <div className="space-y-2 text-gray-700">
-                  <div className="flex items-center space-x-2"><CheckCircle className="w-5 h-5 text-green-500" /><span>Role-based access</span></div>
-                  <div className="flex items-center space-x-2"><CheckCircle className="w-5 h-5 text-green-500" /><span>GDPR & privacy compliance</span></div>
-                  <div className="flex items-center space-x-2"><CheckCircle className="w-5 h-5 text-green-500" /><span>Fast onboarding</span></div>
-                </div>
-              </div>
-              <div className="mt-10 text-center">
-                <Button 
-                  size="lg"
-                  className="bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:opacity-90"
-                  onClick={() => navigate('/contact')}
-                >
-                  Talk to Sales
-                </Button>
-              </div>
+          <div className="relative rounded-[3rem] p-12 overflow-hidden">
+            <div className="absolute inset-0 bg-classivo-blue/5 backdrop-blur-sm border border-white/40 rounded-[3rem]" />
+            {/* Decor */}
+            <div className="absolute -right-20 -top-20 w-64 h-64 bg-classivo-lightblue/30 rounded-full blur-3xl mix-blend-multiply" />
+            <div className="absolute -left-20 -bottom-20 w-64 h-64 bg-classivo-cream/50 rounded-full blur-3xl mix-blend-multiply" />
+
+            <div className="relative z-10 text-center max-w-4xl mx-auto">
+              <h2 className="text-3xl md:text-4xl font-bold text-classivo-black mb-6">Need a custom solution?</h2>
+              <p className="text-lg text-classivo-black/60 mb-10 max-w-2xl mx-auto leading-relaxed">
+                We offer tailored packages for large districts and international school chains.
+                Let's talk about how Classivo can fit your specific requirements.
+              </p>
+              <Button
+                onClick={() => navigate('/contact')}
+                variant="default"
+                size="lg"
+                className="rounded-full px-10 shadow-xl"
+              >
+                Contact SalesTeam
+              </Button>
             </div>
-          </Card>
+          </div>
         </Container>
       </section>
 

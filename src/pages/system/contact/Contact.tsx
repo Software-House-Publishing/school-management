@@ -1,266 +1,157 @@
-import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
+import { Mail, Phone, MapPin, Send, MessageSquare, Clock } from 'lucide-react';
 import { Container } from '@/components/layouts/Container';
-import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import SystemHeader from '@/components/layouts/SystemHeader';
 import SystemFooter from '@/components/layouts/SystemFooter';
-import { 
-  Mail, 
-  Phone, 
-  MapPin, 
-  Clock, 
-  Send,
-  User,
-  MessageSquare,
-  CheckCircle
-} from 'lucide-react';
 
 export default function Contact() {
-  const { t } = useTranslation();
-
   const contactInfo = [
     {
       icon: Mail,
-      title: 'Email Support',
-      details: ['support@schoolmanagement.com', 'help@schoolmanagement.com'],
-      description: 'Get help via email, usually responds within 24 hours'
+      title: 'Email Us',
+      content: 'hello@classivo.io',
+      description: 'We usually respond within 24 hours.'
     },
     {
       icon: Phone,
-      title: 'Phone Support',
-      details: ['+1 (555) 123-4567', '+1 (555) 987-6543'],
-      description: 'Available Mon-Fri, 9 AM - 6 PM EST'
+      title: 'Call Us',
+      content: '+1 (555) 000-0000',
+      description: 'Mon-Fri from 9am to 6pm EST.'
     },
     {
       icon: MapPin,
-      title: 'Office Address',
-      details: ['123 Education Street', 'Learning City, LC 12345', 'United States'],
-      description: 'Visit our headquarters for in-person support'
-    },
-    {
-      icon: Clock,
-      title: 'Business Hours',
-      details: ['Monday - Friday: 9 AM - 6 PM', 'Saturday: 10 AM - 4 PM', 'Sunday: Closed'],
-      description: 'Support available during business hours'
+      title: 'Visit Us',
+      content: 'San Francisco, CA',
+      description: '100 Smith Street, Suite 500'
     }
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
+    <div className="min-h-screen bg-classivo-cream text-classivo-black relative overflow-hidden">
+      {/* Dynamic Background */}
+      <div className="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
+        <div className="absolute top-[-20%] right-[-10%] w-[70vw] h-[70vw] bg-classivo-lightblue/30 blur-[150px] rounded-full mix-blend-multiply opacity-70 animate-blob" />
+        <div className="absolute bottom-[-10%] left-[-10%] w-[60vw] h-[60vw] bg-classivo-blue/20 blur-[150px] rounded-full mix-blend-multiply opacity-70 animate-blob animation-delay-2000" />
+      </div>
+
       <SystemHeader />
-      
-      {/* Hero Section */}
-      <section className="relative bg-gradient-to-r from-blue-600 to-purple-800 text-white py-20">
-        <div className="absolute inset-0 bg-black/20" />
-        <Container className="relative z-10">
-          <motion.div 
-            className="text-center max-w-3xl mx-auto"
+
+      <section className="pt-40 pb-20">
+        <Container>
+          <motion.div
+            className="text-center max-w-3xl mx-auto mb-20"
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
           >
-            <h1 className="text-4xl md:text-5xl font-bold mb-6">Get in Touch</h1>
-            <p className="text-xl opacity-90 leading-relaxed">
-              We're here to help! Reach out to our support team for any questions, concerns, or feedback.
+            <div className="inline-flex items-center px-4 py-1.5 rounded-full font-medium text-sm bg-white/40 backdrop-blur-md border border-white/60 text-classivo-blue mb-8 shadow-sm">
+              <MessageSquare className="w-4 h-4 mr-2" />
+              We'd love to hear from you
+            </div>
+            <h1 className="text-5xl md:text-7xl font-semibold tracking-tight mb-8 text-classivo-black font-display">
+              Get in touch
+            </h1>
+            <p className="text-xl text-classivo-black/60 leading-relaxed font-light">
+              Have questions about our platform? Need a custom demo?
+              Our team is ready to help you transform your educational institution.
             </p>
           </motion.div>
-        </Container>
-      </section>
 
-      {/* Contact Info Section */}
-      <section className="py-16">
-        <Container>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
-            {contactInfo.map((info, index) => {
-              const Icon = info.icon;
-              return (
+          <div className="grid lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
+            {/* Contact Info Cards */}
+            <div className="lg:col-span-1 space-y-6">
+              {contactInfo.map((item, index) => (
                 <motion.div
-                  key={info.title}
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: index * 0.1, duration: 0.6 }}
+                  key={item.title}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                  className="glass-panel p-6 rounded-2xl flex items-start gap-4 hover:bg-white/60 transition-colors"
                 >
-                  <Card className="h-full text-center hover:shadow-lg transition-all duration-300">
-                    <div className="p-6">
-                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center mx-auto mb-4">
-                        <Icon className="w-6 h-6 text-white" />
-                      </div>
-                      <h3 className="text-lg font-semibold text-gray-900 mb-3">{info.title}</h3>
-                      <div className="space-y-1 mb-3">
-                        {info.details.map((detail, i) => (
-                          <p key={i} className="text-gray-600 text-sm">{detail}</p>
-                        ))}
-                      </div>
-                      <p className="text-gray-500 text-xs">{info.description}</p>
-                    </div>
-                  </Card>
+                  <div className="w-12 h-12 rounded-xl bg-white flex items-center justify-center shrink-0 shadow-sm text-classivo-blue">
+                    <item.icon className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-lg text-classivo-black mb-1">{item.title}</h3>
+                    <p className="text-classivo-blue font-medium mb-1">{item.content}</p>
+                    <p className="text-sm text-classivo-black/50">{item.description}</p>
+                  </div>
                 </motion.div>
-              );
-            })}
-          </div>
+              ))}
 
-          {/* Contact Form Section */}
-          <div className="max-w-4xl mx-auto">
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.8 }}
-            >
-              <Card className="bg-gradient-to-br from-white to-gray-50">
-                <div className="p-8">
-                  <div className="text-center mb-8">
-                    <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">Send us a Message</h2>
-                    <p className="text-gray-600">Fill out the form below and we'll get back to you as soon as possible.</p>
-                  </div>
-                  
-                  <form className="space-y-6">
-                    <div className="grid md:grid-cols-2 gap-6">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          <User className="w-4 h-4 inline mr-2" />
-                          Full Name *
-                        </label>
-                        <input
-                          type="text"
-                          required
-                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                          placeholder="Enter your full name"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          <Mail className="w-4 h-4 inline mr-2" />
-                          Email Address *
-                        </label>
-                        <input
-                          type="email"
-                          required
-                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                          placeholder="Enter your email address"
-                        />
-                      </div>
-                    </div>
-                    
-                    <div className="grid md:grid-cols-2 gap-6">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          <Phone className="w-4 h-4 inline mr-2" />
-                          Phone Number
-                        </label>
-                        <input
-                          type="tel"
-                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                          placeholder="Enter your phone number"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Institution Type
-                        </label>
-                        <select className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200">
-                          <option>Select institution type</option>
-                          <option>Elementary School</option>
-                          <option>Middle School</option>
-                          <option>High School</option>
-                          <option>College/University</option>
-                          <option>Other</option>
-                        </select>
-                      </div>
-                    </div>
-                    
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        <MessageSquare className="w-4 h-4 inline mr-2" />
-                        Message *
-                      </label>
-                      <textarea
-                        rows={6}
-                        required
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                        placeholder="Tell us how we can help you..."
-                      />
-                    </div>
-                    
-                    <div className="flex items-center">
-                      <input
-                        type="checkbox"
-                        id="newsletter"
-                        className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                      />
-                      <label htmlFor="newsletter" className="ml-2 text-sm text-gray-600">
-                        I would like to receive updates and news about {t('app.name')}
-                      </label>
-                    </div>
-                    
-                    <motion.button
-                      type="submit"
-                      className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-4 px-6 rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center space-x-2"
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                    >
-                      <Send className="w-5 h-5" />
-                      <span>Send Message</span>
-                    </motion.button>
-                  </form>
+              <div className="glass-panel p-8 rounded-3xl mt-8 bg-classivo-blue/5 border-classivo-blue/10">
+                <div className="flex items-center gap-3 mb-4">
+                  <Clock className="w-6 h-6 text-classivo-blue" />
+                  <h3 className="font-semibold text-lg">Support Hours</h3>
                 </div>
-              </Card>
-            </motion.div>
-          </div>
-        </Container>
-      </section>
+                <p className="text-classivo-black/70 mb-2">Our support team is available:</p>
+                <ul className="space-y-2 text-sm text-classivo-black/60">
+                  <li className="flex justify-between">
+                    <span>Monday - Friday</span>
+                    <span className="font-medium">9:00 AM - 6:00 PM</span>
+                  </li>
+                  <li className="flex justify-between">
+                    <span>Saturday</span>
+                    <span className="font-medium">10:00 AM - 4:00 PM</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
 
-      {/* FAQ Section */}
-      <section className="py-16 bg-gray-50">
-        <Container>
-          <motion.div 
-            className="text-center mb-12"
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8 }}
-          >
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Frequently Asked Questions</h2>
-            <p className="text-gray-600">Quick answers to common questions about our platform.</p>
-          </motion.div>
-          
-          <div className="max-w-3xl mx-auto space-y-4">
-            {[
-              {
-                question: 'How quickly can I get started?',
-                answer: 'You can start using our platform immediately after signing up. Our onboarding process takes less than 30 minutes.'
-              },
-              {
-                question: 'Is my data secure?',
-                answer: 'Yes, we use enterprise-grade security with end-to-end encryption and regular security audits.'
-              },
-              {
-                question: 'Can I migrate from my current system?',
-                answer: 'Absolutely! We provide comprehensive data migration services to ensure a smooth transition.'
-              }
-            ].map((faq, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1, duration: 0.6 }}
-              >
-                <Card className="hover:shadow-md transition-all duration-300">
-                  <div className="p-6">
-                    <div className="flex items-start space-x-3">
-                      <CheckCircle className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
-                      <div>
-                        <h3 className="font-semibold text-gray-900 mb-2">{faq.question}</h3>
-                        <p className="text-gray-600">{faq.answer}</p>
-                      </div>
-                    </div>
+            {/* Contact Form */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="lg:col-span-2"
+            >
+              <form className="glass-panel p-8 md:p-12 rounded-[2.5rem] space-y-8 bg-white/60">
+                <div className="grid md:grid-cols-2 gap-8">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-classivo-black/70 ml-1">First Name</label>
+                    <input
+                      type="text"
+                      className="w-full px-6 py-4 rounded-2xl glass-input bg-white/50 focus:ring-0 placeholder:text-gray-400"
+                      placeholder="Jane"
+                    />
                   </div>
-                </Card>
-              </motion.div>
-            ))}
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-classivo-black/70 ml-1">Last Name</label>
+                    <input
+                      type="text"
+                      className="w-full px-6 py-4 rounded-2xl glass-input bg-white/50 focus:ring-0 placeholder:text-gray-400"
+                      placeholder="Doe"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-classivo-black/70 ml-1">Email Address</label>
+                  <input
+                    type="email"
+                    className="w-full px-6 py-4 rounded-2xl glass-input bg-white/50 focus:ring-0 placeholder:text-gray-400"
+                    placeholder="jane@school.edu"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-classivo-black/70 ml-1">Message</label>
+                  <textarea
+                    rows={6}
+                    className="w-full px-6 py-4 rounded-2xl glass-input bg-white/50 focus:ring-0 placeholder:text-gray-400 resize-none"
+                    placeholder="Type your message here..."
+                  />
+                </div>
+
+                <div className="pt-4">
+                  <Button size="lg" className="w-full md:w-auto px-12 h-14 rounded-xl text-lg shadow-xl" variant="default">
+                    Send Message
+                    <Send className="w-5 h-5 ml-2" />
+                  </Button>
+                </div>
+              </form>
+            </motion.div>
           </div>
         </Container>
       </section>

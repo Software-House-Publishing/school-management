@@ -1,6 +1,6 @@
 {
   "app": {
-    "name": "School Management System",
+    "name": "Classivo",
     "tagline": "ပညာရေးကို နည်းပညာဖြင့် အားပေးခြင်း"
   },
   "navigation": {
@@ -33,7 +33,7 @@
     },
     "roles": {
       "director": "ညွှန်ကြားရေးမှူး",
-      "administrator": "အုပ်ချုပ်ရေးမှူး", 
+      "administrator": "အုပ်ချုပ်ရေးမှူး",
       "manager": "မန်နေဂျာ",
       "finance_officer": "ငွေရေး အရာရှိ",
       "help_desk": "အကူအညီစင်တာ",

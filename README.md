@@ -85,7 +85,7 @@ src/
 - **Internationalization**: react-i18next
 - **Notifications**: Sonner (toast notifications)
 - **Charts**: Recharts for data visualization
-- **Authentication**: Supabase Auth integration
+
 
 ### Design Patterns
 - **Component-Based Architecture**: Modular, reusable components
@@ -170,9 +170,7 @@ VITE_APP_NAME=School Management System
 VITE_API_URL=https://api.yourdomain.com/api/v1
 VITE_APP_URL=https://app.yourdomain.com
 
-# Supabase Configuration
-VITE_SUPABASE_URL=https://your-project.supabase.co
-VITE_SUPABASE_ANON_KEY=your-anon-key
+
 ```
 
 See [`docs/deployment/deployment-guide.md`](docs/deployment/deployment-guide.md) for detailed deployment instructions.
@@ -287,7 +285,7 @@ Include the following information:
 
 - React community for excellent documentation
 - Tailwind CSS team for utility-first styling
-- Supabase team for authentication and database services
+
 - All contributors and supporters
 
 ---

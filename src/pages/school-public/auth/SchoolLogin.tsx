@@ -7,6 +7,9 @@ import { Card } from '@/components/ui/Card';
 import { motion } from 'framer-motion';
 import { Container } from '@/components/layouts/Container';
 import { loginSchema } from '@/utils/validators';
+import { getDefaultRoute } from '@/config/routes';
+
+import { UserRole } from '@/types/auth';
 
 interface SchoolLoginData {
   schoolName: string;
@@ -28,7 +31,10 @@ export default function SchoolLogin() {
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated && user) {
-      const defaultRoute = `/${schoolId}${getDefaultRoute(user.role)}`;
+      // Use the global getDefaultRoute from routes config which returns absolute paths
+      // like /school-admin/dashboard or /system-admin/dashboard
+      // We do NOT prepend schoolId here because currently our admin routes are root-level
+      const defaultRoute = getDefaultRoute(user.role);
       navigate(defaultRoute);
     }
   }, [isAuthenticated, user, navigate, schoolId]);
@@ -48,17 +54,6 @@ export default function SchoolLogin() {
     }, 1000);
   }, [schoolId]);
 
-  const getDefaultRoute = (role: string): string => {
-    switch (role) {
-      case 'student':
-        return '/student/dashboard';
-      case 'teacher':
-        return '/teacher/dashboard';
-      default:
-        return '/admin/dashboard';
-    }
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -68,17 +63,19 @@ export default function SchoolLogin() {
       setLoading(true);
       
       // Mock login - replace with actual API call
-      let role: any = 'student';
+      let role: UserRole = 'student';
       let firstName = 'Demo';
       let lastName = 'User';
       
       // Demo credentials mapping
       if (formData.email.includes('director')) {
-        role = 'director';
-        firstName = 'Director';
+        role = 'system_administrator';
+        firstName = 'System';
+        lastName = 'Administrator';
       } else if (formData.email.includes('admin')) {
-        role = 'administrator';
-        firstName = 'Admin';
+        role = 'school_administrator';
+        firstName = 'School';
+        lastName = 'Administrator';
       } else if (formData.email.includes('manager')) {
         role = 'manager';
         firstName = 'Manager';
@@ -114,18 +111,22 @@ export default function SchoolLogin() {
         setLoading(false);
         
         // Navigate to school-specific dashboard
-        const defaultRoute = `/${schoolId}${getDefaultRoute(role)}`;
+        const defaultRoute = getDefaultRoute(role);
         navigate(defaultRoute);
       }, 1000);
       
-    } catch (error: any) {
+    } catch (error: unknown) {
       setLoading(false);
-      if (error.errors) {
+      // Zod validation errors
+      if (typeof error === 'object' && error !== null && 'errors' in error) {
         const newErrors: Record<string, string> = {};
-        error.errors.forEach((err: any) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (error as any).errors.forEach((err: any) => {
           newErrors[err.path[0]] = err.message;
         });
         setErrors(newErrors);
+      } else {
+        console.error('Login error:', error);
       }
     }
   };
@@ -220,7 +221,7 @@ export default function SchoolLogin() {
             <Button
               type="submit"
               className="w-full"
-              loading={isLoading}
+              isLoading={isLoading}
             >
               {isLoading ? t('auth.login.loading') : t('auth.login.submit')}
             </Button>
