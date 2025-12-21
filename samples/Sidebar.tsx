@@ -2,12 +2,12 @@ import React from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Home, 
-  BookOpen, 
-  Calendar, 
-  FileText, 
-  User, 
+import {
+  Home,
+  BookOpen,
+  Calendar,
+  FileText,
+  User,
   Users,
   CreditCard,
   Award,
@@ -21,7 +21,7 @@ import { useAppStore } from '../../state/appStore';
 import { UserRole } from '../../types';
 import { ROUTES } from '../../utils/routes';
 import { cn } from '../../utils';
-import EduNestLogoIcon from '../icons/EduNestLogoIcon';
+import ClassivoLogoIcon from '../icons/ClassivoLogoIcon';
 
 interface NavItem {
   id: string;
@@ -38,8 +38,8 @@ const Sidebar: React.FC = () => {
   const { user, signOut } = useAuthStore();
   // Align with app store API (uses sidebarCollapsed instead of sidebarOpen)
   const { sidebarCollapsed, setSidebarCollapsed } = useAppStore();
-  const schoolLabel = t('app.schoolName', 'EduNest');
-  
+  const schoolLabel = t('app.schoolName', 'Classivo');
+
   // Determine current portal context from URL to avoid cross-portal duplicates
   const portalPrefix = React.useMemo(() => {
     const pathname = location.pathname || '';
@@ -224,8 +224,8 @@ const Sidebar: React.FC = () => {
       path: portalPrefix === '/student'
         ? ROUTES.STUDENT.PROFILE
         : portalPrefix === '/teacher'
-        ? ROUTES.TEACHER.PROFILE
-  : ROUTES.ADMIN.PROFILE,
+          ? ROUTES.TEACHER.PROFILE
+          : ROUTES.ADMIN.PROFILE,
       roles: [UserRole.STUDENT, UserRole.TEACHER, UserRole.EMPLOYEE, UserRole.ADMIN]
     },
   ];
@@ -238,7 +238,7 @@ const Sidebar: React.FC = () => {
     return roleMatch && portalMatch;
   });
 
-  const filteredBottomNavItems = bottomNavigationItems.filter(item => 
+  const filteredBottomNavItems = bottomNavigationItems.filter(item =>
     user?.role && item.roles.includes(user.role)
   );
 
@@ -260,7 +260,7 @@ const Sidebar: React.FC = () => {
       {/* Mobile overlay */}
       <AnimatePresence>
         {!isDesktop && !sidebarCollapsed && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -272,13 +272,13 @@ const Sidebar: React.FC = () => {
       </AnimatePresence>
 
       {/* Sidebar Container */}
-      <motion.aside 
+      <motion.aside
         initial={{ x: -300, opacity: 0 }}
-        animate={{ 
+        animate={{
           x: isDesktop ? 0 : (!sidebarCollapsed ? 0 : -300),
           opacity: isDesktop ? 1 : (!sidebarCollapsed ? 1 : 0)
         }}
-        transition={{ 
+        transition={{
           type: "spring",
           stiffness: 300,
           damping: 30,
@@ -297,9 +297,9 @@ const Sidebar: React.FC = () => {
             {/* Header */}
             <div className="flex items-center justify-between p-6 border-b border-gray-200/50">
               <div className="flex items-center gap-3">
-              <div className="w-18 h-18 bg-white/60 rounded-2xl border border-gray-200/60 flex items-center justify-center shadow-sm shadow-black/10">
-                  <EduNestLogoIcon className="w-16 h-16 object-contain" alt="EduNest" />
-              </div>
+                <div className="w-18 h-18 bg-white/60 rounded-2xl border border-gray-200/60 flex items-center justify-center shadow-sm shadow-black/10">
+                  <ClassivoLogoIcon className="w-16 h-16 object-contain" alt="Classivo" />
+                </div>
                 <div>
                   <h2 className="font-semibold text-gray-1000 text-xl">
                     {schoolLabel}
@@ -309,7 +309,7 @@ const Sidebar: React.FC = () => {
                   </p>
                 </div>
               </div>
-              
+
               <button
                 onClick={handleCloseSidebar}
                 className="lg:hidden p-2 rounded-xl hover:bg-gray-100 transition-all duration-200 group"
@@ -346,7 +346,7 @@ const Sidebar: React.FC = () => {
               {filteredNavItems.map((item, index) => {
                 const Icon = item.icon;
                 const active = isActive(item.path);
-                
+
                 return (
                   <motion.div
                     key={item.id}
@@ -359,8 +359,8 @@ const Sidebar: React.FC = () => {
                       onClick={handleCloseSidebar}
                       className={cn(
                         "flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-200 text-sm font-medium group relative overflow-hidden",
-                        active 
-                          ? "bg-white text-gray-900 shadow-sm shadow-black/5 border border-gray-200/60" 
+                        active
+                          ? "bg-white text-gray-900 shadow-sm shadow-black/5 border border-gray-200/60"
                           : "text-gray-700 hover:text-gray-900 hover:bg-gray-50"
                       )}
                     >
@@ -369,7 +369,7 @@ const Sidebar: React.FC = () => {
                         active ? "text-gray-700" : "text-gray-500 group-hover:text-gray-700"
                       )} />
                       <span className="relative z-10">{item.label}</span>
-                      
+
                       {/* Active indicator */}
                       {active && (
                         <motion.div
@@ -390,7 +390,7 @@ const Sidebar: React.FC = () => {
               {filteredBottomNavItems.map((item, index) => {
                 const Icon = item.icon;
                 const active = isActive(item.path);
-                
+
                 return (
                   <motion.div
                     key={item.id}
@@ -403,8 +403,8 @@ const Sidebar: React.FC = () => {
                       onClick={handleCloseSidebar}
                       className={cn(
                         "flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-200 text-sm font-medium group relative overflow-hidden",
-                        active 
-                          ? "bg-white text-gray-900 shadow-sm shadow-black/5 border border-gray-200/60" 
+                        active
+                          ? "bg-white text-gray-900 shadow-sm shadow-black/5 border border-gray-200/60"
                           : "text-gray-700 hover:text-gray-900 hover:bg-gray-50"
                       )}
                     >
@@ -413,7 +413,7 @@ const Sidebar: React.FC = () => {
                         active ? "text-gray-700" : "text-gray-500 group-hover:text-gray-700"
                       )} />
                       <span className="relative z-10">{item.label}</span>
-                      
+
                       {/* Active indicator */}
                       {active && (
                         <motion.div

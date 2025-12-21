@@ -24,13 +24,13 @@ export default function StudentLayout() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Sidebar
-        brandName="EduNest"
+        brandName="Classivo"
         brandSubtitle="Student Portal"
         user={userInfo}
         items={studentNavItems}
         onSignOut={handleLogout}
       />
-      
+
       <main className="p-8" style={{ paddingLeft: 'calc(var(--sidebar-width) + var(--sidebar-gutter) + var(--content-gutter))' }}>
         <Container>
           <Outlet />

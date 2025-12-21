@@ -24,13 +24,13 @@ export default function TeacherLayout() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Sidebar
-        brandName="EduNest"
+        brandName="Classivo"
         brandSubtitle="Teacher Portal"
         user={userInfo}
         items={teacherNavItems}
         onSignOut={handleLogout}
       />
-      
+
       <main className="p-8" style={{ paddingLeft: 'calc(var(--sidebar-width) + var(--sidebar-gutter) + var(--content-gutter))' }}>
         <Container>
           <Outlet />

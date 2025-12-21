@@ -1,10 +1,10 @@
 import React from 'react';
-import { 
-  Home, 
-  Users, 
-  BookOpen, 
-  Wallet, 
-  FileText, 
+import {
+  Home,
+  Users,
+  BookOpen,
+  Wallet,
+  FileText,
   Settings,
   BarChart3,
   BellPlus,
@@ -132,6 +132,13 @@ export const directorNavItems: NavItem[] = [
     label: 'Settings',
     href: '/system-admin/settings',
     icon: <Settings size={18} />,
+    section: 'secondary'
+  },
+  {
+    id: 'announcements',
+    label: 'Announcements',
+    href: '/system-admin/announcements',
+    icon: <BellPlus size={18} />,
     section: 'secondary'
   }
 ];

@@ -22,16 +22,16 @@ export default function AdminLayout() {
 
   const userInfo: UserInfo | undefined = user
     ? {
-        name: `${user.firstName} ${user.lastName}`,
-        email: user.email,
-        role: user.role,
-      }
+      name: `${user.firstName} ${user.lastName}`,
+      email: user.email,
+      role: user.role,
+    }
     : undefined;
 
   return (
     <div className="min-h-screen bg-gray-50">
       <Sidebar
-        brandName="EduNest"
+        brandName="Classivo"
         brandSubtitle="Admin Portal"
         user={userInfo}
         items={navItems}

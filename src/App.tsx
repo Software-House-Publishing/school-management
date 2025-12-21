@@ -2,26 +2,26 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { useTranslation } from 'react-i18next';
 import { Toaster } from 'sonner';
 
-// System pages (SaaS provider)
-import SystemHome from '@/pages/system/home/Home';
-import SystemAbout from '@/pages/system/about/About';
-import SystemContact from '@/pages/system/contact/Contact';
-import SystemTerms from '@/pages/system/terms/Terms';
-import SystemPrivacy from '@/pages/system/privacy/Privacy';
-import SystemPricing from '@/pages/system/pricing/Pricing';
-import SystemLogin from '@/pages/system/auth/Login';
-import SystemRegister from '@/pages/system/auth/Register';
-import SystemForgotPassword from '@/pages/system/auth/ForgotPassword';
-import SystemDocs from '@/pages/system/docs/Docs';
-import SystemCommunity from '@/pages/system/community/Community';
-import SystemStatus from '@/pages/system/status/Status';
-import SystemHelp from '@/pages/system/help/HelpCenter';
-import SystemCareers from '@/pages/system/careers/Careers';
-import SystemCareerDetail from '@/pages/system/careers/CareerDetail';
-import SystemPress from '@/pages/system/press/Press';
-import SystemPressDetail from '@/pages/system/press/PressDetail';
-import SystemCookies from '@/pages/system/cookies/Cookies';
-import SystemGDPR from '@/pages/system/gdpr/GDPR';
+// System pages (Public)
+import SystemHome from '@/pages/system/public/home/Home';
+import SystemAbout from '@/pages/system/public/about/About';
+import SystemContact from '@/pages/system/public/contact/Contact';
+import SystemTerms from '@/pages/system/public/terms/Terms';
+import SystemPrivacy from '@/pages/system/public/privacy/Privacy';
+import SystemPricing from '@/pages/system/public/pricing/Pricing';
+import SystemLogin from '@/pages/system/public/auth/Login';
+import SystemRegister from '@/pages/system/public/auth/Register';
+import SystemForgotPassword from '@/pages/system/public/auth/ForgotPassword';
+import SystemDocs from '@/pages/system/public/docs/Docs';
+import SystemCommunity from '@/pages/system/public/community/Community';
+import SystemStatus from '@/pages/system/public/status/Status';
+import SystemHelp from '@/pages/system/public/help/HelpCenter';
+import SystemCareers from '@/pages/system/public/careers/Careers';
+import SystemCareerDetail from '@/pages/system/public/careers/CareerDetail';
+import SystemPress from '@/pages/system/public/press/Press';
+import SystemPressDetail from '@/pages/system/public/press/PressDetail';
+import SystemCookies from '@/pages/system/public/cookies/Cookies';
+import SystemGDPR from '@/pages/system/public/gdpr/GDPR';
 
 // School-specific public pages
 import SchoolHome from '@/pages/school-public/home/SchoolHome';
@@ -36,6 +36,7 @@ import ProtectedRoute from '@/components/shared/ProtectedRoute';
 import StudentLayout from '@/components/layouts/StudentLayout';
 import TeacherLayout from '@/components/layouts/TeacherLayout';
 import AdminLayout from '@/components/layouts/AdminLayout';
+import ScrollToTop from '@/components/shared/ScrollToTop';
 
 // Student portal pages
 import StudentDashboard from '@/pages/student/dashboard/StudentDashboard';
@@ -52,20 +53,29 @@ import TeacherExams from '@/pages/teacher/exams/TeacherExams';
 import TeacherAnnouncements from '@/pages/teacher/announcements/TeacherAnnouncements';
 
 // Admin portal pages
-import AdminAnnouncement from '@/pages/admin/announcement/AdminAnnouncement';
-import AdminDashboard from '@/pages/admin/dashboard/AdminDashboard';
-import AdminUsers from '@/pages/admin/users/AdminUsers';
-import AdminCourses from '@/pages/admin/courses/AdminCourses';
-import AdminExams from '@/pages/admin/exams/AdminExams';
-import AdminFinance from '@/pages/admin/finance/AdminFinance';
-import AdminInvoices from '@/pages/admin/invoices/AdminInvoices';
-import AdminReports from '@/pages/admin/reports/AdminReports';
-import AdminSettings from '@/pages/admin/settings/AdminSettings';
-import AdminStudents from '@/pages/admin/students/StudentList';
-import AdminTeachers from '@/pages/admin/teachers/TeacherList';
-import AdminStudentDetail from '@/pages/admin/students/StudentDetail';
-import AdminStudentCreate from '@/pages/admin/students/StudentCreate';
-import AdminStudentEdit from '@/pages/admin/students/StudentEdit';
+// School Portal Pages
+import SchoolDashboard from '@/pages/school/dashboard/SchoolDashboard';
+import SchoolStudents from '@/pages/school/students/SchoolStudentList';
+import SchoolStudentCreate from '@/pages/school/students/StudentCreate';
+import SchoolStudentDetail from '@/pages/school/students/StudentDetail';
+import SchoolStudentEdit from '@/pages/school/students/StudentEdit';
+import SchoolTeachers from '@/pages/school/teachers/SchoolTeacherList';
+import SchoolCourses from '@/pages/school/courses/SchoolCourses';
+import SchoolAnnouncements from '@/pages/school/announcements/SchoolAnnouncements';
+import SchoolExams from '@/pages/school/exams/SchoolExams';
+import SchoolFinance from '@/pages/school/finance/SchoolFinance';
+import SchoolInvoices from '@/pages/school/invoices/SchoolInvoices';
+import SchoolReports from '@/pages/school/reports/SchoolReports';
+import SchoolSettings from '@/pages/school/settings/SchoolSettings';
+
+// System Portal Pages (Admin)
+import SystemDashboard from '@/pages/system/portal/dashboard/SystemDashboard';
+import SystemUsers from '@/pages/system/portal/users/SystemUsers';
+import SystemCourses from '@/pages/system/portal/courses/SystemCourses';
+import SystemFinance from '@/pages/system/portal/finance/SystemFinance';
+import SystemReports from '@/pages/system/portal/reports/SystemReports';
+import SystemSettings from '@/pages/system/portal/settings/SystemSettings';
+import SystemAnnouncements from '@/pages/system/portal/announcements/SystemAnnouncements';
 
 function App() {
   const { i18n } = useTranslation();
@@ -84,6 +94,7 @@ function App() {
   return (
     <div dir={i18n.language === 'my' ? 'rtl' : 'ltr'}>
       <Router>
+        <ScrollToTop />
         <Routes>
           {/* System routes (SaaS provider) */}
           <Route path="/" element={<SystemHome />} />
@@ -158,19 +169,19 @@ function App() {
             }
           >
             <Route index element={<Navigate to="/school-admin/dashboard" replace />} />
-            <Route path="dashboard" element={<AdminDashboard />} />
-            <Route path="students" element={<AdminStudents />} />
-            <Route path="students/new" element={<AdminStudentCreate />} />
-            <Route path="students/:id" element={<AdminStudentDetail />} />
-            <Route path="students/:id/edit" element={<AdminStudentEdit />} />
-            <Route path="teachers" element={<AdminTeachers />} />
-            <Route path="courses" element={<AdminCourses />} />
-            <Route path="announcements" element={<AdminAnnouncement />} />
-            <Route path="exams" element={<AdminExams />} />
-            <Route path="finance" element={<AdminFinance />} />
-            <Route path="invoices" element={<AdminInvoices />} />
-            <Route path="reports" element={<AdminReports />} />
-            <Route path="settings" element={<AdminSettings />} />
+            <Route path="dashboard" element={<SchoolDashboard />} />
+            <Route path="students" element={<SchoolStudents />} />
+            <Route path="students/new" element={<SchoolStudentCreate />} />
+            <Route path="students/:id" element={<SchoolStudentDetail />} />
+            <Route path="students/:id/edit" element={<SchoolStudentEdit />} />
+            <Route path="teachers" element={<SchoolTeachers />} />
+            <Route path="courses" element={<SchoolCourses />} />
+            <Route path="announcements" element={<SchoolAnnouncements />} />
+            <Route path="exams" element={<SchoolExams />} />
+            <Route path="finance" element={<SchoolFinance />} />
+            <Route path="invoices" element={<SchoolInvoices />} />
+            <Route path="reports" element={<SchoolReports />} />
+            <Route path="settings" element={<SchoolSettings />} />
           </Route>
 
           {/* System Admin portal */}
@@ -183,19 +194,20 @@ function App() {
             }
           >
             <Route index element={<Navigate to="/system-admin/dashboard" replace />} />
-            <Route path="dashboard" element={<AdminDashboard />} />
-            <Route path="users" element={<AdminUsers />} />
-            <Route path="courses" element={<AdminCourses />} />
-            <Route path="finance" element={<AdminFinance />} />
-            <Route path="reports" element={<AdminReports />} />
-            <Route path="settings" element={<AdminSettings />} />
+            <Route path="dashboard" element={<SystemDashboard />} />
+            <Route path="users" element={<SystemUsers />} />
+            <Route path="courses" element={<SystemCourses />} />
+            <Route path="announcements" element={<SystemAnnouncements />} />
+            <Route path="finance" element={<SystemFinance />} />
+            <Route path="reports" element={<SystemReports />} />
+            <Route path="settings" element={<SystemSettings />} />
           </Route>
 
           {/* Catch all route */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Router>
-      
+
       <Toaster
         position="top-right"
         expand={true}
@@ -203,6 +215,7 @@ function App() {
         closeButton
       />
     </div>
+
   );
 }
 
