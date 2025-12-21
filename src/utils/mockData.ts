@@ -1,4 +1,4 @@
-import { User, UserRole } from '@/types/auth';
+import { User } from '@/types/auth';
 import { Student } from '@/pages/school/students/studentData'; // Import Student type
 
 // Extended User type to include specific fields for students and teachers
