@@ -1,54 +1,20 @@
-import { Outlet } from 'react-router-dom';
-import { useNavigate } from 'react-router-dom';
-import { Container } from '@/components/layouts/Container';
-
 import { useAuthStore } from '@/stores/authStore';
-import Sidebar, { UserInfo } from '@/components/shared/Sidebar';
-import { adminNavItems, directorNavItems } from '@/config/navigation.tsx';
+import { adminNavItems, directorNavItems } from '@/config/navigation';
+import ProtectedLayout from './ProtectedLayout';
 
 export default function AdminLayout() {
-  const navigate = useNavigate();
-  const { logout, user } = useAuthStore();
+  const { user } = useAuthStore();
 
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
-  };
-
-  // pick sidebar items based on role
+  // Pick sidebar items based on role
   const navItems = user?.role === 'system_administrator'
-    ? directorNavItems // used by us
-    : adminNavItems; // used by administrator + manager
-
-  const userInfo: UserInfo | undefined = user
-    ? {
-        name: `${user.firstName} ${user.lastName}`,
-        email: user.email,
-        role: user.role,
-      }
-    : undefined;
+    ? directorNavItems
+    : adminNavItems;
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Sidebar
-        brandName="Classivo"
-        brandSubtitle="Admin Portal"
-        user={userInfo}
-        items={navItems}
-        onSignOut={handleLogout}
-      />
-
-      <main
-        className="p-8"
-        style={{
-          paddingLeft:
-            'calc(var(--sidebar-width) + var(--sidebar-gutter) + var(--content-gutter))',
-        }}
-      >
-        <Container>
-          <Outlet />
-        </Container>
-      </main>
-    </div>
+    <ProtectedLayout
+      brandSubtitle="Admin Portal"
+      navItems={navItems}
+      userInfoType="user"
+    />
   );
 }
