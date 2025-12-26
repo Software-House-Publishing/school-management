@@ -67,6 +67,9 @@ jspm_packages/
 # Stores VSCode versions used for testing VSCode extensions
 .vscode-test/
 
+# Claude Code
+.claude/
+
 # IDE files
 .vscode/
 !.vscode/extensions.json
