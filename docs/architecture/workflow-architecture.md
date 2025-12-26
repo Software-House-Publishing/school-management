@@ -1,20 +1,21 @@
-# School Management System — Workflow & Architecture
+# School Management System - Workflow & Architecture
 
-This document details the multi-tenant architecture, role-based access control, login flows for normal users, school admins, and system admins, data management, and end-to-end portal navigation.
+This document details the multi-tenant architecture, role-based access control, login flows, data management, and end-to-end portal navigation.
 
 ## 1. High-Level Architecture
 
 The application is a single multi-tenant frontend serving multiple schools.
 
-- System Provider (Platform Owner): Onboards schools and manages global pages.
-- Tenants (Schools): Each school has public pages and branded login under `school/:schoolId`.
-- Portals: Role-specific portals are protected routes.
+- **System Provider (Platform Owner)**: Onboards schools and manages global pages.
+- **Tenants (Schools)**: Each school has public pages and branded login under `school/:schoolId`.
+- **Portals**: Role-specific portals are protected routes.
 
 ```mermaid
 graph TD
   subgraph "System Provider"
     SP_Web["System Landing & Marketing"]
     SP_Auth["System Login / Register"]
+    SP_Admin["System Admin Portal"]
   end
 
   subgraph "School Tenant"
@@ -25,25 +26,38 @@ graph TD
   subgraph "Portals (Protected)"
     P_Student["/student/*"]
     P_Teacher["/teacher/*"]
-    P_Admin["/admin/*"]
+    P_SchoolAdmin["/school-admin/*"]
+    P_SystemAdmin["/system-admin/*"]
   end
 
   User((User)) --> SP_Web
   User --> School_X
-  SP_Auth --> P_Admin
+  SP_Auth --> P_SystemAdmin
+  SP_Auth --> P_SchoolAdmin
   School_Login --> P_Student
   School_Login --> P_Teacher
-  School_Login --> P_Admin
+  School_Login --> P_SchoolAdmin
 ```
 
 ## 2. Roles & Access Control
 
 RBAC is enforced client-side by a route guard.
 
-- Roles: `director`, `administrator`, `manager`, `finance_officer`, `help_desk`, `teacher`, `student` (`src/types/auth.ts:13`).
-- Guard: `ProtectedRoute` checks auth and allowed roles (`src/components/shared/ProtectedRoute.tsx:11`).
-- Mapping: `getDefaultRoute(role)` returns portal home (`src/config/routes.ts:46`).
-- Permissions: `ROUTE_PERMISSIONS` defines allowed roles per path (`src/config/routes.ts:9`).
+### Roles
+| Role | Code | Portal Access |
+|------|------|---------------|
+| System Administrator | `system_administrator` | `/system-admin/*` |
+| School Administrator | `school_administrator` | `/school-admin/*` |
+| Manager | `manager` | `/school-admin/*` |
+| Finance Officer | `finance_officer` | `/school-admin/*` |
+| Help Desk | `help_desk` | `/school-admin/*` |
+| Teacher | `teacher` | `/teacher/*` |
+| Student | `student` | `/student/*` |
+
+### Route Guard
+- **Guard Component**: `ProtectedRoute` checks auth and allowed roles
+- **Default Route**: `getDefaultRoute(role)` returns portal home
+- **Permissions**: `ROUTE_PERMISSIONS` defines allowed roles per path
 
 ```mermaid
 flowchart LR
@@ -54,80 +68,123 @@ flowchart LR
   D -- Yes --> F["Render Portal"]
 ```
 
-## 3. System Signup (First School Admin)
+## 3. Route Structure
 
-- Entry: `GET /register` (`src/pages/system/auth/Register.tsx:21`).
-- Purpose: Create the first school administrator during initial signup.
-- Validate: `school`, `name`, `email`, `password` with `zod`.
-- Create: Initialize School entity and the first Admin user (mocked client-side currently).
-- Session: Persist via `useAuthStore.login(user, token)`.
-- Redirect: `getDefaultRoute('administrator')` → `/admin/dashboard` (`src/config/routes.ts:46`).
+### System Provider Routes (Public)
 
-```mermaid
-sequenceDiagram
-  participant U as New User
-  participant UI as System Register UI
-  participant Store as Auth Store
-  U->>UI: Open /register
-  U->>UI: Submit school + admin details
-  UI->>UI: Validate fields (zod)
-  UI->>Store: login(adminUser, token)
-  Store-->>UI: isAuthenticated=true
-  UI->>U: Redirect to /admin/dashboard
-```
+| Path | Component | Description |
+|------|-----------|-------------|
+| `/` | SystemHome | Platform landing page |
+| `/about` | SystemAbout | About page |
+| `/contact` | SystemContact | Contact form |
+| `/pricing` | SystemPricing | Pricing plans |
+| `/terms` | SystemTerms | Terms of service |
+| `/privacy` | SystemPrivacy | Privacy policy |
+| `/login` | SystemLogin | System login |
+| `/register` | SystemRegister | School registration |
+| `/forgot-password` | SystemForgotPassword | Password reset |
+| `/docs` | SystemDocs | Documentation |
+| `/community` | SystemCommunity | Community page |
+| `/status` | SystemStatus | System status |
+| `/help` | SystemHelp | Help center |
+| `/careers` | SystemCareers | Careers listing |
+| `/careers/:slug` | SystemCareerDetail | Career detail |
+| `/press` | SystemPress | Press releases |
+| `/press/:slug` | SystemPressDetail | Press detail |
+| `/cookies` | SystemCookies | Cookie policy |
+| `/gdpr` | SystemGDPR | GDPR compliance |
 
-## 4. Login Entry Points
+### School Public Routes
 
-### A. Normal Users (Students, Teachers)
-- Entry: `GET /school/:schoolId/login` (`src/pages/school-public/auth/SchoolLogin.tsx:18`).
-- Load: Fetch school branding by `schoolId` (mocked) and render login.
-- Validate: Form validated with `zod` (`loginSchema`).
-- Authenticate: Demo-only, maps email to role.
-- Session: `useAuthStore.login(user, token)` persists to localStorage (`src/stores/authStore.ts:22`).
-- Redirect: Compute default portal route and navigate.
+| Path | Component | Description |
+|------|-----------|-------------|
+| `/school/:schoolId` | SchoolHome | School landing page |
+| `/school/:schoolId/about` | SchoolAbout | School about page |
+| `/school/:schoolId/contact` | SchoolContact | School contact |
+| `/school/:schoolId/pricing` | SchoolPricing | School pricing |
+| `/school/:schoolId/rules` | SchoolRules | School rules |
+| `/school/:schoolId/login` | SchoolLogin | School-branded login |
+
+### Student Portal Routes (`/student/*`)
+
+**Allowed Roles**: `student`
+
+| Path | Component | Description |
+|------|-----------|-------------|
+| `/student/dashboard` | StudentDashboard | Student overview |
+| `/student/qr-id` | StudentQRId | Virtual ID card |
+| `/student/grades` | StudentGrades | Grade viewing |
+| `/student/schedule` | StudentSchedule | Class schedule |
+| `/student/courses` | StudentCourses | Enrolled courses |
+| `/student/advisor` | StudentAdvisor | Academic advisor |
+| `/student/assignments` | StudentAssignments | Assignments |
+| `/student/fees` | StudentFees | Fee payments |
+| `/student/calendar` | StudentCalendar | Academic calendar |
+| `/student/exams` | StudentExams | Exam schedule |
+| `/student/profile` | StudentProfile | Profile settings |
+
+### Teacher Portal Routes (`/teacher/*`)
+
+**Allowed Roles**: `teacher`
+
+| Path | Component | Description |
+|------|-----------|-------------|
+| `/teacher/dashboard` | TeacherDashboard | Teacher overview |
+| `/teacher/courses` | TeacherCourses | Assigned courses |
+| `/teacher/students` | TeacherStudents | Student roster |
+| `/teacher/exams` | TeacherExams | Exam management |
+| `/teacher/announcements` | TeacherAnnouncements | Announcements |
+
+### School Admin Portal Routes (`/school-admin/*`)
+
+**Allowed Roles**: `school_administrator`, `manager`, `finance_officer`, `help_desk`
+
+| Path | Component | Description |
+|------|-----------|-------------|
+| `/school-admin/dashboard` | AdminDashboard | Admin overview |
+| `/school-admin/students` | StudentList | Student list |
+| `/school-admin/students/new` | StudentCreate | Add student |
+| `/school-admin/students/:id` | StudentDetail | Student details |
+| `/school-admin/students/:id/edit` | StudentEdit | Edit student |
+| `/school-admin/teachers` | TeacherList | Teacher list |
+| `/school-admin/teachers/new` | TeacherCreate | Add teacher |
+| `/school-admin/teachers/:id` | TeacherDetail | Teacher details |
+| `/school-admin/teachers/:id/edit` | TeacherEdit | Edit teacher |
+| `/school-admin/courses` | AdminCourses | Course management |
+| `/school-admin/announcements` | AdminAnnouncement | Announcements |
+| `/school-admin/exams` | AdminExams | Exam management |
+| `/school-admin/finance` | AdminFinance | Financial overview |
+| `/school-admin/invoices` | AdminInvoices | Invoice management |
+| `/school-admin/reports` | AdminReports | Reporting |
+| `/school-admin/settings` | AdminSettings | System settings |
+
+### System Admin Portal Routes (`/system-admin/*`)
+
+**Allowed Roles**: `system_administrator`
+
+| Path | Component | Description |
+|------|-----------|-------------|
+| `/system-admin/dashboard` | SystemDashboard | Platform overview |
+| `/system-admin/users` | AdminUsers | User management |
+| `/system-admin/users/new` | UserCreate | Add user |
+| `/system-admin/users/:id` | UserDetail | User details |
+| `/system-admin/users/:id/edit` | UserEdit | Edit user |
+| `/system-admin/courses` | AdminCourses | Course management |
+| `/system-admin/finance` | AdminFinance | Financial overview |
+| `/system-admin/reports` | AdminReports | Reporting |
+| `/system-admin/settings` | AdminSettings | System settings |
+
+## 4. Login Flows
+
+### A. System Login (Platform Level)
+
+- **Entry**: `GET /login`
+- **Purpose**: Platform owner or cross-tenant login
+- **Flow**: Demo-only; sets role based on email keywords
 
 ```mermaid
 sequenceDiagram
   participant U as User
-  participant UI as School Login UI
-  participant Store as Auth Store
-  U->>UI: Open /school/:schoolId/login
-  UI->>UI: Load branding by schoolId (mock)
-  U->>UI: Submit email/password
-  UI->>Store: login(user, token)
-  Store-->>UI: isAuthenticated=true
-  UI->>U: Redirect to portal (student/teacher)
-```
-
-### B. School Admins (Director, Administrator, Manager, Finance Officer, Help Desk)
-- Entry: `GET /school/:schoolId/login` (same branded login).
-- Authenticate: Demo-only; role maps to admin cohort.
-- Session: Persist via `useAuthStore`.
-- Redirect: Admin default dashboard.
-
-```mermaid
-sequenceDiagram
-  participant U as Admin User
-  participant UI as School Login UI
-  participant Store as Auth Store
-  U->>UI: Open /school/:schoolId/login
-  UI->>UI: Load branding by schoolId (mock)
-  U->>UI: Submit credentials
-  UI->>Store: login(user, token)
-  Store-->>UI: isAuthenticated=true
-  UI->>U: Redirect to /admin/dashboard
-```
-
-### C. System Admins (Platform-Level)
-- Entry: `GET /login` (`src/pages/system/auth/Login.tsx:15`).
-- Use: Intended for platform owner or cross-tenant login.
-- Authenticate: Demo-only; sets role based on email.
-- Session: Persist via `useAuthStore`.
-- Redirect: `getDefaultRoute(role)` → admin/student/teacher portal.
-
-```mermaid
-sequenceDiagram
-  participant U as System Admin/User
   participant UI as System Login UI
   participant Store as Auth Store
   U->>UI: Open /login
@@ -137,56 +194,147 @@ sequenceDiagram
   UI->>U: Redirect to portal
 ```
 
-## 5. Routing Strategy & Portals
+### B. School Login (Tenant Level)
 
-Public routes (`src/App.tsx:65-74`): `/`, `/about`, `/contact`, `/pricing`, `/terms`, `/privacy`, `/login`, `/register`, `/forgot-password`.
+- **Entry**: `GET /school/:schoolId/login`
+- **Purpose**: Students, teachers, and school admins
+- **Flow**: Load school branding, authenticate, redirect to portal
 
-School public routes (`src/App.tsx:77-82`): `/school/:schoolId`, `/school/:schoolId/about`, `/school/:schoolId/contact`, `/school/:schoolId/pricing`, `/school/:schoolId/rules`, `/school/:schoolId/login`.
+```mermaid
+sequenceDiagram
+  participant U as User
+  participant UI as School Login UI
+  participant Store as Auth Store
+  U->>UI: Open /school/:schoolId/login
+  UI->>UI: Load branding by schoolId
+  U->>UI: Submit email/password
+  UI->>Store: login(user, token)
+  Store-->>UI: isAuthenticated=true
+  UI->>U: Redirect to portal
+```
 
-Protected portals (`src/App.tsx:84-139`):
-- Student: `/student/*` → `dashboard`, `courses`, `exams`, `profile`, `fees`.
-- Teacher: `/teacher/*` → `dashboard`, `courses`, `students`, `exams`, `announcements`.
-- Admin: `/admin/*` → `dashboard`, `courses`, `finance`, `reports`, `settings`, `students`, `teachers`, `announcements`, `exams`, `invoices`.
+### C. Mock Authentication (Demo)
 
-Note: Portal routes are currently global (not prefixed by `:schoolId`). If tenant-scoped portals are desired (e.g., `/:schoolId/admin/*`), update the router definitions accordingly (`src/App.tsx:84-139`).
+The current implementation uses mock authentication:
+- Email keywords determine role assignment
+- Contains `student` → student role
+- Contains `teacher` → teacher role
+- Contains `admin` → school_administrator role
+- Contains `system` → system_administrator role
+
+## 5. Navigation Configuration
+
+Navigation items are defined in `src/config/navigation.tsx`:
+
+### Admin Navigation (`adminNavItems`)
+For school_administrator, manager, finance_officer, help_desk:
+- Dashboard, Students, Teachers, Courses
+- Announcements, Exams/Quizzes, Finance
+- Invoices, Reports, Settings
+
+### Director Navigation (`directorNavItems`)
+For system_administrator:
+- Dashboard, Users, Courses
+- Finance, Reports, Settings
+
+### Student Navigation (`studentNavItems`)
+- Dashboard, QR Virtual ID, Grades
+- Schedule, Courses, Advisor
+- Assignments, Payments, Calendar, Profile
+
+### Teacher Navigation (`teacherNavItems`)
+- Dashboard, My Courses, Students
+- Exams, Announcements, Profile
+
+## 6. Portal Flow
 
 ```mermaid
 flowchart LR
   A[Login Success] --> B{Role}
   B -- student --> C["/student/dashboard"]
   B -- teacher --> D["/teacher/dashboard"]
-  B -- admin cohort --> E["/admin/dashboard"]
-  C --> C1[Use StudentLayout]
-  D --> D1[Use TeacherLayout]
-  E --> E1[Use AdminLayout]
+  B -- school_administrator --> E["/school-admin/dashboard"]
+  B -- system_administrator --> F["/system-admin/dashboard"]
+  C --> C1[StudentLayout]
+  D --> D1[TeacherLayout]
+  E --> E1[AdminLayout]
+  F --> F1[AdminLayout]
 ```
 
-## 6. Security & Session Management
+## 7. Layout Architecture
 
-- Store: Zustand with `persist` saves `user`, `token`, `isAuthenticated` in `localStorage` under `auth-storage` (`src/stores/authStore.ts:67`).
-- Token: Demo-only opaque `token` string; no JWT decode/refresh.
-- Guard: `ProtectedRoute` enforces auth and roles; redirects unauthenticated to `/login` and unauthorized to `getDefaultRoute(role)` (`src/components/shared/ProtectedRoute.tsx:22-29`).
-- Future (recommended): Use HTTP-only cookies for JWT, add refresh rotation, and server-side validation.
+All protected portals use the unified `ProtectedLayout` component:
 
+```tsx
+// ProtectedLayout handles:
+// - Sidebar with navigation
+// - User/Student info card
+// - Main content area with Container
+// - Logout functionality
+```
+
+### Layout Hierarchy
+```
+ProtectedLayout
+├── Sidebar
+│   ├── Brand Logo
+│   ├── User/Student Info Card
+│   ├── Primary Navigation
+│   ├── Secondary Navigation
+│   └── Sign Out Button
+└── Main Content
+    └── Container
+        └── Page Component (via Outlet)
+```
+
+### Portal-Specific Layouts
+| Layout | Portal | Nav Items | User Card |
+|--------|--------|-----------|-----------|
+| AdminLayout | school-admin, system-admin | Role-based (admin/director) | User info |
+| StudentLayout | student | studentNavItems | Student info card |
+| TeacherLayout | teacher | teacherNavItems | User info |
+
+## 8. Security & Session Management
+
+### Authentication Store (Zustand)
+```typescript
+// Stored in localStorage under 'auth-storage'
+interface AuthState {
+  user: User | null;
+  token: string | null;
+  isAuthenticated: boolean;
+}
+```
+
+### Route Protection Flow
+1. `ProtectedRoute` checks `isAuthenticated` from store
+2. If not authenticated → redirect to `/login`
+3. If authenticated, checks if user role is in `allowedRoles`
+4. If role not allowed → redirect to `getDefaultRoute(role)`
+5. If authorized → render children
+
+### Session Persistence
+- Auth state persisted to localStorage
+- Survives page refresh
+- Cleared on logout
+
+## 9. Data Management
+
+### Current Implementation (Mock Data)
+- Student data: `loadStudents()`, `saveStudents()` (localStorage)
+- Teacher data: `loadTeachers()`, `saveTeachers()` (localStorage)
+- User data: In-memory mock data
+
+### Data Flow
 ```mermaid
 flowchart LR
-  A["login(user, token)"] --> B["Persist to localStorage"]
-  B --> C["isAuthenticated=true"]
-  C --> D["ProtectedRoute checks"]
-  D -->|ok| E["Render"]
-  D -->|fail| F["Redirect"]
+  A[Component] --> B[useState with loader]
+  B --> C[localStorage]
+  A --> D[Update State]
+  D --> E[Save to localStorage]
 ```
 
-## 7. Data Handling & Models
-
-Conceptual multi-tenant data ownership:
-
-- School: Root tenant entity.
-- User: `id`, `email`, `role`, `firstName`, `lastName`, `isActive`, timestamps (`src/types/auth.ts:1-20`).
-- Academic & Finance: exams, announcements, invoices, etc. in `src/types/*`.
-
-Relationships (conceptual):
-
+### Entity Relationships (Conceptual)
 ```mermaid
 erDiagram
   SCHOOL ||--|{ USER : has
@@ -197,26 +345,60 @@ erDiagram
   COURSE }|--|| TEACHER_PROFILE : taught_by
 ```
 
-## 8. End-to-End Workflows
+## 10. Multi-Tenancy Notes
 
-### Login to Portal
-1. User opens login (system or school).
-2. UI validates input; authenticates (demo).
-3. Store persists session and token.
-4. Compute default route via role.
-5. Navigate to portal; `ProtectedRoute` verifies on each portal page.
+### Current Implementation
+- Public school context via `:schoolId` in URLs
+- Portals are global (not prefixed by schoolId)
+- Mock data is shared across all schools
+
+### Future Enhancement Path
+If tenant-scoped portals are needed:
+1. Update routes to include schoolId: `/:schoolId/admin/*`
+2. Add school context to layouts
+3. Filter data by school in API calls
+4. Store schoolId in auth state
+
+## 11. Internationalization (i18n)
+
+### Supported Languages
+- English (en) - Primary
+- Burmese (my) - Secondary
+
+### RTL Support
+```tsx
+<div dir={i18n.language === 'my' ? 'rtl' : 'ltr'}>
+  {/* App content */}
+</div>
+```
+
+### Translation Files
+- `src/i18n/locales/en.json`
+- `src/i18n/locales/my.json`
+
+## 12. Error Handling
 
 ### Unauthorized Access
-- Unauthenticated → redirect to `/login`.
-- Authenticated but wrong role → redirect to role default.
+- Unauthenticated → redirect to `/login`
+- Wrong role → redirect to user's default portal
 
-### Invalid School Id (School Login)
-- If `schoolId` is invalid, show error page on `/school/:schoolId/*`.
+### Invalid Routes
+- Catch-all route redirects to `/`
 
-## 9. Multi-Tenancy Notes
+### Invalid School ID
+- School public pages should show error if schoolId is invalid
 
-- Public school context is maintained via `:schoolId` in URLs.
-- Portals are global by default. If cross-tenant separation is needed for portals, add `:schoolId` prefix and propagate context through layouts and API calls.
+## 13. Notifications
+
+Using Sonner for toast notifications:
+```tsx
+<Toaster
+  position="top-right"
+  expand={true}
+  richColors
+  closeButton
+/>
+```
 
 ---
-Generated for School Management System
+*Generated for School Management System (Classivo)*

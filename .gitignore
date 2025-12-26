@@ -192,3 +192,5 @@ systemd-private-*.service
 
 backend/.env
 .vercel
+.Ready!
+.Running
