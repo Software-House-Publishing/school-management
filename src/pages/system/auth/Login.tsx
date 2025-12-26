@@ -10,8 +10,11 @@ import AuthLayout from '@/components/layouts/AuthLayout';
 import { UserRole } from '@/types/auth';
 
 // 🔑 Backend base URL (change VITE_API_URL in .env if you want)
-
-const API_BASE_URL = import.meta.env.VITE_API_URL ?? '';
+// Use the VITE_ prefix so Vite exposes the variable in the browser.
+// Default to localhost:8080 (backend) in development so login works even
+// if env var is not configured.
+const API_BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8080';
+console.log('api: ', API_BASE_URL);
 
 
 export default function Login() {
@@ -30,6 +33,83 @@ export default function Login() {
     }
   }, [isAuthenticated, user, navigate]);
 
+  // If redirected back from OAuth provider with token in URL, consume it
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const tokenFromUrl = params.get('token');
+    if (!tokenFromUrl) return;
+
+    (async () => {
+      try {
+        setLoading(true);
+        const meRes = await fetch(`${API_BASE_URL}/api/auth/me`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${tokenFromUrl}`,
+          },
+        });
+        if (!meRes.ok) {
+          console.error('Failed to fetch profile after OAuth callback', await meRes.text());
+          setLoading(false);
+          return;
+        }
+        const apiUser = await meRes.json();
+
+        let primaryRole = 'system_administrator';
+        if (Array.isArray(apiUser.roles) && apiUser.roles.length > 0) {
+          primaryRole = apiUser.roles[0];
+        }
+
+        let appRole: UserRole;
+        switch (primaryRole) {
+          case 'admin':
+          case 'administrator':
+            appRole = 'system_administrator';
+            break;
+          case 'school_admin':
+            appRole = 'school_administrator';
+            break;
+          default:
+            appRole = primaryRole as UserRole;
+        }
+
+        const nameParts = (apiUser.name || '').split(' ');
+        const [firstName, ...rest] = nameParts;
+        const lastName = rest.join(' ');
+
+        const mappedUser = {
+          id: apiUser.id,
+          email: apiUser.email,
+          role: appRole,
+          firstName: firstName || '',
+          lastName: lastName || '',
+          isActive: apiUser.status ? apiUser.status === 'active' : true,
+          createdAt: apiUser.createdAt || new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          schoolName: apiUser.schoolName || (appRole === 'system_administrator' ? 'Central Administration' : 'St. Mary’s High School')
+        };
+
+        login(mappedUser, tokenFromUrl);
+        // navigate to default route for the role
+        try {
+          const defaultRoute = getDefaultRoute(mappedUser.role);
+          navigate(defaultRoute);
+        } catch (navErr) {
+          console.warn('Failed to navigate after OAuth login', navErr);
+        }
+        // remove token param from URL
+        params.delete('token');
+        const newUrl = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
+        window.history.replaceState({}, document.title, newUrl);
+        setLoading(false);
+      } catch (err) {
+        console.error('OAuth token handling failed', err);
+        setLoading(false);
+      }
+    })();
+  }, []);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -43,8 +123,8 @@ export default function Login() {
       // check if we should even try the backend (e.g. if explicitly in demo mode or backend is known missing)
       // For now, we'll try fetch, and if it fails, we fall back to mock.
 
-      try {
-        if (!API_BASE_URL) throw new Error("No API URL");
+        try {
+        if (!API_BASE_URL) throw new Error('No API URL');
 
         // ✅ REAL API CALL to backend
         const res = await fetch(`${API_BASE_URL}/api/auth/login`, {
@@ -55,28 +135,76 @@ export default function Login() {
           body: JSON.stringify(formData),
         });
 
-        const data = await res.json();
+        // parse response (guard if body is empty)
+        let data: any = {};
+        try { data = await res.json(); } catch { data = {}; }
 
         if (!res.ok) {
-          // If 401/403, it's a real auth error. 
-          // But if we are in "no backend" mode, we might want to override?
-          // Let's assume if it fails, and we want mock data, we might just want to force it?
-          // The user said "because we don't have the backend yet". 
-          // So likely the API call will fail with connection error or 404.
+          // Handle auth error (don't fall back to mock on invalid credentials)
+          if (res.status === 401) {
+            setErrors({ general: data.error || data.message || 'Invalid email or password' });
+            setLoading(false);
+            return;
+          }
 
-          throw new Error(data.message || 'Login failed');
+          // Other errors: show message and abort (no mock fallback)
+          setErrors({ general: data.error || data.message || 'Login failed' });
+          setLoading(false);
+          return;
         }
 
-        const apiUser = data.user;
-        // ... (mapping logic) ...
+        // expected backend shape: { accessToken: "..." }
+        const token = data.accessToken || data.token;
+        if (!token) {
+          setErrors({ general: 'no access token returned from server' });
+          setLoading(false);
+          return;
+        }
+
+        // fetch the current user profile
+        const meRes = await fetch(`${API_BASE_URL}/api/auth/me`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+
+        if (!meRes.ok) {
+          // don't fall back to mock on auth failures
+          if (meRes.status === 401) {
+            setErrors({ general: 'Invalid or expired token' });
+            setLoading(false);
+            return;
+          }
+          setErrors({ general: 'failed to fetch user profile' });
+          setLoading(false);
+          return;
+        }
+
+        const apiUser = await meRes.json();
+
+        // Map backend roles -> frontend role enums
+        let primaryRole = 'system_administrator';
+        if (Array.isArray(apiUser.roles) && apiUser.roles.length > 0) {
+          primaryRole = apiUser.roles[0];
+        }
+
         let appRole: UserRole;
-        switch (apiUser.role) {
-          case 'admin': appRole = 'system_administrator'; break;
-          case 'school_admin': appRole = 'school_administrator'; break;
-          default: appRole = apiUser.role as UserRole;
+        switch (primaryRole) {
+          case 'admin':
+          case 'administrator':
+            appRole = 'system_administrator';
+            break;
+          case 'school_admin':
+            appRole = 'school_administrator';
+            break;
+          default:
+            appRole = primaryRole as UserRole;
         }
 
-        const [firstName, ...rest] = (apiUser.name || '').split(' ');
+        const nameParts = (apiUser.name || '').split(' ');
+        const [firstName, ...rest] = nameParts;
         const lastName = rest.join(' ');
 
         const mappedUser = {
@@ -85,69 +213,77 @@ export default function Login() {
           role: appRole,
           firstName: firstName || '',
           lastName: lastName || '',
-          isActive: true,
-          createdAt: new Date().toISOString(),
+          isActive: apiUser.status ? apiUser.status === 'active' : true,
+          createdAt: apiUser.createdAt || new Date().toISOString(),
           updatedAt: new Date().toISOString(),
-          schoolName: "System", // Default for system
+          schoolName: apiUser.schoolName || (appRole === 'system_administrator' ? 'Central Administration' : 'St. Mary’s High School')
         };
 
-        login(mappedUser, data.token);
+        login(mappedUser, token);
         setLoading(false);
         return;
 
       } catch (err) {
-        // If API call fails (network error or specific "no backend" scenario), fall back to MOCK
-        console.warn("Backend login failed, falling back to MOCK DATA due to: ", err);
+        // Only fall back to mock for network errors (e.g. dev backend not reachable)
+        const msg = err instanceof Error ? err.message : String(err);
+        if (msg.includes('Failed to fetch') || msg.includes('NetworkError') || msg.includes('No API URL') || msg.includes('network') ) {
+          console.warn('Backend login failed (network) - falling back to MOCK DATA: ', err);
 
-        // Simulate network delay
-        await new Promise(resolve => setTimeout(resolve, 800));
+          // Simulate network delay
+          await new Promise(resolve => setTimeout(resolve, 800));
 
-        let mockRole: UserRole = 'system_administrator';
-        let mockFirstName = 'System';
-        let mockLastName = 'Admin';
+          let mockRole: UserRole = 'system_administrator';
+          let mockFirstName = 'System';
+          let mockLastName = 'Admin';
 
-        const emailLower = formData.email.toLowerCase();
+          const emailLower = formData.email.toLowerCase();
 
-        if (emailLower.includes('school')) {
-          mockRole = 'school_administrator';
-          mockFirstName = 'School';
-          mockLastName = 'Admin';
-        } else if (emailLower.includes('teacher')) {
-          mockRole = 'teacher';
-          mockFirstName = 'John';
-          mockLastName = 'Doe';
-        } else if (emailLower.includes('student')) {
-          mockRole = 'student';
-          mockFirstName = 'Sarah';
-          mockLastName = 'Connor';
-        } else if (emailLower.includes('manager')) {
-          mockRole = 'manager';
-          mockFirstName = 'Michael';
-          mockLastName = 'Scott';
-        } else if (emailLower.includes('finance')) {
-          mockRole = 'finance_officer';
-          mockFirstName = 'Angela';
-          mockLastName = 'Martin';
-        } else if (emailLower.includes('help')) {
-          mockRole = 'help_desk';
-          mockFirstName = 'Help';
-          mockLastName = 'Desk';
+          if (emailLower.includes('school')) {
+            mockRole = 'school_administrator';
+            mockFirstName = 'School';
+            mockLastName = 'Admin';
+          } else if (emailLower.includes('teacher')) {
+            mockRole = 'teacher';
+            mockFirstName = 'John';
+            mockLastName = 'Doe';
+          } else if (emailLower.includes('student')) {
+            mockRole = 'student';
+            mockFirstName = 'Sarah';
+            mockLastName = 'Connor';
+          } else if (emailLower.includes('manager')) {
+            mockRole = 'manager';
+            mockFirstName = 'Michael';
+            mockLastName = 'Scott';
+          } else if (emailLower.includes('finance')) {
+            mockRole = 'finance_officer';
+            mockFirstName = 'Angela';
+            mockLastName = 'Martin';
+          } else if (emailLower.includes('help')) {
+            mockRole = 'help_desk';
+            mockFirstName = 'Help';
+            mockLastName = 'Desk';
+          }
+
+          const mockUser = {
+            id: `MOCK-${mockRole.toUpperCase()}-001`,
+            email: formData.email,
+            role: mockRole,
+            firstName: mockFirstName,
+            lastName: mockLastName,
+            isActive: true,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            schoolName: mockRole === 'system_administrator' ? 'Central Administration' : 'St. Mary’s High School'
+          };
+
+          login(mockUser, 'mock-token-12345');
+          setLoading(false);
+          return;
         }
-        // Default to system admin if 'admin' or any other
 
-        const mockUser = {
-          id: `MOCK-${mockRole.toUpperCase()}-001`,
-          email: formData.email,
-          role: mockRole,
-          firstName: mockFirstName,
-          lastName: mockLastName,
-          isActive: true,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          schoolName: mockRole === 'system_administrator' ? 'Central Administration' : 'St. Mary’s High School'
-        };
-
-        login(mockUser, 'mock-token-12345');
+        // Otherwise show the error returned from server (or a generic message)
+        console.error('Login error:', err);
+        setErrors({ general: (err instanceof Error ? err.message : 'Login failed') });
         setLoading(false);
         return;
       }
@@ -265,6 +401,17 @@ export default function Login() {
           {isLoading ? t('auth.login.loading') : t('auth.login.submit')}
           {!isLoading && <ArrowRight className="ml-2 w-5 h-5" />}
         </Button>
+
+        <div className="mt-4 text-center">
+          <p className="text-xs text-gray-500 mb-2">or</p>
+          <button
+            type="button"
+            onClick={() => { window.location.href = `${API_BASE_URL}/api/auth/google/login`; }}
+            className="inline-flex items-center justify-center w-full py-2 px-4 border border-gray-300 rounded-2xl bg-white hover:bg-gray-50 text-sm"
+          >
+            Continue with Google
+          </button>
+        </div>
 
         {/* Demo Credentials Hint */}
         <div className="mt-6 p-4 bg-classivo-lightblue/10 rounded-xl border border-classivo-lightblue/20">
