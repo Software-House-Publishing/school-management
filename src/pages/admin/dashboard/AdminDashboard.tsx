@@ -1,6 +1,7 @@
 "use client"
 
 import { useMemo } from "react"
+import { useNavigate } from "react-router-dom"
 import { useTranslation } from "react-i18next"
 import { useAuthStore } from "@/stores/authStore"
 import { Card } from "@/components/ui/Card"
@@ -13,6 +14,7 @@ import {
   Receipt,
   FileText,
   CalendarDays,
+  Calendar,
   AlertTriangle,
   Clock,
   FileCheck2,
@@ -20,8 +22,7 @@ import {
   TrendingUp,
   TrendingDown,
   CheckCircle2,
-  UserRoundCheck,
-  UserRound,
+  GraduationCap,
 } from "lucide-react"
 
 type AlertTone = "red" | "amber" | "orange" | "blue"
@@ -31,6 +32,7 @@ type AlertItem = {
   title: string
   subtitle: string
   actionLabel: string
+  actionRoute?: string
 }
 
 type ApprovalItem = {
@@ -81,16 +83,6 @@ function toneIconColor(tone: AlertTone) {
   }
 }
 
-function leftAccent(accent: "green" | "blue" | "gray") {
-  switch (accent) {
-    case "green":
-      return "border-l-4 border-emerald-600"
-    case "blue":
-      return "border-l-4 border-blue-600"
-    case "gray":
-      return "border-l-4 border-slate-200"
-  }
-}
 
 function ApprovalIcon({ kind }: { kind: ApprovalItem["icon"] }) {
   const base = "h-4 w-4"
@@ -124,6 +116,7 @@ function kpiTrendChip(tone: "up" | "down" | "neutral") {
 export default function AdminDashboard() {
   const { t } = useTranslation()
   const { user } = useAuthStore()
+  const navigate = useNavigate()
 
   // Dummy snapshot – replace with API later
   const snapshot = useMemo(
@@ -165,6 +158,7 @@ export default function AdminDashboard() {
         title: "Substitute teacher needed",
         subtitle: "Ms. Johnson absent • Grade 10 Math (Period 5 & 6)",
         actionLabel: "Assign",
+        actionRoute: "/school-admin/teachers",
       },
       {
         id: "u2",
@@ -172,6 +166,7 @@ export default function AdminDashboard() {
         title: "23 overdue fee payments",
         subtitle: "Total outstanding: $34,500 • Oldest: 45 days",
         actionLabel: "Review",
+        actionRoute: "/school-admin/finance",
       },
       {
         id: "u3",
@@ -179,6 +174,7 @@ export default function AdminDashboard() {
         title: "5 staff documents expiring soon",
         subtitle: "Teaching certifications & work permits (within 30 days)",
         actionLabel: "View",
+        actionRoute: "/school-admin/teachers",
       },
       {
         id: "u4",
@@ -186,6 +182,7 @@ export default function AdminDashboard() {
         title: "8 pending admission requests",
         subtitle: "New student applications awaiting review",
         actionLabel: "Review",
+        actionRoute: "/school-admin/students",
       },
     ],
     []
@@ -251,6 +248,9 @@ export default function AdminDashboard() {
     []
   )
 
+  // Quick action button style - consistent sizing
+  const quickActionBtnClass = "h-10 min-w-[140px] rounded-lg px-4 text-sm font-medium"
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -278,23 +278,38 @@ export default function AdminDashboard() {
       {/* Quick actions row */}
       <Card>
         <div className="flex flex-wrap gap-3">
-          <Button className="h-10 rounded-lg px-4">
+          <Button
+            className={quickActionBtnClass}
+            onClick={() => navigate('/school-admin/students/new')}
+          >
             <UserPlus className="mr-2 h-4 w-4" />
             Add Student
           </Button>
-          <Button className="h-10 rounded-lg px-4">
-            <Users className="mr-2 h-4 w-4" />
-            Add Staff
+          <Button
+            className={quickActionBtnClass}
+            onClick={() => navigate('/school-admin/teachers/new')}
+          >
+            <GraduationCap className="mr-2 h-4 w-4" />
+            Add Teacher
           </Button>
-          <Button className="h-10 rounded-lg px-4">
+          <Button
+            className={quickActionBtnClass}
+            onClick={() => navigate('/school-admin/announcements')}
+          >
             <Megaphone className="mr-2 h-4 w-4" />
-            Post Announcement
+            Announcement
           </Button>
-          <Button className="h-10 rounded-lg px-4">
+          <Button
+            className={quickActionBtnClass}
+            onClick={() => navigate('/school-admin/invoices')}
+          >
             <Receipt className="mr-2 h-4 w-4" />
             Create Invoice
           </Button>
-          <Button className="h-10 rounded-lg px-4">
+          <Button
+            className={quickActionBtnClass}
+            onClick={() => navigate('/school-admin/reports')}
+          >
             <FileText className="mr-2 h-4 w-4" />
             Generate Report
           </Button>
@@ -304,70 +319,63 @@ export default function AdminDashboard() {
       {/* 4 top tiles */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
         {/* School Status */}
-        <Card>
-          <div className={cn("h-full rounded-xl p-4", leftAccent("green"))}>
-            <div className="flex items-start justify-between">
-              <div className="inline-flex items-center rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800">
+        <Card className="cursor-pointer hover:shadow-lg transition-shadow border-l-4 border-l-emerald-500" onClick={() => navigate('/school-admin/settings')}>
+          <div className="flex justify-between items-start">
+            <div className="flex-1">
+              <div className="inline-flex items-center rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800 mb-2">
                 {snapshot.schoolStatusPill}
               </div>
+              <h3 className="text-2xl font-bold text-slate-900">School Status</h3>
+              <p className="text-xs text-slate-500 mt-1">{snapshot.schoolStatusLine}</p>
             </div>
-            <h3 className="mt-3 text-2xl font-bold text-slate-900">School Status</h3>
-            <p className="mt-1 text-sm text-slate-600">{snapshot.schoolStatusLine}</p>
           </div>
         </Card>
 
         {/* Student Attendance */}
-        <Card>
-          <div className={cn("h-full rounded-xl p-4", leftAccent("blue"))}>
-            <div className="flex items-start justify-between gap-3">
-              <p className="text-sm font-medium text-slate-600">Student Attendance</p>
-              <div className="rounded-lg bg-blue-50 p-2 text-blue-700">
-                <UserRound className="h-4 w-4" />
+        <Card className="cursor-pointer hover:shadow-lg transition-shadow border-l-4 border-l-blue-500" onClick={() => navigate('/school-admin/students')}>
+          <div className="flex justify-between items-start">
+            <div className="flex-1">
+              <p className="text-sm text-slate-500 font-medium">Student Attendance</p>
+              <p className="text-3xl font-bold text-slate-900 mt-2">{snapshot.studentAttendancePct.toFixed(1)}%</p>
+              <div className="flex items-center gap-2 mt-2">
+                <p className="text-xs text-slate-500">{snapshot.studentPresent} present</p>
+                <span className="text-xs text-slate-400">•</span>
+                <p className="text-xs text-rose-600 font-medium">{snapshot.studentAbsent} absent</p>
               </div>
             </div>
-
-            <div className="mt-2 text-3xl font-bold text-slate-900">
-              {snapshot.studentAttendancePct.toFixed(1)}%
-            </div>
-            <div className="mt-1 text-sm text-slate-600">
-              {snapshot.studentPresent} present •{" "}
-              <span className="font-medium text-rose-600">{snapshot.studentAbsent} absent</span>
-            </div>
+            <Users className="h-8 w-8 text-blue-500" />
           </div>
         </Card>
 
         {/* Staff Attendance */}
-        <Card>
-          <div className="h-full rounded-xl p-4">
-            <div className="flex items-start justify-between gap-3">
-              <p className="text-sm font-medium text-slate-600">Staff Attendance</p>
-              <div className="rounded-lg bg-slate-50 p-2 text-slate-500">
-                <UserRoundCheck className="h-4 w-4" />
+        <Card className="cursor-pointer hover:shadow-lg transition-shadow border-l-4 border-l-slate-400" onClick={() => navigate('/school-admin/teachers')}>
+          <div className="flex justify-between items-start">
+            <div className="flex-1">
+              <p className="text-sm text-slate-500 font-medium">Staff Attendance</p>
+              <p className="text-3xl font-bold text-slate-900 mt-2">{snapshot.staffAttendancePct.toFixed(1)}%</p>
+              <div className="flex items-center gap-2 mt-2">
+                <p className="text-xs text-slate-500">{snapshot.staffPresent} present</p>
+                <span className="text-xs text-slate-400">•</span>
+                <p className="text-xs text-rose-600 font-medium">{snapshot.staffAbsent} absent</p>
               </div>
             </div>
-
-            <div className="mt-2 text-3xl font-bold text-slate-900">
-              {snapshot.staffAttendancePct.toFixed(1)}%
-            </div>
-            <div className="mt-1 text-sm text-slate-600">
-              {snapshot.staffPresent} present •{" "}
-              <span className="font-medium text-rose-600">{snapshot.staffAbsent} absent</span>
-            </div>
+            <Users className="h-8 w-8 text-slate-400" />
           </div>
         </Card>
 
         {/* Today's Schedule */}
-        <Card>
-          <div className={cn("h-full rounded-xl p-4", leftAccent("green"))}>
-            <div className="flex items-start justify-between gap-3">
-              <p className="text-sm font-medium text-slate-600">Today&apos;s Schedule</p>
-              <div className="rounded-lg bg-emerald-50 p-2 text-emerald-700">
-                <CalendarDays className="h-4 w-4" />
+        <Card className="cursor-pointer hover:shadow-lg transition-shadow border-l-4 border-l-emerald-500" onClick={() => navigate('/school-admin/courses')}>
+          <div className="flex justify-between items-start">
+            <div className="flex-1">
+              <p className="text-sm text-slate-500 font-medium">Today&apos;s Schedule</p>
+              <p className="text-3xl font-bold text-slate-900 mt-2">{snapshot.scheduleCount}</p>
+              <div className="flex items-center gap-2 mt-2">
+                <p className="text-xs text-slate-500">Classes running</p>
+                <span className="text-xs text-slate-400">•</span>
+                <p className="text-xs text-emerald-600">2 exams</p>
               </div>
             </div>
-
-            <div className="mt-2 text-3xl font-bold text-slate-900">{snapshot.scheduleCount}</div>
-            <p className="mt-1 text-sm text-slate-600">{snapshot.scheduleLine}</p>
+            <Calendar className="h-8 w-8 text-emerald-500" />
           </div>
         </Card>
       </div>
@@ -410,7 +418,12 @@ export default function AdminDashboard() {
                 </div>
               </div>
 
-              <Button className="h-9 rounded-lg px-4">{a.actionLabel}</Button>
+              <Button
+                className="h-9 min-w-[80px] rounded-lg px-4 text-sm"
+                onClick={() => a.actionRoute && navigate(a.actionRoute)}
+              >
+                {a.actionLabel}
+              </Button>
             </div>
           ))}
         </div>
@@ -441,16 +454,24 @@ export default function AdminDashboard() {
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <Button className="h-9 rounded-lg bg-white px-4 text-slate-900 shadow-sm ring-1 ring-slate-200 hover:bg-slate-50">
+                  <Button
+                    variant="outline"
+                    className="h-9 min-w-[70px] rounded-lg px-3 text-sm"
+                  >
                     {a.denyLabel}
                   </Button>
-                  <Button className="h-9 rounded-lg px-4">{a.approveLabel}</Button>
+                  <Button className="h-9 min-w-[80px] rounded-lg px-3 text-sm">
+                    {a.approveLabel}
+                  </Button>
                 </div>
               </div>
             ))}
           </div>
 
-          <button className="mt-5 w-full text-sm font-medium text-blue-700 hover:underline">
+          <button
+            className="mt-5 w-full text-sm font-medium text-blue-700 hover:underline"
+            onClick={() => navigate('/school-admin/reports')}
+          >
             View all approvals →
           </button>
         </Card>
@@ -482,14 +503,20 @@ export default function AdminDashboard() {
                   </div>
                 </div>
 
-                <Button className="h-9 rounded-lg bg-white px-4 text-slate-900 shadow-sm ring-1 ring-slate-200 hover:bg-slate-50">
+                <Button
+                  variant="outline"
+                  className="h-9 min-w-[80px] rounded-lg px-3 text-sm"
+                >
                   {f.actionLabel}
                 </Button>
               </div>
             ))}
           </div>
 
-          <button className="mt-5 w-full text-sm font-medium text-blue-700 hover:underline">
+          <button
+            className="mt-5 w-full text-sm font-medium text-blue-700 hover:underline"
+            onClick={() => navigate('/school-admin/finance')}
+          >
             View all overdue fees →
           </button>
         </Card>
@@ -497,7 +524,7 @@ export default function AdminDashboard() {
 
       {/* Bottom KPIs */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <Card>
+        <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate('/school-admin/students')}>
           <div className="flex items-start justify-between">
             <p className="text-sm font-medium text-slate-600">Total Enrollment</p>
             <TrendingUp className="h-4 w-4 text-emerald-600" />
@@ -511,7 +538,7 @@ export default function AdminDashboard() {
           </div>
         </Card>
 
-        <Card>
+        <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate('/school-admin/finance')}>
           <div className="flex items-start justify-between">
             <p className="text-sm font-medium text-slate-600">Monthly Revenue</p>
             <TrendingUp className="h-4 w-4 text-emerald-600" />
@@ -527,7 +554,7 @@ export default function AdminDashboard() {
           </div>
         </Card>
 
-        <Card>
+        <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate('/school-admin/reports')}>
           <div className="flex items-start justify-between">
             <p className="text-sm font-medium text-slate-600">Avg Attendance</p>
             <TrendingDown className="h-4 w-4 text-rose-600" />
@@ -543,7 +570,7 @@ export default function AdminDashboard() {
           </div>
         </Card>
 
-        <Card>
+        <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate('/school-admin/courses')}>
           <div className="flex items-start justify-between">
             <p className="text-sm font-medium text-slate-600">Active Courses</p>
             <CheckCircle2 className="h-4 w-4 text-emerald-600" />

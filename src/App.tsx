@@ -75,6 +75,12 @@ import AdminStudentEdit from '@/pages/admin/students/StudentEdit';
 import AdminTeacherDetail from '@/pages/admin/teachers/TeacherDetail';
 import AdminTeacherCreate from '@/pages/admin/teachers/TeacherCreate';
 import AdminTeacherEdit from '@/pages/admin/teachers/TeacherEdit';
+import AdminUserDetail from '@/pages/admin/users/UserDetail';
+import AdminUserCreate from '@/pages/admin/users/UserCreate';
+import AdminUserEdit from '@/pages/admin/users/UserEdit';
+
+// System Admin portal pages
+import SystemDashboard from '@/pages/system-admin/dashboard/SystemDashboard';
 
 function App() {
   const { i18n } = useTranslation();
@@ -201,8 +207,11 @@ function App() {
             }
           >
             <Route index element={<Navigate to="/system-admin/dashboard" replace />} />
-            <Route path="dashboard" element={<AdminDashboard />} />
+            <Route path="dashboard" element={<SystemDashboard />} />
             <Route path="users" element={<AdminUsers />} />
+            <Route path="users/new" element={<AdminUserCreate />} />
+            <Route path="users/:id" element={<AdminUserDetail />} />
+            <Route path="users/:id/edit" element={<AdminUserEdit />} />
             <Route path="courses" element={<AdminCourses />} />
             <Route path="finance" element={<AdminFinance />} />
             <Route path="reports" element={<AdminReports />} />

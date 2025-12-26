@@ -107,8 +107,8 @@ export function Sidebar({
           <div className="flex flex-col h-full">
             <div className="flex items-center justify-between p-6 border-b border-gray-200/50">
               <div className="flex items-center gap-3">
-                <div className="w-14 h-14 bg-white/60 rounded-2xl border border-gray-200/60 flex items-center justify-center shadow-sm">
-                  <span className="text-gray-800 text-base font-semibold">{brandName.slice(0,2).toUpperCase()}</span>
+                <div className="w-14 h-14 bg-white/60 rounded-2xl border border-gray-200/60 flex items-center justify-center shadow-sm overflow-hidden p-1.5">
+                  <img src="/src/assets/Logo.png" alt={brandName} className="w-full h-full object-contain" />
                 </div>
                 {!collapsed && (
                   <div>

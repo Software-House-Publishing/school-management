@@ -14,7 +14,8 @@ import {
   Shield,
   ArrowUp,
   ArrowDown,
-  ArrowUpDown
+  ArrowUpDown,
+  Eye
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -83,6 +84,7 @@ interface UserManagementProps {
   users?: User[]; // Made optional to support mock data fallback
   isLoading?: boolean;
   onAddUser?: () => void;
+  onViewUser?: (user: User) => void;
   onEditUser?: (user: User) => void;
   onDeleteUser?: (userId: string) => void;
   title?: string;
@@ -96,6 +98,7 @@ export function UserManagement({
   users: propUsers,
   isLoading = false,
   onAddUser,
+  onViewUser,
   onEditUser,
   onDeleteUser,
   title = "Users",
@@ -335,173 +338,184 @@ export function UserManagement({
         transition={{ delay: 0.4 }}
         className="glass-panel rounded-3xl overflow-hidden border border-white/40 shadow-xl shadow-classivo-blue/5"
       >
-        <div className="overflow-x-auto">
-          <table className="min-w-full">
-            <thead>
-              <tr className="bg-white/40 border-b border-white/30">
-                <th
-                  className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-white/50 transition-colors select-none"
-                  onClick={() => handleSort('user')}
-                >
-                  <div className="flex items-center">
-                    User <SortIcon field="user" />
+        <table className="w-full table-fixed">
+          <thead>
+            <tr className="bg-white/40 border-b border-white/30">
+              <th
+                className="w-[26%] px-4 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-white/50 transition-colors select-none"
+                onClick={() => handleSort('user')}
+              >
+                <div className="flex items-center">
+                  User <SortIcon field="user" />
+                </div>
+              </th>
+              <th
+                className="w-[8%] px-2 py-4 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-white/50 transition-colors select-none"
+                onClick={() => handleSort('id')}
+              >
+                <div className="flex items-center justify-center">
+                  ID <SortIcon field="id" />
+                </div>
+              </th>
+              <th
+                className="w-[20%] px-4 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-white/50 transition-colors select-none"
+                onClick={() => handleSort('school')}
+              >
+                <div className="flex items-center">
+                  School <SortIcon field="school" />
+                </div>
+              </th>
+              <th
+                className="w-[18%] px-3 py-4 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-white/50 transition-colors select-none"
+                onClick={() => handleSort('role')}
+              >
+                <div className="flex items-center justify-center">
+                  Role <SortIcon field="role" />
+                </div>
+              </th>
+              <th
+                className="w-[12%] px-2 py-4 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-white/50 transition-colors select-none"
+                onClick={() => handleSort('status')}
+              >
+                <div className="flex items-center justify-center">
+                  Status <SortIcon field="status" />
+                </div>
+              </th>
+              <th className="w-[16%] px-3 py-4 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-white/20">
+            {isLoading ? (
+              <tr>
+                <td colSpan={6} className="px-4 py-10 text-center text-gray-500">
+                  <div className="flex flex-col justify-center items-center">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-classivo-blue"></div>
+                    <span className="mt-2 text-sm">Loading users...</span>
                   </div>
-                </th>
-                <th
-                  className="px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-white/50 transition-colors select-none"
-                  onClick={() => handleSort('id')}
-                >
-                  <div className="flex items-center justify-center">
-                    ID <SortIcon field="id" />
-                  </div>
-                </th>
-                <th
-                  className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-white/50 transition-colors select-none"
-                  onClick={() => handleSort('school')}
-                >
-                  <div className="flex items-center">
-                    School <SortIcon field="school" />
-                  </div>
-                </th>
-                <th
-                  className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-white/50 transition-colors select-none"
-                  onClick={() => handleSort('role')}
-                >
-                  <div className="flex items-center">
-                    Role <SortIcon field="role" />
-                  </div>
-                </th>
-                <th
-                  className="px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-white/50 transition-colors select-none"
-                  onClick={() => handleSort('status')}
-                >
-                  <div className="flex items-center justify-center">
-                    Status <SortIcon field="status" />
-                  </div>
-                </th>
-                <th className="px-6 py-4 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
+                </td>
               </tr>
-            </thead>
-            <tbody className="divide-y divide-white/20">
-              {isLoading ? (
-                <tr>
-                  <td colSpan={6} className="px-6 py-10 text-center text-gray-500">
-                    <div className="flex flex-col justify-center items-center">
-                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-classivo-blue"></div>
-                      <span className="mt-2 text-sm">Loading users...</span>
+            ) : filteredAndSortedUsers.length === 0 ? (
+              <tr>
+                <td colSpan={6} className="px-4 py-16 text-center text-gray-500">
+                  <div className="flex flex-col items-center">
+                    <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4 text-gray-400">
+                      <Search className="w-8 h-8" />
                     </div>
-                  </td>
-                </tr>
-              ) : filteredAndSortedUsers.length === 0 ? (
-                <tr>
-                  <td colSpan={6} className="px-6 py-16 text-center text-gray-500">
-                    <div className="flex flex-col items-center">
-                      <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4 text-gray-400">
-                        <Search className="w-8 h-8" />
+                    <p className="text-lg font-medium text-gray-900">No users found</p>
+                    <p className="text-sm text-gray-500">Try adjusting your search or filters.</p>
+                  </div>
+                </td>
+              </tr>
+            ) : (
+              <AnimatePresence>
+                {filteredAndSortedUsers.map((user, index) => (
+                  <motion.tr
+                    key={user.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    transition={{ delay: index * 0.05 }}
+                    className={`group hover:bg-white/40 transition-colors duration-200 ${onViewUser ? 'cursor-pointer' : ''}`}
+                    onClick={() => onViewUser?.(user)}
+                  >
+                    <td className="px-4 py-4">
+                      <div className="flex items-center min-w-0">
+                        <div className="flex-shrink-0 h-10 w-10 rounded-full p-0.5 bg-gradient-to-tr from-classivo-blue to-classivo-lightblue">
+                          <div className="h-full w-full rounded-full border-2 border-white overflow-hidden bg-white">
+                            {user.avatar ? (
+                              <img className="h-full w-full object-cover" src={user.avatar} alt="" />
+                            ) : (
+                              <div className="h-full w-full bg-classivo-cream flex items-center justify-center text-classivo-blue font-bold text-xs">
+                                {user.firstName.charAt(0)}{user.lastName.charAt(0)}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                        <div className="ml-3 min-w-0 flex-1">
+                          <div className="text-sm font-semibold text-gray-900 group-hover:text-classivo-blue transition-colors truncate">
+                            {user.firstName} {user.lastName}
+                          </div>
+                          <div className="text-xs text-gray-500 flex items-center mt-0.5 truncate">
+                            <Mail className="w-3 h-3 mr-1 opacity-70 flex-shrink-0" />
+                            <span className="truncate">{user.email}</span>
+                          </div>
+                        </div>
                       </div>
-                      <p className="text-lg font-medium text-gray-900">No users found</p>
-                      <p className="text-sm text-gray-500">Try adjusting your search or filters.</p>
-                    </div>
-                  </td>
-                </tr>
-              ) : (
-                <AnimatePresence>
-                  {filteredAndSortedUsers.map((user, index) => (
-                    <motion.tr
-                      key={user.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, scale: 0.95 }}
-                      transition={{ delay: index * 0.05 }}
-                      className="group hover:bg-white/40 transition-colors duration-200"
-                    >
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center">
-                          <div className="flex-shrink-0 h-11 w-11 rounded-full p-0.5 bg-gradient-to-tr from-classivo-blue to-classivo-lightblue">
-                            <div className="h-full w-full rounded-full border-2 border-white overflow-hidden bg-white">
-                              {user.avatar ? (
-                                <img className="h-full w-full object-cover" src={user.avatar} alt="" />
-                              ) : (
-                                <div className="h-full w-full bg-classivo-cream flex items-center justify-center text-classivo-blue font-bold text-sm">
-                                  {user.firstName.charAt(0)}{user.lastName.charAt(0)}
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                          <div className="ml-4">
-                            <div className="text-sm font-semibold text-gray-900 group-hover:text-classivo-blue transition-colors">
-                              {user.firstName} {user.lastName}
-                            </div>
-                            <div className="text-xs text-gray-500 flex items-center mt-0.5">
-                              <Mail className="w-3 h-3 mr-1 opacity-70" />
-                              {user.email}
-                            </div>
-                          </div>
+                    </td>
+                    <td className="px-2 py-4 text-center">
+                      <div className="inline-flex items-center px-2 py-1 rounded-md bg-gray-50 border border-gray-100/50 text-xs font-mono text-gray-500">
+                        <Hash className="w-3 h-3 mr-0.5 opacity-50" />
+                        {user.id.split('-').pop()}
+                      </div>
+                    </td>
+                    <td className="px-4 py-4">
+                      <div className="flex items-center text-sm text-gray-600 min-w-0">
+                        <School className="w-4 h-4 mr-1.5 text-gray-400 flex-shrink-0" />
+                        <span className="truncate">{user.schoolName || <span className="text-gray-400 italic">Not Assigned</span>}</span>
+                      </div>
+                    </td>
+                    <td className="px-3 py-4 text-center">
+                      <span className={`px-2 py-1 inline-flex items-center text-xs font-medium rounded-full border ${getRoleBadgeStyle(user.role)}`}>
+                        <Shield className="w-3 h-3 mr-1 opacity-70" />
+                        <span className="truncate">{formatRole(user.role)}</span>
+                      </span>
+                    </td>
+                    <td className="px-2 py-4 text-center">
+                      {user.isActive ? (
+                        <div className="flex items-center justify-center">
+                          <div className="h-2 w-2 rounded-full bg-green-500 mr-1.5 shadow-[0_0_6px_rgba(34,197,94,0.5)]"></div>
+                          <span className="text-xs font-medium text-green-700">Active</span>
                         </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-center">
-                        <div className="inline-flex items-center px-2.5 py-1 rounded-md bg-gray-50 border border-gray-100/50 text-xs font-mono text-gray-500">
-                          <Hash className="w-3 h-3 mr-1 opacity-50" />
-                          {user.id.split('-').pop()}
+                      ) : (
+                        <div className="flex items-center justify-center">
+                          <div className="h-2 w-2 rounded-full bg-red-400 mr-1.5"></div>
+                          <span className="text-xs font-medium text-red-600">Inactive</span>
                         </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center text-sm text-gray-600">
-                          <School className="w-4 h-4 mr-2 text-gray-400" />
-                          {user.schoolName || <span className="text-gray-400 italic">Not Assigned</span>}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`px-3 py-1 inline-flex items-center text-xs font-medium rounded-full border ${getRoleBadgeStyle(user.role)}`}>
-                          <Shield className="w-3 h-3 mr-1.5 opacity-70" />
-                          {formatRole(user.role)}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-center">
-                        {user.isActive ? (
-                          <div className="flex items-center justify-center">
-                            <div className="h-2.5 w-2.5 rounded-full bg-green-500 mr-2 shadow-[0_0_8px_rgba(34,197,94,0.5)]"></div>
-                            <span className="text-xs font-medium text-green-700">Active</span>
-                          </div>
-                        ) : (
-                          <div className="flex items-center justify-center">
-                            <div className="h-2.5 w-2.5 rounded-full bg-red-400 mr-2"></div>
-                            <span className="text-xs font-medium text-red-600">Inactive</span>
-                          </div>
-                        )}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <div className="flex justify-end gap-1 opacity-60 group-hover:opacity-100 transition-opacity">
-                          {onEditUser && (
-                            <button
-                              onClick={() => onEditUser(user)}
-                              className="text-classivo-blue hover:text-white hover:bg-classivo-blue p-2 rounded-lg transition-all duration-200 hover:shadow-md"
-                              title="Edit User"
-                            >
-                              <Edit className="w-4 h-4" />
-                            </button>
-                          )}
-                          {onDeleteUser && (
-                            <button
-                              onClick={() => onDeleteUser(user.id)}
-                              className="text-red-500 hover:text-white hover:bg-red-500 p-2 rounded-lg transition-all duration-200 hover:shadow-md"
-                              title="Delete User"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          )}
-                          <button className="text-gray-400 hover:text-gray-600 p-2 rounded-lg hover:bg-gray-100">
-                            <MoreVertical className="w-4 h-4" />
+                      )}
+                    </td>
+                    <td className="px-3 py-4 text-center text-sm font-medium">
+                      <div className="flex justify-center gap-0.5 opacity-60 group-hover:opacity-100 transition-opacity">
+                        {onViewUser && (
+                          <button
+                            onClick={(e) => { e.stopPropagation(); onViewUser(user); }}
+                            className="text-violet-500 hover:text-white hover:bg-violet-500 p-1.5 rounded-lg transition-all duration-200 hover:shadow-md"
+                            title="View Details"
+                          >
+                            <Eye className="w-4 h-4" />
                           </button>
-                        </div>
-                      </td>
-                    </motion.tr>
-                  ))}
-                </AnimatePresence>
-              )}
-            </tbody>
-          </table>
-        </div>
+                        )}
+                        {onEditUser && (
+                          <button
+                            onClick={(e) => { e.stopPropagation(); onEditUser(user); }}
+                            className="text-classivo-blue hover:text-white hover:bg-classivo-blue p-1.5 rounded-lg transition-all duration-200 hover:shadow-md"
+                            title="Edit User"
+                          >
+                            <Edit className="w-4 h-4" />
+                          </button>
+                        )}
+                        {onDeleteUser && (
+                          <button
+                            onClick={(e) => { e.stopPropagation(); onDeleteUser(user.id); }}
+                            className="text-red-500 hover:text-white hover:bg-red-500 p-1.5 rounded-lg transition-all duration-200 hover:shadow-md"
+                            title="Delete User"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        )}
+                        <button
+                          onClick={(e) => e.stopPropagation()}
+                          className="text-gray-400 hover:text-gray-600 p-1.5 rounded-lg hover:bg-gray-100"
+                        >
+                          <MoreVertical className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </td>
+                  </motion.tr>
+                ))}
+              </AnimatePresence>
+            )}
+          </tbody>
+        </table>
         <div className="bg-white/30 px-6 py-4 border-t border-white/20 flex justify-between items-center">
           <div className="text-xs text-gray-500">
             Showing <span className="font-medium text-gray-900">{filteredAndSortedUsers.length}</span> of <span className="font-medium text-gray-900">{displayUsers.length}</span> users
