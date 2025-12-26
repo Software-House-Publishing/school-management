@@ -39,10 +39,16 @@ import AdminLayout from '@/components/layouts/AdminLayout';
 
 // Student portal pages
 import StudentDashboard from '@/pages/student/dashboard/StudentDashboard';
+import StudentQRId from '@/pages/student/qr-id/StudentQRId';
+import StudentGrades from '@/pages/student/grades/StudentGrades';
+import StudentSchedule from '@/pages/student/schedule/StudentSchedule';
 import StudentCourses from '@/pages/student/courses/StudentCourses';
+import StudentAdvisor from '@/pages/student/advisor/StudentAdvisor';
+import StudentAssignments from '@/pages/student/assignments/StudentAssignments';
+import StudentFees from '@/pages/student/fees/StudentFees';
+import StudentCalendar from '@/pages/student/calendar/StudentCalendar';
 import StudentExams from '@/pages/student/exams/StudentExams';
 import StudentProfile from '@/pages/student/profile/StudentProfile';
-import StudentFees from '@/pages/student/fees/StudentFees';
 
 // Teacher portal pages
 import TeacherDashboard from '@/pages/teacher/dashboard/TeacherDashboard';
@@ -66,6 +72,9 @@ import AdminTeachers from '@/pages/admin/teachers/TeacherList';
 import AdminStudentDetail from '@/pages/admin/students/StudentDetail';
 import AdminStudentCreate from '@/pages/admin/students/StudentCreate';
 import AdminStudentEdit from '@/pages/admin/students/StudentEdit';
+import AdminTeacherDetail from '@/pages/admin/teachers/TeacherDetail';
+import AdminTeacherCreate from '@/pages/admin/teachers/TeacherCreate';
+import AdminTeacherEdit from '@/pages/admin/teachers/TeacherEdit';
 
 function App() {
   const { i18n } = useTranslation();
@@ -125,10 +134,16 @@ function App() {
           >
             <Route index element={<Navigate to="/student/dashboard" replace />} />
             <Route path="dashboard" element={<StudentDashboard />} />
+            <Route path="qr-id" element={<StudentQRId />} />
+            <Route path="grades" element={<StudentGrades />} />
+            <Route path="schedule" element={<StudentSchedule />} />
             <Route path="courses" element={<StudentCourses />} />
+            <Route path="advisor" element={<StudentAdvisor />} />
+            <Route path="assignments" element={<StudentAssignments />} />
+            <Route path="fees" element={<StudentFees />} />
+            <Route path="calendar" element={<StudentCalendar />} />
             <Route path="exams" element={<StudentExams />} />
             <Route path="profile" element={<StudentProfile />} />
-            <Route path="fees" element={<StudentFees />} />
           </Route>
 
           {/* Teacher portal */}
@@ -164,6 +179,9 @@ function App() {
             <Route path="students/:id" element={<AdminStudentDetail />} />
             <Route path="students/:id/edit" element={<AdminStudentEdit />} />
             <Route path="teachers" element={<AdminTeachers />} />
+            <Route path="teachers/new" element={<AdminTeacherCreate />} />
+            <Route path="teachers/:id" element={<AdminTeacherDetail />} />
+            <Route path="teachers/:id/edit" element={<AdminTeacherEdit />} />
             <Route path="courses" element={<AdminCourses />} />
             <Route path="announcements" element={<AdminAnnouncement />} />
             <Route path="exams" element={<AdminExams />} />

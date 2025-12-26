@@ -2,7 +2,7 @@ import { Outlet } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import { Container } from '@/components/layouts/Container';
 import { useAuthStore } from '@/stores/authStore';
-import Sidebar, { UserInfo } from '@/components/shared/Sidebar';
+import Sidebar, { StudentInfo } from '@/components/shared/Sidebar';
 import { studentNavItems } from '@/config/navigation.tsx';
 
 export default function StudentLayout() {
@@ -14,19 +14,22 @@ export default function StudentLayout() {
     navigate('/login');
   };
 
-  // Get user info for sidebar
-  const userInfo: UserInfo | undefined = user ? {
+  // Get student info for sidebar card
+  const studentInfo: StudentInfo | undefined = user ? {
     name: `${user.firstName} ${user.lastName}`,
-    email: user.email,
-    role: user.role
+    department: 'Computer Science',
+    faculty: 'Science and Technology',
+    studentId: 'STU-2400001',
+    gpa: 3.85,
+    credits: 115
   } : undefined;
 
   return (
     <div className="min-h-screen bg-gray-50">
       <Sidebar
-        brandName="EduNest"
+        brandName="Classivo"
         brandSubtitle="Student Portal"
-        user={userInfo}
+        studentInfo={studentInfo}
         items={studentNavItems}
         onSignOut={handleLogout}
       />

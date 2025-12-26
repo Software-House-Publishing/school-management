@@ -1,189 +1,144 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
-import { Student, StudentStatus } from './studentData';
-import { useAuthStore } from '@/stores/authStore';
-
-const API_BASE_URL = import.meta.env.VITE_API_URL ?? '';
+import {
+  Student,
+  StudentStatus,
+  loadStudents,
+  saveStudents,
+} from './studentData';
 
 export default function StudentEdit() {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
-  const { token } = useAuthStore();
 
-  const [student, setStudent] = useState<Student | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  // load existing student
+  const existing = loadStudents().find((s) => s.id === id);
 
-  // ---------- form state ----------
+  // --- if not found, show simple error ---
+  if (!existing) {
+    return (
+      <div className="space-y-4">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => navigate('/school-admin/students')}
+        >
+          ← Back to Students
+        </Button>
+        <Card padding="lg">
+          <p className="text-sm text-red-600">Student not found.</p>
+        </Card>
+      </div>
+    );
+  }
+
+  // ---------- form state (pre-filled from existing) ----------
   // Basic
-  const [studentId, setStudentId] = useState('');
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [email, setEmail] = useState('');
+  const [studentId, setStudentId] = useState(existing.studentId);
+  const [firstName, setFirstName] = useState(existing.firstName);
+  const [lastName, setLastName] = useState(existing.lastName);
+  const [email, setEmail] = useState(existing.email ?? '');
 
   // Personal
-  const [gender, setGender] = useState('');
-  const [dateOfBirth, setDateOfBirth] = useState('');
-  const [phone, setPhone] = useState('');
-  const [address, setAddress] = useState('');
-  const [language, setLanguage] = useState('');
+  const [gender, setGender] = useState(existing.gender ?? '');
+  const [dateOfBirth, setDateOfBirth] = useState(existing.dateOfBirth ?? '');
+  const [phone, setPhone] = useState(existing.phone ?? '');
+  const [address, setAddress] = useState(existing.address ?? '');
+  const [language, setLanguage] = useState(existing.language ?? '');
 
   // Enrollment
-  const [grade, setGrade] = useState('');
-  const [section, setSection] = useState('');
-  const [status, setStatus] = useState<StudentStatus>('active');
+  const [grade, setGrade] = useState(existing.enrollment.grade);
+  const [section, setSection] = useState(existing.enrollment.section ?? '');
+  const [status, setStatus] = useState<StudentStatus>(
+    existing.enrollment.status,
+  );
 
   // Guardian – just use first guardian for now
-  const [guardianName, setGuardianName] = useState('');
-  const [guardianPhone, setGuardianPhone] = useState('');
+  const primaryGuardian = existing.guardians[0];
+  const [guardianName, setGuardianName] = useState(
+    primaryGuardian?.name ?? '',
+  );
+  const [guardianPhone, setGuardianPhone] = useState(
+    primaryGuardian?.phone ?? '',
+  );
 
   // Academics
-  const [gpa, setGpa] = useState('');
-  const [subjects, setSubjects] = useState('');
-  const [lastExamScore, setLastExamScore] = useState('');
-  const [remarks, setRemarks] = useState('');
+  const [gpa, setGpa] = useState(
+    existing.academics.gpa != null ? String(existing.academics.gpa) : '',
+  );
+  const [subjects, setSubjects] = useState(
+    (existing.academics.currentSubjects || []).join(', '),
+  );
+  const [lastExamScore, setLastExamScore] = useState(
+    existing.academics.lastExamScore != null
+      ? String(existing.academics.lastExamScore)
+      : '',
+  );
+  const [remarks, setRemarks] = useState(existing.academics.remarks ?? '');
 
   // Attendance
-  const [totalDays, setTotalDays] = useState('');
-  const [presentDays, setPresentDays] = useState('');
-  const [lastAbsentDate, setLastAbsentDate] = useState('');
+  const [totalDays, setTotalDays] = useState(
+    existing.attendance.totalDays != null
+      ? String(existing.attendance.totalDays)
+      : '',
+  );
+  const [presentDays, setPresentDays] = useState(
+    existing.attendance.presentDays != null
+      ? String(existing.attendance.presentDays)
+      : '',
+  );
+  const [lastAbsentDate, setLastAbsentDate] = useState(
+    existing.attendance.lastAbsentDate ?? '',
+  );
 
   // Finance
-  const [feePlan, setFeePlan] = useState('');
-  const [totalDue, setTotalDue] = useState('');
-  const [totalPaid, setTotalPaid] = useState('');
-  const [outstanding, setOutstanding] = useState('');
-  const [lastPaymentDate, setLastPaymentDate] = useState('');
-  const [scholarship, setScholarship] = useState('');
+  const [feePlan, setFeePlan] = useState(existing.finance?.feePlan ?? '');
+  const [totalDue, setTotalDue] = useState(
+    existing.finance?.totalDue != null ? String(existing.finance.totalDue) : '',
+  );
+  const [totalPaid, setTotalPaid] = useState(
+    existing.finance?.totalPaid != null
+      ? String(existing.finance.totalPaid)
+      : '',
+  );
+  const [outstanding, setOutstanding] = useState(
+    existing.finance?.outstanding != null
+      ? String(existing.finance.outstanding)
+      : '',
+  );
+  const [lastPaymentDate, setLastPaymentDate] = useState(
+    existing.finance?.lastPaymentDate ?? '',
+  );
+  const [scholarship, setScholarship] = useState(
+    existing.finance?.scholarship ?? '',
+  );
 
   // Health
-  const [allergies, setAllergies] = useState('');
-  const [medicalNotes, setMedicalNotes] = useState('');
-  const [emergencyInstructions, setEmergencyInstructions] = useState('');
+  const [allergies, setAllergies] = useState(
+    existing.health?.allergies ?? '',
+  );
+  const [medicalNotes, setMedicalNotes] = useState(
+    existing.health?.medicalNotes ?? '',
+  );
+  const [emergencyInstructions, setEmergencyInstructions] = useState(
+    existing.health?.emergencyInstructions ?? '',
+  );
 
   // System
-  const [portalUsername, setPortalUsername] = useState('');
-  const [portalActive, setPortalActive] = useState(true);
-  const [rfidCardId, setRfidCardId] = useState('');
+  const [portalUsername, setPortalUsername] = useState(
+    existing.system?.portalUsername ?? '',
+  );
+  const [portalActive, setPortalActive] = useState(
+    existing.system?.portalActive ?? true,
+  );
+  const [rfidCardId, setRfidCardId] = useState(
+    existing.system?.rfidCardId ?? '',
+  );
 
-  // ---------- Load existing student from backend ----------
-  useEffect(() => {
-    async function fetchStudent() {
-      if (!id) return;
-      if (!token) {
-        setError('Not authenticated');
-        setLoading(false);
-        return;
-      }
-
-      try {
-        setLoading(true);
-        setError(null);
-
-        const res = await fetch(`${API_BASE_URL}/api/students/${id}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        const data = await res.json();
-        if (!res.ok) {
-          throw new Error(data.message || 'Failed to load student');
-        }
-
-        const s: Student = data.student;
-        setStudent(s);
-
-        // Prefill form from fetched student
-        setStudentId(s.studentId);
-        setFirstName(s.firstName);
-        setLastName(s.lastName);
-        setEmail(s.email ?? '');
-
-        setGender(s.gender ?? '');
-        setDateOfBirth(s.dateOfBirth ?? '');
-        setPhone(s.phone ?? '');
-        setAddress(s.address ?? '');
-        setLanguage(s.language ?? '');
-
-        setGrade(s.enrollment?.grade ?? '');
-        setSection(s.enrollment?.section ?? '');
-        setStatus((s.enrollment?.status as StudentStatus) ?? 'active');
-
-        const primaryGuardian = s.guardians?.[0];
-        setGuardianName(primaryGuardian?.name ?? '');
-        setGuardianPhone(primaryGuardian?.phone ?? '');
-
-        setGpa(
-          s.academics?.gpa != null ? String(s.academics.gpa) : '',
-        );
-        setSubjects(
-          (s.academics?.currentSubjects || []).join(', '),
-        );
-        setLastExamScore(
-          s.academics?.lastExamScore != null
-            ? String(s.academics.lastExamScore)
-            : '',
-        );
-        setRemarks(s.academics?.remarks ?? '');
-
-        setTotalDays(
-          s.attendance?.totalDays != null
-            ? String(s.attendance.totalDays)
-            : '',
-        );
-        setPresentDays(
-          s.attendance?.presentDays != null
-            ? String(s.attendance.presentDays)
-            : '',
-        );
-        setLastAbsentDate(s.attendance?.lastAbsentDate ?? '');
-
-        setFeePlan(s.finance?.feePlan ?? '');
-        setTotalDue(
-          s.finance?.totalDue != null
-            ? String(s.finance.totalDue)
-            : '',
-        );
-        setTotalPaid(
-          s.finance?.totalPaid != null
-            ? String(s.finance.totalPaid)
-            : '',
-        );
-        setOutstanding(
-          s.finance?.outstanding != null
-            ? String(s.finance.outstanding)
-            : '',
-        );
-        setLastPaymentDate(s.finance?.lastPaymentDate ?? '');
-        setScholarship(s.finance?.scholarship ?? '');
-
-        setAllergies(s.health?.allergies ?? '');
-        setMedicalNotes(s.health?.medicalNotes ?? '');
-        setEmergencyInstructions(
-          s.health?.emergencyInstructions ?? '',
-        );
-
-        setPortalUsername(s.system?.portalUsername ?? '');
-        setPortalActive(s.system?.portalActive ?? true);
-        setRfidCardId(s.system?.rfidCardId ?? '');
-      } catch (err: unknown) {
-        console.error(err);
-        setError(err instanceof Error ? err.message : 'Failed to load student');
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchStudent();
-  }, [id, token]);
-
-  async function handleSubmit(e: React.FormEvent) {
+  function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-
-    if (!student) return;
 
     if (!studentId || !firstName || !lastName || !grade) {
       alert('Please fill ID, first name, last name and grade.');
@@ -198,7 +153,7 @@ export default function StudentEdit() {
         : undefined;
 
     const updatedStudent: Student = {
-      ...student,
+      ...existing,
       studentId,
       firstName,
       lastName,
@@ -220,28 +175,25 @@ export default function StudentEdit() {
           ]
         : [],
 
-      // enrollment: {
-      //   ...(student.enrollment || {}),
-      //   grade,
-      //   section: section || undefined,
-      //   status,
-      // },
+      enrollment: {
+        ...existing.enrollment,
+        grade,
+        section: section || undefined,
+        status,
+      },
 
       academics: {
-        ...(student.academics || {}),
+        ...existing.academics,
         gpa: gpa ? Number(gpa) : undefined,
         currentSubjects: subjects
-          ? subjects
-              .split(',')
-              .map((s) => s.trim())
-              .filter(Boolean)
+          ? subjects.split(',').map((s) => s.trim()).filter(Boolean)
           : [],
         lastExamScore: lastExamScore ? Number(lastExamScore) : undefined,
         remarks,
       },
 
       attendance: {
-        ...(student.attendance || {}),
+        ...existing.attendance,
         totalDays: totalDaysNum,
         presentDays: presentDaysNum,
         absentDays:
@@ -253,7 +205,7 @@ export default function StudentEdit() {
       },
 
       finance: {
-        ...(student.finance || {}),
+        ...(existing.finance || {}),
         feePlan,
         totalDue: totalDue ? Number(totalDue) : undefined,
         totalPaid: totalPaid ? Number(totalPaid) : undefined,
@@ -263,92 +215,41 @@ export default function StudentEdit() {
       },
 
       health: {
-        ...(student.health || {}),
+        ...(existing.health || {}),
         allergies,
         medicalNotes,
         emergencyInstructions,
       },
 
       system: {
-        ...(student.system || {}),
+        ...(existing.system || {}),
         portalUsername,
         portalActive,
         rfidCardId,
       },
     };
 
-    try {
-      const res = await fetch(`${API_BASE_URL}/api/students/${student.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: token ? `Bearer ${token}` : '',
-        },
-        body: JSON.stringify(updatedStudent),
-      });
-
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.message || 'Failed to update student');
-      }
-
-      navigate(`/school-admin/students/${student.id}`);
-    } catch (err: unknown) {
-      console.error(err);
-      alert(err instanceof Error ? err.message : 'Failed to update student');
-    }
-  }
-
-  // ---------- Loading / error states ----------
-  if (loading) {
-    return (
-      <div className="space-y-4">
-        <Button
-          type="button"
-          variant="outline"
-          onClick={() => navigate('/school-admin/students')}
-        >
-          ← Back to Students
-        </Button>
-        <Card padding="lg">
-          <p className="text-sm text-muted-foreground">Loading student...</p>
-        </Card>
-      </div>
+    const current = loadStudents();
+    const updatedList = current.map((s) =>
+      s.id === existing.id ? updatedStudent : s,
     );
+    saveStudents(updatedList);
+
+    navigate(`/school-admin/students/${existing.id}`);
   }
 
-  if (error || !student) {
-    return (
-      <div className="space-y-4">
-        <Button
-          type="button"
-          variant="outline"
-          onClick={() => navigate('/school-admin/students')}
-        >
-          ← Back to Students
-        </Button>
-        <Card padding="lg">
-          <p className="text-sm text-red-600">
-            {error || 'Student not found.'}
-          </p>
-        </Card>
-      </div>
-    );
-  }
-
-  // ---------- Main form ----------
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <Button
           type="button"
           variant="outline"
-          onClick={() => navigate(`/school-admin/students/${student.id}`)}
+          onClick={() => navigate(`/school-admin/students/${existing.id}`)}
         >
           ← Back to Student Detail
         </Button>
         <h1 className="text-xl font-semibold">
-          Edit Student – {student.firstName} {student.lastName}
+          Edit Student – {existing.firstName} {existing.lastName}
         </h1>
       </div>
 
@@ -675,7 +576,7 @@ export default function StudentEdit() {
             <Button
               type="button"
               variant="outline"
-              onClick={() => navigate(`/admin/students/${student.id}`)}
+              onClick={() => navigate(`/school-admin/students/${existing.id}`)}
             >
               Cancel
             </Button>

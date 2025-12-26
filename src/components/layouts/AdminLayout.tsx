@@ -31,7 +31,7 @@ export default function AdminLayout() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Sidebar
-        brandName="EduNest"
+        brandName="Classivo"
         brandSubtitle="Admin Portal"
         user={userInfo}
         items={navItems}

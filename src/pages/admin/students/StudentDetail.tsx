@@ -1,13 +1,10 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
-import { Student } from './studentData';
-import { useAuthStore } from '@/stores/authStore';
+import { loadStudents, saveStudents } from './studentData';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
-
-const API_BASE_URL = import.meta.env.VITE_API_URL ?? '';
 
 function statusClasses(status: string) {
   switch (status) {
@@ -25,81 +22,38 @@ function statusClasses(status: string) {
 export default function StudentDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { token } = useAuthStore();
-
-  const [student, setStudent] = useState<Student | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   // this ref will be used to capture the layout for PDF
   const reportRef = useRef<HTMLDivElement | null>(null);
 
-  // 👉 Load student from backend
-  useEffect(() => {
-    async function fetchStudent() {
-      if (!id) return;
-      if (!token) {
-        setError('Not authenticated');
-        setLoading(false);
-        return;
-      }
+  const student = loadStudents().find((s) => s.id === id);
 
-      try {
-        setLoading(true);
-        setError(null);
+  if (!student) {
+    return (
+      <div className="space-y-4">
+        <Button type="button" variant="outline" onClick={() => navigate('/school-admin/students')}>
+          ← Back to Students
+        </Button>
+        <Card padding="lg">
+          <p className="text-sm text-red-600">Student not found.</p>
+        </Card>
+      </div>
+    );
+  }
 
-        const res = await fetch(`${API_BASE_URL}/api/students/${id}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+  const fullName = `${student.firstName} ${student.lastName}`;
+  const status = student.enrollment.status;
+  const classLabel = `${student.enrollment.grade}${
+    student.enrollment.section ? `-${student.enrollment.section}` : ''
+  }`;
 
-        const data = await res.json();
-        if (!res.ok) {
-          throw new Error(data.message || 'Failed to load student');
-        }
-
-        setStudent(data.student);
-      } catch (err: unknown) {
-        console.error(err);
-        setError(err instanceof Error ? err.message : 'Failed to load student');
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchStudent();
-  }, [id, token]);
-
-  // -------- DELETE HANDLER (calls backend) --------
-  const handleDelete = async () => {
-    if (!student || !id) return;
-    const ok = window.confirm('Are you sure you want to delete this student?');
-    if (!ok) return;
-
-    try {
-      const res = await fetch(`${API_BASE_URL}/api/students/${id}`, {
-        method: 'DELETE',
-        headers: {
-          Authorization: token ? `Bearer ${token}` : '',
-        },
-      });
-
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.message || 'Failed to delete student');
-      }
-
-      navigate('/school-admin/students');
-    } catch (err: unknown) {
-      console.error(err);
-      alert(err instanceof Error ? err.message : 'Failed to delete student');
-    }
-  };
+  const gpa = student.academics.gpa ?? null;
+  const attendance = student.attendance.attendancePercentage ?? null;
+  const outstanding = student.finance?.outstanding ?? null;
 
   // -------- PDF DOWNLOAD HANDLER --------
   const handleDownloadReport = async () => {
-    if (!reportRef.current || !student) return;
+    if (!reportRef.current) return;
 
     const element = reportRef.current;
 
@@ -115,7 +69,7 @@ export default function StudentDetail() {
     const pageWidth = pdf.internal.pageSize.getWidth();
     const pageHeight = pdf.internal.pageSize.getHeight();
 
-
+    // keep aspect ratio, scale to fit on a single A4 page
     let imgWidth = pageWidth;
     let imgHeight = (canvas.height * imgWidth) / canvas.width;
 
@@ -137,89 +91,40 @@ export default function StudentDetail() {
     pdf.save(fileName);
   };
 
-  // ------- LOADING / ERROR / NOT FOUND STATES -------
-  if (loading) {
-    return (
-      <div className="space-y-4">
-        <Button
-          type="button"
-          variant="outline"
-          onClick={() => navigate('/school-admin/students')}
-        >
-          ← Back to Students
-        </Button>
-        <Card padding="lg">
-          <p className="text-sm text-muted-foreground">Loading student...</p>
-        </Card>
-      </div>
-    );
-  }
-
-  if (error || !student) {
-    return (
-      <div className="space-y-4">
-        <Button
-          type="button"
-          variant="outline"
-          onClick={() => navigate('/school-admin/students')}
-        >
-          ← Back to Students
-        </Button>
-        <Card padding="lg">
-          <p className="text-sm text-red-600">
-            {error || 'Student not found.'}
-          </p>
-        </Card>
-      </div>
-    );
-  }
-
-  // ------- MAIN DETAIL RENDER -------
-
-  const fullName = `${student.firstName} ${student.lastName}`;
-  const status = student.enrollment?.status ?? 'active';
-  const classLabel = `${student.enrollment?.grade ?? ''}${
-    student.enrollment?.section ? `-${student.enrollment.section}` : ''
-  }`;
-
-  const gpa = student.academics?.gpa ?? null;
-  const attendance = student.attendance?.attendancePercentage ?? null;
-  const outstanding = student.finance?.outstanding ?? null;
-
   return (
     <div className="space-y-6">
       {/* Top bar */}
       <div className="flex items-center justify-between gap-3">
-        <Button
-          type="button"
-          variant="outline"
-          onClick={() => navigate('/school-admin/students')}
-        >
+        <Button type="button" variant="outline" onClick={() => navigate('/school-admin/students')}>
           ← Back to Students
         </Button>
-        <div className="flex gap-2">
+        <div className="flex gap-3">
           <Button
             type="button"
-            size="sm"
-            variant="outline"
-            onClick={() => id && navigate(`/school-admin/students/${id}/edit`)}
+            className="bg-blue-600 text-white border-blue-600 hover:bg-blue-700 hover:border-blue-700 hover:scale-105 transition-all duration-200 shadow-sm hover:shadow-md rounded-lg px-5 py-2.5 text-sm font-medium"
+            onClick={() => navigate(`/school-admin/students/${student.id}/edit`)}
           >
             Edit
           </Button>
 
           <Button
             type="button"
-            variant="outline"
-            className="bg-red-600 hover:bg-red-700 text-white"
-            onClick={handleDelete}
+            className="bg-red-600 text-white border-red-600 hover:bg-red-700 hover:border-red-700 hover:scale-105 transition-all duration-200 shadow-sm hover:shadow-md rounded-lg px-5 py-2.5 text-sm font-medium"
+            onClick={() => {
+              const ok = window.confirm('Are you sure you want to delete this student?');
+              if (!ok) return;
+              const current = loadStudents();
+              const updated = current.filter((s) => s.id !== student.id);
+              saveStudents(updated);
+              navigate('/school-admin/students');
+            }}
           >
             Delete
           </Button>
 
           <Button
             type="button"
-            variant="outline"
-            className="bg-purple-600 hover:bg-purple-700 text-white"
+            className="bg-purple-600 text-white border-purple-600 hover:bg-purple-700 hover:border-purple-700 hover:scale-105 transition-all duration-200 shadow-sm hover:shadow-md rounded-lg px-5 py-2.5 text-sm font-medium"
             onClick={handleDownloadReport}
           >
             Download Report
@@ -244,10 +149,10 @@ export default function StudentDetail() {
                   <h1 className="text-2xl font-semibold leading-tight">{fullName}</h1>
                   <p className="text-xs md:text-sm text-sky-100">
                     Class <span className="font-medium">{classLabel}</span> • Homeroom{' '}
-                    {student.enrollment?.homeroomTeacher ?? '—'}
+                    {student.enrollment.homeroomTeacher ?? '—'}
                   </p>
                   <p className="mt-1 text-[11px] md:text-xs text-sky-100">
-                    Admitted on {student.enrollment?.admissionDate}
+                    Admitted on {student.enrollment.admissionDate}
                   </p>
                 </div>
               </div>
@@ -265,7 +170,7 @@ export default function StudentDetail() {
                   ID: {student.studentId}
                 </span>
                 <span className="rounded-full bg-white/10 px-3 py-1 text-[11px] uppercase tracking-wide">
-                  Grade {student.enrollment?.grade}
+                  Grade {student.enrollment.grade}
                 </span>
               </div>
             </div>
@@ -339,7 +244,7 @@ export default function StudentDetail() {
                 <section className="rounded-lg border bg-slate-50/60 px-4 py-3">
                   <h2 className="text-sm font-semibold">Parents / Guardians</h2>
                   <div className="mt-3 space-y-2 text-sm">
-                    {(student.guardians ?? []).map((g, idx) => (
+                    {student.guardians.map((g, idx) => (
                       <div
                         key={idx}
                         className="rounded-md border bg-white px-3 py-2 text-xs md:text-sm"
@@ -363,9 +268,6 @@ export default function StudentDetail() {
                         </p>
                       </div>
                     ))}
-                    {(student.guardians ?? []).length === 0 && (
-                      <p className="text-xs text-slate-500">No guardians recorded.</p>
-                    )}
                   </div>
                 </section>
 
@@ -390,7 +292,7 @@ export default function StudentDetail() {
                 <section className="rounded-lg border bg-slate-50/60 px-4 py-3">
                   <div className="flex items-center justify-between">
                     <h2 className="text-sm font-semibold">Academics & Attendance</h2>
-                    {student.academics?.remarks && (
+                    {student.academics.remarks && (
                       <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-800">
                         Teacher note
                       </span>
@@ -404,7 +306,7 @@ export default function StudentDetail() {
                     <InfoItem
                       label="Last Exam Score"
                       value={
-                        student.academics?.lastExamScore != null
+                        student.academics.lastExamScore != null
                           ? String(student.academics.lastExamScore)
                           : undefined
                       }
@@ -417,14 +319,14 @@ export default function StudentDetail() {
                     />
                     <InfoItem
                       label="Last Absent"
-                      value={student.attendance?.lastAbsentDate}
+                      value={student.attendance.lastAbsentDate}
                     />
                     <InfoItem
                       label="Current Subjects"
-                      value={(student.academics?.currentSubjects ?? []).join(', ')}
+                      value={student.academics.currentSubjects.join(', ')}
                       className="md:col-span-2"
                     />
-                    {student.academics?.remarks && (
+                    {student.academics.remarks && (
                       <InfoItem
                         label="Teacher Remarks"
                         value={student.academics.remarks}
@@ -538,9 +440,7 @@ function InfoItem({ label, value, className }: InfoItemProps) {
       <p className="text-[11px] font-medium uppercase tracking-wide text-slate-500">
         {label}
       </p>
-      <p className="mt-0.5 text-sm text-slate-900">
-        {value && value !== '' ? value : '—'}
-      </p>
+      <p className="mt-0.5 text-sm text-slate-900">{value && value !== '' ? value : '—'}</p>
     </div>
   );
 }

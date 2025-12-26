@@ -1,15 +1,21 @@
 import React from 'react';
-import { 
-  Home, 
-  Users, 
-  BookOpen, 
-  Wallet, 
-  FileText, 
+import {
+  Home,
+  Users,
+  BookOpen,
+  Wallet,
+  FileText,
   Settings,
   BarChart3,
   BellPlus,
   UserCog,
-  BookCheck
+  BookCheck,
+  QrCode,
+  GraduationCap,
+  CalendarDays,
+  ClipboardList,
+  UserCircle,
+  Calendar
 } from 'lucide-react';
 import { NavItem } from '@/components/shared/Sidebar';
 
@@ -146,24 +152,59 @@ export const studentNavItems: NavItem[] = [
     section: 'primary'
   },
   {
+    id: 'qr-virtual-id',
+    label: 'QR Virtual ID',
+    href: '/student/qr-id',
+    icon: <QrCode size={18} />,
+    section: 'primary'
+  },
+  {
+    id: 'grades',
+    label: 'Grades',
+    href: '/student/grades',
+    icon: <GraduationCap size={18} />,
+    section: 'primary'
+  },
+  {
+    id: 'schedule',
+    label: 'Schedule',
+    href: '/student/schedule',
+    icon: <CalendarDays size={18} />,
+    section: 'primary'
+  },
+  {
     id: 'courses',
-    label: 'My Courses',
+    label: 'Courses',
     href: '/student/courses',
     icon: <BookOpen size={18} />,
     section: 'primary'
   },
   {
-    id: 'exams',
-    label: 'Exams',
-    href: '/student/exams',
-    icon: <FileText size={18} />,
+    id: 'advisor',
+    label: 'Advisor',
+    href: '/student/advisor',
+    icon: <UserCircle size={18} />,
     section: 'primary'
   },
   {
-    id: 'fees',
-    label: 'Fees',
+    id: 'assignments',
+    label: 'Assignments',
+    href: '/student/assignments',
+    icon: <ClipboardList size={18} />,
+    section: 'primary'
+  },
+  {
+    id: 'payments',
+    label: 'Payments',
     href: '/student/fees',
     icon: <Wallet size={18} />,
+    section: 'primary'
+  },
+  {
+    id: 'calendar',
+    label: 'Calendar',
+    href: '/student/calendar',
+    icon: <Calendar size={18} />,
     section: 'primary'
   },
   {

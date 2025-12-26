@@ -2,172 +2,123 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
-import { Student, StudentStatus } from './studentData';
-import { useAuthStore } from '@/stores/authStore';
-
-const API_BASE_URL = import.meta.env.VITE_API_URL ?? '';
-
-// Payload for creating a new student – studentId is optional/omitted
-type NewStudentPayload = Omit<Student, 'id' | 'studentId'> & {
-  studentId?: string;
-};
+import {
+  Student,
+  StudentStatus,
+  loadStudents,
+  saveStudents,
+} from './studentData';
 
 export default function StudentCreate() {
   const navigate = useNavigate();
-  const { token } = useAuthStore();
 
-  // ------- basic -------
+  // form state (keep it simple for now)
+  const [studentId, setStudentId] = useState('');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
-
-  // ------- personal & contact -------
-  const [gender, setGender] = useState('');
-  const [dateOfBirth, setDateOfBirth] = useState('');
-  const [phone, setPhone] = useState('');
-  const [address, setAddress] = useState('');
-  const [language, setLanguage] = useState('');
-
-  // ------- enrollment -------
   const [grade, setGrade] = useState('');
   const [section, setSection] = useState('');
   const [status, setStatus] = useState<StudentStatus>('active');
-
-  // ------- guardian (simple – first guardian only) -------
   const [guardianName, setGuardianName] = useState('');
   const [guardianPhone, setGuardianPhone] = useState('');
 
-  // ------- health -------
-  const [allergies, setAllergies] = useState('');
-  const [medicalNotes, setMedicalNotes] = useState('');
-  const [emergencyInstructions, setEmergencyInstructions] = useState('');
-
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  async function handleSubmit(e: React.FormEvent) {
+  function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 
-    // minimal required fields
-    if (!firstName || !lastName || !grade) {
-      alert('Please fill first name, last name and grade.');
-      return;
-    }
-
-    if (!token) {
-      alert('You are not authenticated.');
+    // very small validation
+    if (!studentId || !firstName || !lastName || !grade) {
+      alert('Please fill ID, first name, last name and grade.');
       return;
     }
 
     const today = new Date().toISOString().slice(0, 10);
 
-    const payload: NewStudentPayload = {
-      // studentId will be generated on the backend
-      firstName,
-      lastName,
-      email: email || undefined,
+    const newStudent: Student = {
+        id: Date.now().toString(), 
+        studentId,
+        firstName,
+        lastName,
+        email,
+        gender: undefined,
+        dateOfBirth: undefined,
+        address: '',
+        phone: '',
+        language: '',
+        photoUrl: undefined,
 
-      gender: gender || undefined,
-      dateOfBirth: dateOfBirth || undefined,
-      address: address || '',
-      phone: phone || '',
-      language: language || '',
-      photoUrl: undefined,
+        guardians: guardianName
+            ? [
+                {
+                name: guardianName,
+                relationship: 'Parent',
+                phone: guardianPhone || '-',
+                isEmergencyContact: true,
+                },
+            ]
+            : [],
 
-      guardians: guardianName
-        ? [
-            {
-              name: guardianName,
-              relationship: 'Parent',
-              phone: guardianPhone || '-',
-              isEmergencyContact: true,
-            },
-          ]
-        : [],
-
-      enrollment: {
-        admissionDate: today,
-        grade,
-        section: section || undefined,
-        status,
-        previousSchool: '',
-        homeroomTeacher: '',
-        rollNumber: '',
-      },
-
-      academics: {
-        gpa: undefined,
-        currentSubjects: [],
-        lastExamScore: undefined,
-        remarks: '',
-      },
-
-      attendance: {
-        totalDays: undefined,
-        presentDays: undefined,
-        absentDays: undefined,
-        attendancePercentage: undefined,
-        lastAbsentDate: undefined,
-      },
-
-      activities: {
-        clubs: [],
-        sports: [],
-        awards: [],
-        disciplineNotes: '',
-      },
-
-      health: {
-        allergies,
-        medicalNotes,
-        emergencyInstructions,
-      },
-
-      finance: {
-        feePlan: '',
-        totalDue: undefined,
-        totalPaid: undefined,
-        outstanding: undefined,
-        lastPaymentDate: undefined,
-        scholarship: '',
-      },
-
-      system: {
-        portalUsername: '',
-        portalActive: true,
-        rfidCardId: '',
-      },
-
-      documents: [],
-    };
-
-    try {
-      setLoading(true);
-      setError(null);
-
-      const res = await fetch(`${API_BASE_URL}/api/students`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
+        enrollment: {
+            admissionDate: today,
+            grade,
+            section: section || undefined,
+            status,
+            previousSchool: '',
+            homeroomTeacher: '',
+            rollNumber: '',
         },
-        body: JSON.stringify(payload),
-      });
 
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.message || 'Failed to create student');
-      }
+        academics: {
+            gpa: undefined,
+            currentSubjects: [],     
+            lastExamScore: undefined,
+            remarks: '',
+        },
 
-      navigate('/school-admin/students');
-    } catch (err: unknown) {
-      console.error(err);
-      const message = err instanceof Error ? err.message : 'Failed to create student';
-      setError(message);
-      alert(message);
-    } finally {
-      setLoading(false);
-    }
+        attendance: {
+            totalDays: undefined,
+            presentDays: undefined,
+            absentDays: undefined,
+            attendancePercentage: undefined,
+            lastAbsentDate: undefined,
+        },
+
+        activities: {
+            clubs: [],
+            sports: [],
+            awards: [],
+            disciplineNotes: '',
+        },
+
+        health: {
+            allergies: '',
+            medicalNotes: '',
+            emergencyInstructions: '',
+        },
+
+        finance: {
+            feePlan: '',
+            totalDue: undefined,
+            totalPaid: undefined,
+            outstanding: undefined,
+            lastPaymentDate: undefined,
+            scholarship: '',
+        },
+
+        system: {
+            portalUsername: '',
+            portalActive: true,
+            rfidCardId: '',
+        },
+
+        documents: [],
+        };
+
+
+    const current = loadStudents();
+    saveStudents([...current, newStudent]);
+
+    navigate('/school-admin/students');
   }
 
   return (
@@ -184,32 +135,22 @@ export default function StudentCreate() {
       </div>
 
       <Card padding="lg">
-        <form className="space-y-8" onSubmit={handleSubmit}>
-          {error && (
-            <p className="text-sm text-red-600 mb-2">
-              {error}
-            </p>
-          )}
-
-          {/* BASIC */}
+        <form className="space-y-6" onSubmit={handleSubmit}>
+          {/* Basic info */}
           <section className="space-y-3">
             <h2 className="text-sm font-semibold">Basic Information</h2>
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-1 text-sm">
-                <label className="text-xs font-medium text-slate-600">
-                  Student ID
-                </label>
+                <label className="text-xs font-medium text-slate-600">Student ID *</label>
                 <input
-                  className="w-full rounded-md border px-3 py-2 text-sm bg-slate-100 text-slate-500 cursor-not-allowed"
-                  value="Will be generated automatically"
-                  disabled
-                  readOnly
+                  className="w-full rounded-md border px-3 py-2 text-sm"
+                  value={studentId}
+                  onChange={(e) => setStudentId(e.target.value)}
+                  placeholder="STU006"
                 />
               </div>
               <div className="space-y-1 text-sm">
-                <label className="text-xs font-medium text-slate-600">
-                  Email
-                </label>
+                <label className="text-xs font-medium text-slate-600">Email</label>
                 <input
                   className="w-full rounded-md border px-3 py-2 text-sm"
                   value={email}
@@ -219,9 +160,7 @@ export default function StudentCreate() {
                 />
               </div>
               <div className="space-y-1 text-sm">
-                <label className="text-xs font-medium text-slate-600">
-                  First Name *
-                </label>
+                <label className="text-xs font-medium text-slate-600">First Name *</label>
                 <input
                   className="w-full rounded-md border px-3 py-2 text-sm"
                   value={firstName}
@@ -230,9 +169,7 @@ export default function StudentCreate() {
                 />
               </div>
               <div className="space-y-1 text-sm">
-                <label className="text-xs font-medium text-slate-600">
-                  Last Name *
-                </label>
+                <label className="text-xs font-medium text-slate-600">Last Name *</label>
                 <input
                   className="w-full rounded-md border px-3 py-2 text-sm"
                   value={lastName}
@@ -243,80 +180,12 @@ export default function StudentCreate() {
             </div>
           </section>
 
-          {/* PERSONAL & CONTACT */}
-          <section className="space-y-3">
-            <h2 className="text-sm font-semibold">Personal & Contact</h2>
-            <div className="grid gap-4 md:grid-cols-3">
-              <div className="space-y-1 text-sm">
-                <label className="text-xs font-medium text-slate-600">
-                  Gender
-                </label>
-                <select
-                  className="w-full rounded-md border px-3 py-2 text-sm"
-                  value={gender}
-                  onChange={(e) => setGender(e.target.value)}
-                >
-                  <option value="">—</option>
-                  <option value="Male">Male</option>
-                  <option value="Female">Female</option>
-                  <option value="Other">Other</option>
-                </select>
-              </div>
-              <div className="space-y-1 text-sm">
-                <label className="text-xs font-medium text-slate-600">
-                  Date of Birth
-                </label>
-                <input
-                  type="date"
-                  className="w-full rounded-md border px-3 py-2 text-sm"
-                  value={dateOfBirth}
-                  onChange={(e) => setDateOfBirth(e.target.value)}
-                />
-              </div>
-              <div className="space-y-1 text-sm">
-                <label className="text-xs font-medium text-slate-600">
-                  Phone
-                </label>
-                <input
-                  className="w-full rounded-md border px-3 py-2 text-sm"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                />
-              </div>
-            </div>
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-1 text-sm">
-                <label className="text-xs font-medium text-slate-600">
-                  Languages
-                </label>
-                <input
-                  className="w-full rounded-md border px-3 py-2 text-sm"
-                  value={language}
-                  onChange={(e) => setLanguage(e.target.value)}
-                  placeholder="e.g. Myanmar, English"
-                />
-              </div>
-              <div className="space-y-1 text-sm">
-                <label className="text-xs font-medium text-slate-600">
-                  Address
-                </label>
-                <input
-                  className="w-full rounded-md border px-3 py-2 text-sm"
-                  value={address}
-                  onChange={(e) => setAddress(e.target.value)}
-                />
-              </div>
-            </div>
-          </section>
-
-          {/* ENROLLMENT */}
+          {/* Enrollment */}
           <section className="space-y-3">
             <h2 className="text-sm font-semibold">Enrollment</h2>
             <div className="grid gap-4 md:grid-cols-3">
               <div className="space-y-1 text-sm">
-                <label className="text-xs font-medium text-slate-600">
-                  Grade *
-                </label>
+                <label className="text-xs font-medium text-slate-600">Grade *</label>
                 <input
                   className="w-full rounded-md border px-3 py-2 text-sm"
                   value={grade}
@@ -325,9 +194,7 @@ export default function StudentCreate() {
                 />
               </div>
               <div className="space-y-1 text-sm">
-                <label className="text-xs font-medium text-slate-600">
-                  Section
-                </label>
+                <label className="text-xs font-medium text-slate-600">Section</label>
                 <input
                   className="w-full rounded-md border px-3 py-2 text-sm"
                   value={section}
@@ -336,15 +203,11 @@ export default function StudentCreate() {
                 />
               </div>
               <div className="space-y-1 text-sm">
-                <label className="text-xs font-medium text-slate-600">
-                  Status
-                </label>
+                <label className="text-xs font-medium text-slate-600">Status</label>
                 <select
                   className="w-full rounded-md border px-3 py-2 text-sm"
                   value={status}
-                  onChange={(e) =>
-                    setStatus(e.target.value as StudentStatus)
-                  }
+                  onChange={(e) => setStatus(e.target.value as StudentStatus)}
                 >
                   <option value="active">Active</option>
                   <option value="graduated">Graduated</option>
@@ -355,7 +218,7 @@ export default function StudentCreate() {
             </div>
           </section>
 
-          {/* GUARDIAN */}
+          {/* Parent / guardian */}
           <section className="space-y-3">
             <h2 className="text-sm font-semibold">Parent / Guardian (optional)</h2>
             <div className="grid gap-4 md:grid-cols-2">
@@ -384,56 +247,15 @@ export default function StudentCreate() {
             </div>
           </section>
 
-          {/* HEALTH */}
-          <section className="space-y-3">
-            <h2 className="text-sm font-semibold">Health</h2>
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-1 text-sm">
-                <label className="text-xs font-medium text-slate-600">
-                  Allergies
-                </label>
-                <input
-                  className="w-full rounded-md border px-3 py-2 text-sm"
-                  value={allergies}
-                  onChange={(e) => setAllergies(e.target.value)}
-                />
-              </div>
-              <div className="space-y-1 text-sm">
-                <label className="text-xs font-medium text-slate-600">
-                  Medical Notes
-                </label>
-                <input
-                  className="w-full rounded-md border px-3 py-2 text-sm"
-                  value={medicalNotes}
-                  onChange={(e) => setMedicalNotes(e.target.value)}
-                />
-              </div>
-            </div>
-            <div className="space-y-1 text-sm">
-              <label className="text-xs font-medium text-slate-600">
-                Emergency Instructions
-              </label>
-              <textarea
-                className="w-full rounded-md border px-3 py-2 text-sm"
-                rows={2}
-                value={emergencyInstructions}
-                onChange={(e) => setEmergencyInstructions(e.target.value)}
-              />
-            </div>
-          </section>
-
           <div className="flex justify-end gap-2 pt-2">
             <Button
               type="button"
               variant="outline"
-              onClick={() => navigate('/admin/students')}
-              disabled={loading}
+              onClick={() => navigate('/school-admin/students')}
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={loading}>
-              {loading ? 'Saving...' : 'Save Student'}
-            </Button>
+            <Button type="submit">Save Student</Button>
           </div>
         </form>
       </Card>
