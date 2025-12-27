@@ -54,8 +54,10 @@ import StudentProfile from '@/pages/student/profile/StudentProfile';
 import TeacherDashboard from '@/pages/teacher/dashboard/TeacherDashboard';
 import TeacherCourses from '@/pages/teacher/courses/TeacherCourses';
 import TeacherStudents from '@/pages/teacher/students/TeacherStudents';
+import TeacherSchedule from '@/pages/teacher/schedule/TeacherSchedule';
 import TeacherExams from '@/pages/teacher/exams/TeacherExams';
 import TeacherAnnouncements from '@/pages/teacher/announcements/TeacherAnnouncements';
+import TeacherProfile from '@/pages/teacher/profile/TeacherProfile';
 
 // Admin portal pages
 import AdminAnnouncement from '@/pages/admin/announcement/AdminAnnouncement';
@@ -81,6 +83,9 @@ import AdminUserEdit from '@/pages/admin/users/UserEdit';
 
 // System Admin portal pages
 import SystemDashboard from '@/pages/system-admin/dashboard/SystemDashboard';
+
+// Shared pages
+import NotificationsPage from '@/pages/shared/notifications/NotificationsPage';
 
 function App() {
   const { i18n } = useTranslation();
@@ -149,6 +154,7 @@ function App() {
             <Route path="fees" element={<StudentFees />} />
             <Route path="calendar" element={<StudentCalendar />} />
             <Route path="exams" element={<StudentExams />} />
+            <Route path="notifications" element={<NotificationsPage />} />
             <Route path="profile" element={<StudentProfile />} />
           </Route>
 
@@ -165,8 +171,11 @@ function App() {
             <Route path="dashboard" element={<TeacherDashboard />} />
             <Route path="courses" element={<TeacherCourses />} />
             <Route path="students" element={<TeacherStudents />} />
+            <Route path="schedule" element={<TeacherSchedule />} />
             <Route path="exams" element={<TeacherExams />} />
             <Route path="announcements" element={<TeacherAnnouncements />} />
+            <Route path="notifications" element={<NotificationsPage />} />
+            <Route path="profile" element={<TeacherProfile />} />
           </Route>
 
           {/* School Admin portal */}
@@ -194,6 +203,7 @@ function App() {
             <Route path="finance" element={<AdminFinance />} />
             <Route path="invoices" element={<AdminInvoices />} />
             <Route path="reports" element={<AdminReports />} />
+            <Route path="notifications" element={<NotificationsPage />} />
             <Route path="settings" element={<AdminSettings />} />
           </Route>
 
@@ -215,6 +225,7 @@ function App() {
             <Route path="courses" element={<AdminCourses />} />
             <Route path="finance" element={<AdminFinance />} />
             <Route path="reports" element={<AdminReports />} />
+            <Route path="notifications" element={<NotificationsPage />} />
             <Route path="settings" element={<AdminSettings />} />
           </Route>
 

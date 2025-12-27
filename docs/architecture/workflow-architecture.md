@@ -400,5 +400,268 @@ Using Sonner for toast notifications:
 />
 ```
 
+## 14. Exam/Quiz Approval Workflow
+
+The system implements a comprehensive exam management workflow with approval gates between Teachers, School Administrators, and Students.
+
+### Workflow Overview
+
+```mermaid
+flowchart TD
+    subgraph Teacher["Teacher Portal"]
+        T1[Create Question] --> T2{Question Type}
+        T2 --> T2a[Multiple Choice]
+        T2 --> T2b[True/False]
+        T2 --> T2c[Short Answer]
+        T2 --> T2d[Essay]
+        T2a & T2b & T2c & T2d --> T3[Submit for Approval]
+
+        T4[Create Exam] --> T5[Select Questions from Pool]
+        T5 --> T6[Set Schedule & Duration]
+        T6 --> T7[Submit for Approval]
+    end
+
+    subgraph Admin["School Admin Portal"]
+        A1[Review Question] --> A2{Approve?}
+        A2 -- Yes --> A3[Add to Course Question Pool]
+        A2 -- No --> A4[Reject with Reason]
+
+        A5[Review Exam] --> A6{Approve?}
+        A6 -- Yes --> A7[Exam Published]
+        A6 -- No --> A8[Reject with Reason]
+    end
+
+    subgraph Student["Student Portal"]
+        S1[View Available Exams] --> S2{Current Time >= Start Time?}
+        S2 -- No --> S3[Show Countdown]
+        S2 -- Yes --> S4[Take Exam]
+        S4 --> S5[Submit Answers]
+        S5 --> S6[View Results when Graded]
+    end
+
+    T3 --> A1
+    T7 --> A5
+    A7 --> S1
+```
+
+### Question Types
+
+| Type | Code | Description | Auto-Grading |
+|------|------|-------------|--------------|
+| Multiple Choice | `multiple_choice` | Single correct answer from options | Yes |
+| True/False | `true_false` | Boolean answer | Yes |
+| Short Answer | `short_answer` | Brief text response | No |
+| Essay | `essay` | Long-form written response | No |
+
+### Question Approval States
+
+```mermaid
+stateDiagram-v2
+    [*] --> pending: Teacher creates question
+    pending --> approved: Admin approves
+    pending --> rejected: Admin rejects
+    approved --> [*]: Added to Question Pool
+    rejected --> pending: Teacher revises & resubmits
+```
+
+| State | Description | Actions Available |
+|-------|-------------|-------------------|
+| `pending` | Awaiting admin review | Admin: Approve/Reject |
+| `approved` | Added to course question pool | Teacher: Use in exams |
+| `rejected` | Not approved, needs revision | Teacher: Edit & resubmit |
+
+### Exam Approval States
+
+```mermaid
+stateDiagram-v2
+    [*] --> draft: Teacher creates exam
+    draft --> pending_approval: Teacher submits
+    pending_approval --> approved: Admin approves
+    pending_approval --> rejected: Admin rejects
+    approved --> [*]: Available to students at scheduled time
+    rejected --> draft: Teacher revises
+```
+
+| State | Description | Actions Available |
+|-------|-------------|-------------------|
+| `draft` | Work in progress | Teacher: Edit, Submit |
+| `pending_approval` | Awaiting admin review | Admin: Approve/Reject |
+| `approved` | Published, visible to students | Students: Take at scheduled time |
+| `rejected` | Not approved | Teacher: Edit & resubmit |
+
+### Course-Specific Question Pools
+
+Each course/subject maintains its own question pool:
+
+```mermaid
+erDiagram
+    COURSE ||--|{ QUESTION_POOL : has
+    QUESTION_POOL ||--|{ QUESTION : contains
+    QUESTION }o--|| TEACHER : created_by
+    QUESTION }o--|| ADMIN : approved_by
+    EXAM ||--|{ EXAM_QUESTION : contains
+    EXAM_QUESTION }o--|| QUESTION : references
+```
+
+- Questions are categorized by course (e.g., Mathematics, English, Science)
+- Only approved questions appear in the pool
+- Teachers can only use questions from pools they have access to
+- Admins can view and manage all question pools
+
+### Time-Based Exam Visibility
+
+Students can only see and take exams when:
+1. Exam status is `approved`
+2. Current time is >= `availableAt` (exam start time)
+3. Current time is <= `endsAt` (exam end time)
+
+```typescript
+interface ExamSchedule {
+  availableAt: string;  // ISO datetime - exam becomes visible
+  endsAt: string;       // ISO datetime - exam closes
+  duration: number;     // Duration in minutes once started
+}
+```
+
+### Exam Taking Flow
+
+```mermaid
+sequenceDiagram
+    participant S as Student
+    participant UI as Exam Interface
+    participant Timer as Timer Component
+    participant Store as Exam Store
+
+    S->>UI: Open available exam
+    UI->>Timer: Start countdown (duration)
+    S->>UI: Answer questions
+    UI->>UI: Auto-save progress
+
+    alt Time expires
+        Timer->>UI: Force submit
+    else Student submits
+        S->>UI: Click submit
+    end
+
+    UI->>Store: Save answers
+    Store-->>S: Confirmation
+    S->>UI: View results (when graded)
+```
+
+### Grading Workflow
+
+```mermaid
+flowchart LR
+    A[Student Submits] --> B{Question Type}
+    B -- Multiple Choice/True-False --> C[Auto-Grade]
+    B -- Short Answer/Essay --> D[Manual Grading Required]
+    C --> E[Calculate Score]
+    D --> F[Teacher Reviews]
+    F --> G[Assign Points & Feedback]
+    G --> E
+    E --> H[Final Grade]
+    H --> I[Student Notified]
+```
+
+### Data Structures
+
+#### Question Interface
+```typescript
+interface Question {
+  id: string;
+  type: 'multiple_choice' | 'true_false' | 'short_answer' | 'essay';
+  question: string;
+  options?: string[];           // For multiple choice
+  correctAnswer?: string | number;
+  points: number;
+  course: string;
+
+  // Approval workflow
+  approvalStatus: 'pending' | 'approved' | 'rejected';
+  submittedForApprovalAt?: string;
+  approvedBy?: string;
+  approvedAt?: string;
+  rejectionReason?: string;
+  createdBy: string;
+}
+```
+
+#### Exam Interface
+```typescript
+interface Exam {
+  id: string;
+  title: string;
+  course: string;
+  grade: string;
+  questions: Question[];
+  totalPoints: number;
+  duration: number;             // Minutes
+  availableAt: string;          // When students can start
+  endsAt: string;               // When exam closes
+
+  // Approval workflow
+  approvalStatus: 'draft' | 'pending_approval' | 'approved' | 'rejected';
+  submittedForApprovalAt?: string;
+  approvedBy?: string;
+  approvedAt?: string;
+  rejectionReason?: string;
+  createdBy: string;
+  createdAt: string;
+}
+```
+
+### Portal Responsibilities
+
+#### Teacher Portal (`/teacher/exams`)
+- Create new questions with type, content, and point value
+- Submit questions for admin approval
+- View question approval status
+- Create exams by selecting from approved question pool
+- Set exam schedule (availableAt, endsAt, duration)
+- Submit exams for admin approval
+- Grade submitted exams (short answer, essay questions)
+- View student submissions and scores
+
+#### School Admin Portal (`/school-admin/exams`)
+- **Pending Approvals Tab**: Review and approve/reject questions and exams
+- **Question Pools Tab**: Manage course-specific question pools
+- **All Exams Tab**: View all exams across all statuses
+- Approve questions → adds to course question pool
+- Approve exams → makes available to students at scheduled time
+- Reject with reason → sends back to teacher for revision
+
+#### Student Portal (`/student/exams`)
+- View upcoming exams with countdown
+- Take available exams in full-screen mode
+- Timer display during exam
+- Question navigation sidebar
+- Submit exam answers
+- View graded results with feedback
+
+### Notification Flow
+
+```mermaid
+sequenceDiagram
+    participant T as Teacher
+    participant A as Admin
+    participant S as Student
+
+    T->>A: Submit question/exam for approval
+    Note over A: Admin sees pending item
+
+    alt Approved
+        A->>T: Approval notification
+        Note over T: Question added to pool / Exam published
+    else Rejected
+        A->>T: Rejection with reason
+        Note over T: Revise and resubmit
+    end
+
+    Note over S: At scheduled time
+    S->>S: Exam becomes visible
+    S->>T: Submits exam
+    T->>S: Grades available
+```
+
 ---
 *Generated for School Management System (Classivo)*

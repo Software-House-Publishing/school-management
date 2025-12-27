@@ -15,7 +15,8 @@ import {
   CalendarDays,
   ClipboardList,
   UserCircle,
-  Calendar
+  Calendar,
+  Bell
 } from 'lucide-react';
 import { NavItem } from '@/components/shared/Sidebar';
 
@@ -85,6 +86,13 @@ export const adminNavItems: NavItem[] = [
     section: 'primary',
   },
   {
+    id: 'notifications',
+    label: 'Notifications',
+    href: '/school-admin/notifications',
+    icon: <Bell size={18} />,
+    section: 'secondary'
+  },
+  {
     id: 'settings',
     label: 'Settings',
     href: '/school-admin/settings',
@@ -132,6 +140,13 @@ export const directorNavItems: NavItem[] = [
     href: '/system-admin/reports',
     icon: <BarChart3 size={18} />,
     section: 'primary'
+  },
+  {
+    id: 'notifications',
+    label: 'Notifications',
+    href: '/system-admin/notifications',
+    icon: <Bell size={18} />,
+    section: 'secondary'
   },
   {
     id: 'settings',
@@ -194,6 +209,13 @@ export const studentNavItems: NavItem[] = [
     section: 'primary'
   },
   {
+    id: 'exams',
+    label: 'Exams',
+    href: '/student/exams',
+    icon: <BookCheck size={18} />,
+    section: 'primary'
+  },
+  {
     id: 'payments',
     label: 'Payments',
     href: '/student/fees',
@@ -206,6 +228,13 @@ export const studentNavItems: NavItem[] = [
     href: '/student/calendar',
     icon: <Calendar size={18} />,
     section: 'primary'
+  },
+  {
+    id: 'notifications',
+    label: 'Notifications',
+    href: '/student/notifications',
+    icon: <Bell size={18} />,
+    section: 'secondary'
   },
   {
     id: 'profile',
@@ -240,24 +269,38 @@ export const teacherNavItems: NavItem[] = [
     section: 'primary'
   },
   {
+    id: 'schedule',
+    label: 'Schedule',
+    href: '/teacher/schedule',
+    icon: <CalendarDays size={18} />,
+    section: 'primary'
+  },
+  {
     id: 'exams',
     label: 'Exams',
     href: '/teacher/exams',
-    icon: <FileText size={18} />,
+    icon: <BookCheck size={18} />,
     section: 'primary'
   },
   {
     id: 'announcements',
     label: 'Announcements',
     href: '/teacher/announcements',
-    icon: <BarChart3 size={18} />,
+    icon: <BellPlus size={18} />,
     section: 'primary'
+  },
+  {
+    id: 'notifications',
+    label: 'Notifications',
+    href: '/teacher/notifications',
+    icon: <Bell size={18} />,
+    section: 'secondary'
   },
   {
     id: 'profile',
     label: 'Profile',
     href: '/teacher/profile',
-    icon: <Settings size={18} />,
+    icon: <UserCircle size={18} />,
     section: 'secondary'
   }
 ];

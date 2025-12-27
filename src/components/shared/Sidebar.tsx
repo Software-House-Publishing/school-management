@@ -1,9 +1,10 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
+import {
   LogOut,
 } from 'lucide-react';
+import NotificationBell from './NotificationBell';
 
 export interface NavItem {
   id: string;
@@ -119,6 +120,7 @@ export function Sidebar({
                   </div>
                 )}
               </div>
+              {!collapsed && <NotificationBell />}
             </div>
 
             {/* Student Info Card - shows when studentInfo is provided */}
