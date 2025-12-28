@@ -384,9 +384,11 @@ function CreateQuestionModal({
 function CreateExamModal({
   onClose,
   onCreateQuestion,
+  onSubmitExam,
 }: {
   onClose: () => void;
   onCreateQuestion: () => void;
+  onSubmitExam: (examTitle: string, courseCode: string, courseName: string, questionCount: number, totalPoints: number) => void;
 }) {
   const [step, setStep] = useState<'details' | 'questions'>('details');
   const [selectedCourse, setSelectedCourse] = useState(teacherCourses[0]?.courseCode || '');
@@ -439,8 +441,13 @@ function CreateExamModal({
   };
 
   const handleCreate = (asDraft: boolean) => {
-    const status = asDraft ? 'Draft' : 'Pending Approval';
-    alert(`Exam ${asDraft ? 'saved as draft' : 'submitted for approval'}!\n\nTitle: ${title}\nDate: ${date} at ${startTime}\nQuestions: ${selectedQuestions.length}\nTotal Points: ${totalPoints}\nStatus: ${status}`);
+    const courseName = teacherCourses.find(c => c.courseCode === selectedCourse)?.courseName || selectedCourse;
+
+    if (!asDraft) {
+      // Submit for approval - send notification to admin
+      onSubmitExam(title, selectedCourse, courseName, selectedQuestions.length, totalPoints);
+    }
+
     onClose();
   };
 
@@ -1114,11 +1121,13 @@ function ExamDetailModal({
   onClose,
   onGrade,
   onSubmitForApproval,
+  onEditRejected,
 }: {
   exam: Exam;
   onClose: () => void;
   onGrade: () => void;
   onSubmitForApproval?: () => void;
+  onEditRejected?: () => void;
 }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
@@ -1261,9 +1270,9 @@ function ExamDetailModal({
             </button>
           )}
 
-          {exam.approvalStatus === 'rejected' && (
+          {exam.approvalStatus === 'rejected' && onEditRejected && (
             <button
-              onClick={onClose}
+              onClick={onEditRejected}
               className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
             >
               <RefreshCw className="h-4 w-4" />
@@ -1301,6 +1310,7 @@ export default function TeacherExams() {
   const [showCreateQuestionModal, setShowCreateQuestionModal] = useState(false);
   const [selectedExam, setSelectedExam] = useState<Exam | null>(null);
   const [gradingExam, setGradingExam] = useState<Exam | null>(null);
+  const [editingRejectedExam, setEditingRejectedExam] = useState<Exam | null>(null);
 
   const filteredExams = useMemo(() => {
     let exams = teacherExams;
@@ -1556,6 +1566,12 @@ export default function TeacherExams() {
             setShowCreateModal(false);
             setShowCreateQuestionModal(true);
           }}
+          onSubmitExam={(examTitle, courseCode, courseName, questionCount, totalPoints) => {
+            // Generate a unique exam ID
+            const examId = `exam-${Date.now()}`;
+            // Send notification to school admin
+            notifyExamSubmitted(examTitle, teacherName, courseCode, courseName, examId);
+          }}
         />
       )}
       {showCreateQuestionModal && (
@@ -1585,7 +1601,133 @@ export default function TeacherExams() {
             }
             setSelectedExam(null);
           }}
+          onEditRejected={selectedExam.approvalStatus === 'rejected' ? () => {
+            // Allow editing rejected exam - open edit modal
+            setEditingRejectedExam(selectedExam);
+            setSelectedExam(null);
+          } : undefined}
         />
+      )}
+
+      {/* Edit Rejected Exam Modal */}
+      {editingRejectedExam && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <Card className="w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto rounded-2xl">
+            <div className="flex items-center justify-between p-6 border-b">
+              <div>
+                <h2 className="text-lg font-semibold text-gray-900">Revise & Resubmit Exam</h2>
+                <p className="text-sm text-gray-500">Make changes and resubmit for approval</p>
+              </div>
+              <button
+                onClick={() => setEditingRejectedExam(null)}
+                className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            {/* Rejection Reason */}
+            {editingRejectedExam.rejectionReason && (
+              <div className="mx-6 mt-6 bg-red-50 border border-red-200 rounded-xl p-4">
+                <div className="flex items-start gap-3">
+                  <XCircle className="h-5 w-5 text-red-600 shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-sm font-medium text-red-800">Rejection Reason</p>
+                    <p className="text-sm text-red-700 mt-1">{editingRejectedExam.rejectionReason}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div className="p-6 space-y-4">
+              {/* Exam Details (Read-only info) */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Course</label>
+                  <div className="px-3 py-2 bg-gray-100 rounded-lg text-gray-900">
+                    {editingRejectedExam.courseCode} - {editingRejectedExam.courseName}
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Exam Type</label>
+                  <div className="px-3 py-2 bg-gray-100 rounded-lg text-gray-900 capitalize">
+                    {editingRejectedExam.examType}
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
+                <div className="px-3 py-2 bg-gray-100 rounded-lg text-gray-900">
+                  {editingRejectedExam.title}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>
+                  <div className="px-3 py-2 bg-gray-100 rounded-lg text-gray-900">
+                    {formatDate(editingRejectedExam.date)}
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Time</label>
+                  <div className="px-3 py-2 bg-gray-100 rounded-lg text-gray-900">
+                    {formatTime(editingRejectedExam.startTime)}
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Duration</label>
+                  <div className="px-3 py-2 bg-gray-100 rounded-lg text-gray-900">
+                    {editingRejectedExam.duration} min
+                  </div>
+                </div>
+              </div>
+
+              {/* Info about modifications */}
+              <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+                <div className="flex items-start gap-3">
+                  <AlertCircle className="h-5 w-5 text-blue-600 shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-sm font-medium text-blue-800">How to Revise</p>
+                    <p className="text-sm text-blue-700 mt-1">
+                      To make changes to the questions, use the "New Question" button to add questions
+                      or contact your administrator if you need to modify existing questions.
+                      Once ready, click "Resubmit for Approval" below.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3 p-6 border-t">
+              <button
+                onClick={() => setEditingRejectedExam(null)}
+                className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  // Resubmit the exam for approval
+                  notifyExamSubmitted(
+                    editingRejectedExam.title,
+                    teacherName,
+                    editingRejectedExam.courseCode,
+                    editingRejectedExam.courseName,
+                    editingRejectedExam.id
+                  );
+                  setEditingRejectedExam(null);
+                  alert('Exam has been resubmitted for approval!');
+                }}
+                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                <Send className="h-4 w-4" />
+                Resubmit for Approval
+              </button>
+            </div>
+          </Card>
+        </div>
       )}
     </div>
   );

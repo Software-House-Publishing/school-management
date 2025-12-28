@@ -1,5 +1,7 @@
 import { useState, useMemo } from 'react';
 import { Card } from '@/components/ui/Card';
+import { DataTable, Column, Filter } from '@/components/ui/DataTable';
+import { StatusBadge } from '@/components/ui/Badge';
 import {
   Users,
   Search,
@@ -7,8 +9,6 @@ import {
   GraduationCap,
   CheckCircle2,
   TrendingUp,
-  Filter,
-  ChevronRight,
   BookOpen,
   X,
   ArrowLeft,
@@ -752,58 +752,37 @@ function StudentDetailView({
    MAIN COMPONENT
 ───────────────────────────────────────────────────────────────────────────── */
 export default function TeacherStudents() {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [courseFilter, setCourseFilter] = useState<string>('all');
   const [selectedStudent, setSelectedStudent] = useState<AggregatedStudent | null>(null);
   const [viewMode, setViewMode] = useState<'list' | 'detail'>('list');
 
   const allStudents = useMemo(() => aggregateStudents(), []);
 
-  const uniqueCourses = useMemo(() => {
-    const courses = new Map<string, string>();
-    teacherCourses.forEach((c) => {
-      const key = `${c.courseCode}-${c.section}`;
-      courses.set(key, `${c.courseCode} (${c.section})`);
-    });
-    return Array.from(courses.entries());
-  }, []);
-
-  const filteredStudents = useMemo(() => {
-    let students = allStudents;
-
-    // Filter by course
-    if (courseFilter !== 'all') {
-      const [code, section] = courseFilter.split('-');
-      students = students.filter((s) =>
-        s.courses.some((c) => c.code === code && c.section === section)
-      );
-    }
-
-    // Filter by search term
-    if (searchTerm) {
-      const term = searchTerm.toLowerCase();
-      students = students.filter(
-        (s) =>
-          s.firstName.toLowerCase().includes(term) ||
-          s.lastName.toLowerCase().includes(term) ||
-          s.studentId.toLowerCase().includes(term) ||
-          s.email.toLowerCase().includes(term)
-      );
-    }
-
-    return students;
-  }, [allStudents, searchTerm, courseFilter]);
-
   // Stats
   const stats = useMemo(() => {
-    const active = filteredStudents.filter((s) => s.status === 'active').length;
-    const avgAttendance = filteredStudents.length > 0
-      ? Math.round(filteredStudents.reduce((sum, s) => sum + s.attendancePercentage, 0) / filteredStudents.length)
+    const active = allStudents.filter((s) => s.status === 'active').length;
+    const avgAttendance = allStudents.length > 0
+      ? Math.round(allStudents.reduce((sum, s) => sum + s.attendancePercentage, 0) / allStudents.length)
       : 0;
-    const aGrades = filteredStudents.filter((s) => s.currentGrade.startsWith('A')).length;
+    const aGrades = allStudents.filter((s) => s.currentGrade.startsWith('A')).length;
 
-    return { total: filteredStudents.length, active, avgAttendance, aGrades };
-  }, [filteredStudents]);
+    return { total: allStudents.length, active, avgAttendance, aGrades };
+  }, [allStudents]);
+
+  // Search filter function
+  const searchFilter = (student: AggregatedStudent, term: string): boolean => {
+    const name = `${student.firstName} ${student.lastName}`.toLowerCase();
+    return (
+      name.includes(term) ||
+      student.studentId.toLowerCase().includes(term) ||
+      student.email.toLowerCase().includes(term)
+    );
+  };
+
+  // Handle view student
+  const handleView = (student: AggregatedStudent) => {
+    setSelectedStudent(student);
+    setViewMode('detail');
+  };
 
   // If viewing a student's full details
   if (viewMode === 'detail' && selectedStudent) {
@@ -818,18 +797,117 @@ export default function TeacherStudents() {
     );
   }
 
+  // Define table columns
+  const columns: Column<AggregatedStudent>[] = [
+    {
+      key: 'student',
+      header: 'Student',
+      width: '24%',
+      render: (s) => (
+        <div className="flex items-center gap-3">
+          <div className="flex-shrink-0 h-10 w-10 rounded-full overflow-hidden bg-gradient-to-br from-sky-500 to-indigo-500 flex items-center justify-center text-white font-semibold text-sm">
+            {s.firstName[0]}{s.lastName[0]}
+          </div>
+          <div className="min-w-0">
+            <p className="font-medium text-gray-900 truncate">{s.firstName} {s.lastName}</p>
+            <p className="text-xs text-gray-500">{s.email}</p>
+          </div>
+        </div>
+      ),
+    },
+    {
+      key: 'studentId',
+      header: 'ID',
+      width: '12%',
+      render: (s) => <span className="text-xs font-mono text-gray-600">{s.studentId}</span>,
+    },
+    {
+      key: 'courses',
+      header: 'Courses',
+      width: '18%',
+      render: (s) => (
+        <div className="flex flex-wrap gap-1">
+          {s.courses.slice(0, 2).map((course, idx) => (
+            <span
+              key={idx}
+              className="inline-flex items-center px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 text-xs font-medium"
+            >
+              {course.code}
+            </span>
+          ))}
+          {s.courses.length > 2 && (
+            <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-gray-100 text-gray-600 text-xs font-medium">
+              +{s.courses.length - 2}
+            </span>
+          )}
+        </div>
+      ),
+    },
+    {
+      key: 'attendance',
+      header: 'Attendance',
+      width: '15%',
+      render: (s) => (
+        <div className="flex items-center gap-2">
+          <div className="w-16 h-2 rounded-full bg-gray-100 overflow-hidden">
+            <div
+              className={cn(
+                'h-full rounded-full',
+                s.attendancePercentage >= 80 ? 'bg-emerald-500' :
+                s.attendancePercentage >= 60 ? 'bg-amber-500' : 'bg-red-500'
+              )}
+              style={{ width: `${s.attendancePercentage}%` }}
+            />
+          </div>
+          <span className="text-xs text-gray-600">{s.attendancePercentage}%</span>
+        </div>
+      ),
+    },
+    {
+      key: 'grade',
+      header: 'Grade',
+      width: '10%',
+      align: 'center',
+      render: (s) => (
+        <span className={cn('font-semibold text-sm', getGradeColor(s.currentGrade))}>
+          {s.currentGrade}
+        </span>
+      ),
+    },
+    {
+      key: 'status',
+      header: 'Status',
+      width: '12%',
+      align: 'center',
+      render: (s) => (
+        <span
+          className={cn(
+            'inline-flex px-2.5 py-1 rounded-full text-xs font-medium capitalize',
+            s.status === 'active'
+              ? 'bg-emerald-50 text-emerald-700'
+              : 'bg-red-50 text-red-700'
+          )}
+        >
+          {s.status}
+        </span>
+      ),
+    },
+  ];
+
   return (
-    <div>
+    <div className="space-y-6">
       {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold tracking-tight text-gray-900">My Students</h1>
-        <p className="mt-2 text-sm text-gray-600">
-          View all students enrolled in your courses
-        </p>
+      <div className="flex items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-semibold">My Students</h1>
+          <p className="text-sm text-muted-foreground">
+            View all students enrolled in your courses
+          </p>
+        </div>
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4 mb-6">
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <Card className="p-4 rounded-xl border">
           <div className="flex items-center gap-2 text-gray-500 mb-1">
             <Users className="h-4 w-4" />
@@ -866,152 +944,21 @@ export default function TeacherStudents() {
         </Card>
       </div>
 
-      {/* Filters */}
-      <Card className="rounded-2xl border shadow-sm overflow-hidden">
-        {/* Toolbar */}
-        <div className="flex flex-wrap items-center justify-between gap-4 p-4 border-b">
-          <div className="flex items-center gap-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Search students..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-64 rounded-lg border border-gray-300 py-2 pl-9 pr-4 text-sm focus:border-blue-500 focus:outline-none"
-              />
-            </div>
-            <div className="flex items-center gap-2">
-              <Filter className="h-4 w-4 text-gray-400" />
-              <select
-                value={courseFilter}
-                onChange={(e) => setCourseFilter(e.target.value)}
-                className="rounded-lg border border-gray-300 py-2 px-3 text-sm focus:border-blue-500 focus:outline-none"
-              >
-                <option value="all">All Courses</option>
-                {uniqueCourses.map(([key, label]) => (
-                  <option key={key} value={key}>{label}</option>
-                ))}
-              </select>
-            </div>
-          </div>
-          <div className="text-sm text-gray-500">
-            {filteredStudents.length} students
-          </div>
-        </div>
-
-        {/* Table */}
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                <th className="px-6 py-3">Student</th>
-                <th className="px-6 py-3">ID</th>
-                <th className="px-6 py-3">Email</th>
-                <th className="px-6 py-3">Courses</th>
-                <th className="px-6 py-3">Attendance</th>
-                <th className="px-6 py-3">Grade</th>
-                <th className="px-6 py-3">Status</th>
-                <th className="px-6 py-3"></th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {filteredStudents.map((student) => (
-                <tr
-                  key={student.studentId}
-                  className="hover:bg-gray-50 cursor-pointer"
-                  onClick={() => {
-                    setSelectedStudent(student);
-                    setViewMode('detail');
-                  }}
-                >
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-3">
-                      <div className="h-9 w-9 rounded-full bg-gray-100 flex items-center justify-center text-sm font-medium text-gray-600">
-                        {student.firstName[0]}{student.lastName[0]}
-                      </div>
-                      <div>
-                        <div className="font-medium text-gray-900">
-                          {student.firstName} {student.lastName}
-                        </div>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-500">{student.studentId}</td>
-                  <td className="px-6 py-4 text-sm text-gray-500">{student.email}</td>
-                  <td className="px-6 py-4">
-                    <div className="flex flex-wrap gap-1">
-                      {student.courses.slice(0, 3).map((course, idx) => {
-                        const colors = getCourseColor(course.color);
-                        return (
-                          <span
-                            key={idx}
-                            className={cn(
-                              'inline-flex px-2 py-0.5 rounded text-xs font-medium',
-                              colors.bg.replace('-500', '-100'),
-                              colors.text
-                            )}
-                          >
-                            {course.code}
-                          </span>
-                        );
-                      })}
-                      {student.courses.length > 3 && (
-                        <span className="inline-flex px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-600">
-                          +{student.courses.length - 3}
-                        </span>
-                      )}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-2">
-                      <div className="w-16 h-2 rounded-full bg-gray-100 overflow-hidden">
-                        <div
-                          className={cn(
-                            'h-full rounded-full',
-                            student.attendancePercentage >= 80 ? 'bg-emerald-500' :
-                            student.attendancePercentage >= 60 ? 'bg-amber-500' : 'bg-red-500'
-                          )}
-                          style={{ width: `${student.attendancePercentage}%` }}
-                        />
-                      </div>
-                      <span className="text-sm text-gray-600">{student.attendancePercentage}%</span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className={cn('font-semibold', getGradeColor(student.currentGrade))}>
-                      {student.currentGrade}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span
-                      className={cn(
-                        'inline-flex px-2.5 py-1 rounded-full text-xs font-medium',
-                        student.status === 'active'
-                          ? 'bg-emerald-50 text-emerald-700'
-                          : 'bg-red-50 text-red-700'
-                      )}
-                    >
-                      {student.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <ChevronRight className="h-5 w-5 text-gray-400" />
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        {filteredStudents.length === 0 && (
-          <div className="text-center py-12">
-            <Users className="mx-auto h-12 w-12 text-gray-300" />
-            <p className="mt-4 text-gray-500">No students found</p>
-          </div>
-        )}
-      </Card>
-
+      {/* Data Table */}
+      <DataTable
+        data={allStudents}
+        columns={columns}
+        keyExtractor={(s) => s.studentId}
+        searchPlaceholder="Search students by name, ID, or email..."
+        searchFilter={searchFilter}
+        entityName="students"
+        onView={handleView}
+        onRowClick={handleView}
+        showActions={true}
+        emptyIcon={<Users className="w-10 h-10 text-gray-300 mb-3" />}
+        emptyTitle="No students found"
+        emptyDescription="No students are enrolled in your courses"
+      />
     </div>
   );
 }

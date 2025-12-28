@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Card } from '@/components/ui/Card';
+import { DataTable, Column } from '@/components/ui/DataTable';
 import {
   BookOpen,
   Users,
@@ -30,6 +31,7 @@ import {
 import {
   teacherCourses,
   TeacherCourse,
+  CourseStudent,
   GradeKey,
   GRADE_POINTS,
   formatTime,
@@ -285,127 +287,117 @@ function CourseDetailView({
    ROSTER TAB
 ───────────────────────────────────────────────────────────────────────────── */
 function RosterTab({ course }: { course: TeacherCourse }) {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'dropped'>('all');
+  // Search filter function
+  const searchFilter = (student: CourseStudent, term: string): boolean => {
+    const name = `${student.firstName} ${student.lastName}`.toLowerCase();
+    return (
+      name.includes(term) ||
+      student.studentId.toLowerCase().includes(term) ||
+      student.email.toLowerCase().includes(term)
+    );
+  };
 
-  const filteredStudents = useMemo(() => {
-    let students = course.students;
-
-    if (statusFilter !== 'all') {
-      students = students.filter((s) => s.status === statusFilter);
-    }
-
-    if (searchTerm) {
-      const term = searchTerm.toLowerCase();
-      students = students.filter(
-        (s) =>
-          s.firstName.toLowerCase().includes(term) ||
-          s.lastName.toLowerCase().includes(term) ||
-          s.studentId.toLowerCase().includes(term)
-      );
-    }
-
-    return students;
-  }, [course.students, searchTerm, statusFilter]);
-
-  return (
-    <Card className="rounded-2xl border shadow-sm overflow-hidden">
-      {/* Toolbar */}
-      <div className="flex items-center justify-between p-4 border-b">
-        <div className="flex items-center gap-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Search students..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-64 rounded-lg border border-gray-300 py-2 pl-9 pr-4 text-sm focus:border-blue-500 focus:outline-none"
+  // Define table columns
+  const columns: Column<CourseStudent>[] = [
+    {
+      key: 'student',
+      header: 'Student',
+      width: '28%',
+      render: (s) => (
+        <div className="flex items-center gap-3">
+          <div className="flex-shrink-0 h-10 w-10 rounded-full overflow-hidden bg-gradient-to-br from-sky-500 to-indigo-500 flex items-center justify-center text-white font-semibold text-sm">
+            {s.firstName[0]}{s.lastName[0]}
+          </div>
+          <div className="min-w-0">
+            <p className="font-medium text-gray-900 truncate">{s.firstName} {s.lastName}</p>
+            <p className="text-xs text-gray-500">{s.email}</p>
+          </div>
+        </div>
+      ),
+    },
+    {
+      key: 'studentId',
+      header: 'ID',
+      width: '12%',
+      render: (s) => <span className="text-xs font-mono text-gray-600">{s.studentId}</span>,
+    },
+    {
+      key: 'attendance',
+      header: 'Attendance',
+      width: '18%',
+      render: (s) => (
+        <div className="flex items-center gap-2">
+          <div className="w-16 h-2 rounded-full bg-gray-100 overflow-hidden">
+            <div
+              className={cn(
+                'h-full rounded-full',
+                s.attendancePercentage >= 80 ? 'bg-emerald-500' :
+                s.attendancePercentage >= 60 ? 'bg-amber-500' : 'bg-red-500'
+              )}
+              style={{ width: `${s.attendancePercentage}%` }}
             />
           </div>
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value as 'all' | 'active' | 'dropped')}
-            className="rounded-lg border border-gray-300 py-2 px-3 text-sm focus:border-blue-500 focus:outline-none"
-          >
-            <option value="all">All Status</option>
-            <option value="active">Active</option>
-            <option value="dropped">Dropped</option>
-          </select>
+          <span className="text-xs text-gray-600">{s.attendancePercentage}%</span>
         </div>
-        <div className="text-sm text-gray-500">
-          {filteredStudents.length} students
-        </div>
-      </div>
+      ),
+    },
+    {
+      key: 'grade',
+      header: 'Current Grade',
+      width: '12%',
+      align: 'center',
+      render: (s) => (
+        <span className={cn('font-semibold text-sm', getGradeColor(s.currentGrade))}>
+          {s.currentGrade}
+        </span>
+      ),
+    },
+    {
+      key: 'status',
+      header: 'Status',
+      width: '12%',
+      align: 'center',
+      render: (s) => (
+        <span
+          className={cn(
+            'inline-flex px-2.5 py-1 rounded-full text-xs font-medium capitalize',
+            s.status === 'active'
+              ? 'bg-emerald-50 text-emerald-700'
+              : 'bg-red-50 text-red-700'
+          )}
+        >
+          {s.status}
+        </span>
+      ),
+    },
+  ];
 
-      {/* Table */}
-      <div className="overflow-x-auto">
-        <table className="w-full">
-          <thead>
-            <tr className="bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              <th className="px-6 py-3">Student</th>
-              <th className="px-6 py-3">ID</th>
-              <th className="px-6 py-3">Email</th>
-              <th className="px-6 py-3">Attendance</th>
-              <th className="px-6 py-3">Current Grade</th>
-              <th className="px-6 py-3">Status</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-100">
-            {filteredStudents.map((student) => (
-              <tr key={student.id} className="hover:bg-gray-50">
-                <td className="px-6 py-4">
-                  <div className="flex items-center gap-3">
-                    <div className="h-9 w-9 rounded-full bg-gray-100 flex items-center justify-center text-sm font-medium text-gray-600">
-                      {student.firstName[0]}{student.lastName[0]}
-                    </div>
-                    <div>
-                      <div className="font-medium text-gray-900">
-                        {student.firstName} {student.lastName}
-                      </div>
-                    </div>
-                  </div>
-                </td>
-                <td className="px-6 py-4 text-sm text-gray-500">{student.studentId}</td>
-                <td className="px-6 py-4 text-sm text-gray-500">{student.email}</td>
-                <td className="px-6 py-4">
-                  <div className="flex items-center gap-2">
-                    <div className="w-16 h-2 rounded-full bg-gray-100 overflow-hidden">
-                      <div
-                        className={cn(
-                          'h-full rounded-full',
-                          student.attendancePercentage >= 80 ? 'bg-emerald-500' :
-                          student.attendancePercentage >= 60 ? 'bg-amber-500' : 'bg-red-500'
-                        )}
-                        style={{ width: `${student.attendancePercentage}%` }}
-                      />
-                    </div>
-                    <span className="text-sm text-gray-600">{student.attendancePercentage}%</span>
-                  </div>
-                </td>
-                <td className="px-6 py-4">
-                  <span className={cn('font-semibold', getGradeColor(student.currentGrade))}>
-                    {student.currentGrade}
-                  </span>
-                </td>
-                <td className="px-6 py-4">
-                  <span
-                    className={cn(
-                      'inline-flex px-2.5 py-1 rounded-full text-xs font-medium',
-                      student.status === 'active'
-                        ? 'bg-emerald-50 text-emerald-700'
-                        : 'bg-red-50 text-red-700'
-                    )}
-                  >
-                    {student.status}
-                  </span>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </Card>
+  // Define filters
+  const filters = [
+    {
+      key: 'status',
+      label: 'All Status',
+      options: [
+        { value: 'active', label: 'Active' },
+        { value: 'dropped', label: 'Dropped' },
+      ],
+    },
+  ];
+
+  return (
+    <DataTable
+      data={course.students}
+      columns={columns}
+      keyExtractor={(s) => s.id}
+      searchPlaceholder="Search students by name, ID, or email..."
+      searchFilter={searchFilter}
+      filters={filters}
+      entityName="students"
+      showActions={false}
+      emptyIcon={<Users className="w-10 h-10 text-gray-300 mb-3" />}
+      emptyTitle="No students found"
+      emptyDescription="No students are enrolled in this course"
+    />
   );
 }
 
@@ -464,6 +456,111 @@ function GradesTab({ course }: { course: TeacherCourse }) {
     };
   }, [activeStudents, grades]);
 
+  // Search filter function
+  const searchFilter = (student: CourseStudent, term: string): boolean => {
+    const name = `${student.firstName} ${student.lastName}`.toLowerCase();
+    return (
+      name.includes(term) ||
+      student.studentId.toLowerCase().includes(term) ||
+      student.email.toLowerCase().includes(term)
+    );
+  };
+
+  // Define table columns
+  const columns: Column<CourseStudent>[] = [
+    {
+      key: 'student',
+      header: 'Student',
+      width: '28%',
+      render: (s) => (
+        <div className="flex items-center gap-3">
+          <div className="flex-shrink-0 h-10 w-10 rounded-full overflow-hidden bg-gradient-to-br from-sky-500 to-indigo-500 flex items-center justify-center text-white font-semibold text-sm">
+            {s.firstName[0]}{s.lastName[0]}
+          </div>
+          <div className="min-w-0">
+            <p className="font-medium text-gray-900 truncate">{s.firstName} {s.lastName}</p>
+            <p className="text-xs text-gray-500">{s.email}</p>
+          </div>
+        </div>
+      ),
+    },
+    {
+      key: 'studentId',
+      header: 'ID',
+      width: '12%',
+      render: (s) => <span className="text-xs font-mono text-gray-600">{s.studentId}</span>,
+    },
+    {
+      key: 'midterm',
+      header: 'Midterm Grade',
+      width: '18%',
+      render: (s) => (
+        <select
+          value={grades[s.id]?.midterm || '-'}
+          onChange={(e) => handleGradeChange(s.id, 'midterm', e.target.value as GradeKey)}
+          onClick={(e) => e.stopPropagation()}
+          className={cn(
+            'rounded-lg border border-gray-300 py-1.5 px-3 text-sm font-medium focus:border-blue-500 focus:outline-none',
+            getGradeColor(grades[s.id]?.midterm || '-')
+          )}
+        >
+          {gradeOptions.map((g) => (
+            <option key={g} value={g}>{g}</option>
+          ))}
+        </select>
+      ),
+    },
+    {
+      key: 'final',
+      header: 'Final Grade',
+      width: '18%',
+      render: (s) => (
+        <select
+          value={grades[s.id]?.final || '-'}
+          onChange={(e) => handleGradeChange(s.id, 'final', e.target.value as GradeKey)}
+          onClick={(e) => e.stopPropagation()}
+          className={cn(
+            'rounded-lg border border-gray-300 py-1.5 px-3 text-sm font-medium focus:border-blue-500 focus:outline-none',
+            getGradeColor(grades[s.id]?.final || '-')
+          )}
+        >
+          {gradeOptions.map((g) => (
+            <option key={g} value={g}>{g}</option>
+          ))}
+        </select>
+      ),
+    },
+    {
+      key: 'status',
+      header: 'Status',
+      width: '14%',
+      align: 'center',
+      render: (s) => {
+        if (grades[s.id]?.final && grades[s.id]?.final !== '-') {
+          return (
+            <span className="inline-flex items-center gap-1 text-emerald-600 text-sm">
+              <CheckCircle2 className="h-4 w-4" />
+              Complete
+            </span>
+          );
+        } else if (grades[s.id]?.midterm && grades[s.id]?.midterm !== '-') {
+          return (
+            <span className="inline-flex items-center gap-1 text-amber-600 text-sm">
+              <AlertCircle className="h-4 w-4" />
+              Midterm Only
+            </span>
+          );
+        }
+        return (
+          <span className="inline-flex items-center gap-1 text-gray-400 text-sm">
+            <XCircle className="h-4 w-4" />
+            Pending
+          </span>
+        );
+      },
+    },
+  ];
+
   return (
     <div className="space-y-6">
       {/* Stats Cards */}
@@ -512,102 +609,37 @@ function GradesTab({ course }: { course: TeacherCourse }) {
         </Card>
       </div>
 
-      {/* Grade Entry Table */}
-      <Card className="rounded-2xl border shadow-sm overflow-hidden">
-        <div className="flex items-center justify-between p-4 border-b">
-          <h3 className="font-semibold text-gray-900">Grade Entry</h3>
-          <button
-            onClick={handleSave}
-            disabled={!hasChanges}
-            className={cn(
-              'flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors',
-              hasChanges
-                ? 'bg-blue-600 text-white hover:bg-blue-700'
-                : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-            )}
-          >
-            <Save className="h-4 w-4" />
-            Save Grades
-          </button>
-        </div>
+      {/* Grade Entry Header with Save Button */}
+      <div className="flex items-center justify-between">
+        <h3 className="font-semibold text-gray-900">Grade Entry</h3>
+        <button
+          onClick={handleSave}
+          disabled={!hasChanges}
+          className={cn(
+            'flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors',
+            hasChanges
+              ? 'bg-blue-600 text-white hover:bg-blue-700'
+              : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+          )}
+        >
+          <Save className="h-4 w-4" />
+          Save Grades
+        </button>
+      </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                <th className="px-6 py-3">Student</th>
-                <th className="px-6 py-3">Student ID</th>
-                <th className="px-6 py-3">Midterm Grade</th>
-                <th className="px-6 py-3">Final Grade</th>
-                <th className="px-6 py-3">Status</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {activeStudents.map((student) => (
-                <tr key={student.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-3">
-                      <div className="h-9 w-9 rounded-full bg-gray-100 flex items-center justify-center text-sm font-medium text-gray-600">
-                        {student.firstName[0]}{student.lastName[0]}
-                      </div>
-                      <div className="font-medium text-gray-900">
-                        {student.firstName} {student.lastName}
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-500">{student.studentId}</td>
-                  <td className="px-6 py-4">
-                    <select
-                      value={grades[student.id]?.midterm || '-'}
-                      onChange={(e) => handleGradeChange(student.id, 'midterm', e.target.value as GradeKey)}
-                      className={cn(
-                        'rounded-lg border border-gray-300 py-1.5 px-3 text-sm font-medium focus:border-blue-500 focus:outline-none',
-                        getGradeColor(grades[student.id]?.midterm || '-')
-                      )}
-                    >
-                      {gradeOptions.map((g) => (
-                        <option key={g} value={g}>{g}</option>
-                      ))}
-                    </select>
-                  </td>
-                  <td className="px-6 py-4">
-                    <select
-                      value={grades[student.id]?.final || '-'}
-                      onChange={(e) => handleGradeChange(student.id, 'final', e.target.value as GradeKey)}
-                      className={cn(
-                        'rounded-lg border border-gray-300 py-1.5 px-3 text-sm font-medium focus:border-blue-500 focus:outline-none',
-                        getGradeColor(grades[student.id]?.final || '-')
-                      )}
-                    >
-                      {gradeOptions.map((g) => (
-                        <option key={g} value={g}>{g}</option>
-                      ))}
-                    </select>
-                  </td>
-                  <td className="px-6 py-4">
-                    {grades[student.id]?.final && grades[student.id]?.final !== '-' ? (
-                      <span className="inline-flex items-center gap-1 text-emerald-600 text-sm">
-                        <CheckCircle2 className="h-4 w-4" />
-                        Complete
-                      </span>
-                    ) : grades[student.id]?.midterm && grades[student.id]?.midterm !== '-' ? (
-                      <span className="inline-flex items-center gap-1 text-amber-600 text-sm">
-                        <AlertCircle className="h-4 w-4" />
-                        Midterm Only
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center gap-1 text-gray-400 text-sm">
-                        <XCircle className="h-4 w-4" />
-                        Pending
-                      </span>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </Card>
+      {/* Grade Entry DataTable */}
+      <DataTable
+        data={activeStudents}
+        columns={columns}
+        keyExtractor={(s) => s.id}
+        searchPlaceholder="Search students by name, ID, or email..."
+        searchFilter={searchFilter}
+        entityName="students"
+        showActions={false}
+        emptyIcon={<GraduationCap className="w-10 h-10 text-gray-300 mb-3" />}
+        emptyTitle="No students found"
+        emptyDescription="No active students in this course"
+      />
     </div>
   );
 }
@@ -648,6 +680,88 @@ function AttendanceTab({ course }: { course: TeacherCourse }) {
     excused: 'bg-blue-100 text-blue-700 border-blue-200',
   };
 
+  // Search filter function
+  const searchFilter = (student: CourseStudent, term: string): boolean => {
+    const name = `${student.firstName} ${student.lastName}`.toLowerCase();
+    return (
+      name.includes(term) ||
+      student.studentId.toLowerCase().includes(term) ||
+      student.email.toLowerCase().includes(term)
+    );
+  };
+
+  // Define table columns
+  const columns: Column<CourseStudent>[] = [
+    {
+      key: 'student',
+      header: 'Student',
+      width: '28%',
+      render: (s) => (
+        <div className="flex items-center gap-3">
+          <div className="flex-shrink-0 h-10 w-10 rounded-full overflow-hidden bg-gradient-to-br from-sky-500 to-indigo-500 flex items-center justify-center text-white font-semibold text-sm">
+            {s.firstName[0]}{s.lastName[0]}
+          </div>
+          <div className="min-w-0">
+            <p className="font-medium text-gray-900 truncate">{s.firstName} {s.lastName}</p>
+            <p className="text-xs text-gray-500">{s.email}</p>
+          </div>
+        </div>
+      ),
+    },
+    {
+      key: 'studentId',
+      header: 'ID',
+      width: '12%',
+      render: (s) => <span className="text-xs font-mono text-gray-600">{s.studentId}</span>,
+    },
+    {
+      key: 'attendance',
+      header: 'Overall Attendance',
+      width: '20%',
+      render: (s) => (
+        <div className="flex items-center gap-2">
+          <div className="w-20 h-2 rounded-full bg-gray-100 overflow-hidden">
+            <div
+              className={cn(
+                'h-full rounded-full',
+                s.attendancePercentage >= 80 ? 'bg-emerald-500' :
+                s.attendancePercentage >= 60 ? 'bg-amber-500' : 'bg-red-500'
+              )}
+              style={{ width: `${s.attendancePercentage}%` }}
+            />
+          </div>
+          <span className="text-sm text-gray-600">{s.attendancePercentage}%</span>
+        </div>
+      ),
+    },
+    {
+      key: 'status',
+      header: "Today's Status",
+      width: '35%',
+      render: (s) => (
+        <div className="flex gap-2">
+          {(['present', 'absent', 'late', 'excused'] as const).map((status) => (
+            <button
+              key={status}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleAttendanceChange(s.id, status);
+              }}
+              className={cn(
+                'px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors capitalize',
+                attendance[s.id] === status
+                  ? statusColors[status]
+                  : 'bg-white text-gray-500 border-gray-200 hover:border-gray-300'
+              )}
+            >
+              {status}
+            </button>
+          ))}
+        </div>
+      ),
+    },
+  ];
+
   return (
     <div className="space-y-6">
       {/* Date Selector */}
@@ -686,71 +800,19 @@ function AttendanceTab({ course }: { course: TeacherCourse }) {
         </div>
       </Card>
 
-      {/* Attendance Table */}
-      <Card className="rounded-2xl border shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                <th className="px-6 py-3">Student</th>
-                <th className="px-6 py-3">Student ID</th>
-                <th className="px-6 py-3">Overall Attendance</th>
-                <th className="px-6 py-3">Today's Status</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {activeStudents.map((student) => (
-                <tr key={student.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-3">
-                      <div className="h-9 w-9 rounded-full bg-gray-100 flex items-center justify-center text-sm font-medium text-gray-600">
-                        {student.firstName[0]}{student.lastName[0]}
-                      </div>
-                      <div className="font-medium text-gray-900">
-                        {student.firstName} {student.lastName}
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-500">{student.studentId}</td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-2">
-                      <div className="w-20 h-2 rounded-full bg-gray-100 overflow-hidden">
-                        <div
-                          className={cn(
-                            'h-full rounded-full',
-                            student.attendancePercentage >= 80 ? 'bg-emerald-500' :
-                            student.attendancePercentage >= 60 ? 'bg-amber-500' : 'bg-red-500'
-                          )}
-                          style={{ width: `${student.attendancePercentage}%` }}
-                        />
-                      </div>
-                      <span className="text-sm text-gray-600">{student.attendancePercentage}%</span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex gap-2">
-                      {(['present', 'absent', 'late', 'excused'] as const).map((status) => (
-                        <button
-                          key={status}
-                          onClick={() => handleAttendanceChange(student.id, status)}
-                          className={cn(
-                            'px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors capitalize',
-                            attendance[student.id] === status
-                              ? statusColors[status]
-                              : 'bg-white text-gray-500 border-gray-200 hover:border-gray-300'
-                          )}
-                        >
-                          {status}
-                        </button>
-                      ))}
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </Card>
+      {/* Attendance DataTable */}
+      <DataTable
+        data={activeStudents}
+        columns={columns}
+        keyExtractor={(s) => s.id}
+        searchPlaceholder="Search students by name, ID, or email..."
+        searchFilter={searchFilter}
+        entityName="students"
+        showActions={false}
+        emptyIcon={<ClipboardCheck className="w-10 h-10 text-gray-300 mb-3" />}
+        emptyTitle="No students found"
+        emptyDescription="No active students in this course"
+      />
     </div>
   );
 }
