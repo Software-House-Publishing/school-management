@@ -13,15 +13,12 @@ import {
   X,
   ArrowLeft,
   Phone,
-  Calendar,
   FileText,
   Plus,
   Clock,
-  AlertCircle,
-  Star,
   MessageSquare,
-  User,
   Trash2,
+  Shield,
 } from 'lucide-react';
 import {
   teacherCourses,
@@ -30,6 +27,7 @@ import {
   getCourseColor,
   formatDate,
 } from '../data/teacherPortalData';
+import { loadStudents, Student } from '@/pages/admin/students/studentData';
 
 function cn(...classes: (string | false | null | undefined)[]) {
   return classes.filter(Boolean).join(' ');
@@ -110,155 +108,6 @@ function aggregateStudents(): AggregatedStudent[] {
   });
 
   return Array.from(studentMap.values());
-}
-
-/* ─────────────────────────────────────────────────────────────────────────────
-   STUDENT QUICK VIEW MODAL (Summary popup)
-───────────────────────────────────────────────────────────────────────────── */
-function StudentQuickViewModal({
-  student,
-  onClose,
-  onViewDetails,
-}: {
-  student: AggregatedStudent;
-  onClose: () => void;
-  onViewDetails: () => void;
-}) {
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <Card className="w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto rounded-2xl">
-        {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b">
-          <div className="flex items-center gap-4">
-            <div className="h-14 w-14 rounded-full bg-blue-100 flex items-center justify-center text-xl font-bold text-blue-600">
-              {student.firstName[0]}{student.lastName[0]}
-            </div>
-            <div>
-              <h2 className="text-xl font-bold text-gray-900">
-                {student.firstName} {student.lastName}
-              </h2>
-              <p className="text-sm text-gray-500">{student.studentId}</p>
-            </div>
-          </div>
-          <button
-            onClick={onClose}
-            className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-          >
-            <X className="h-5 w-5" />
-          </button>
-        </div>
-
-        {/* Content */}
-        <div className="p-6 space-y-6">
-          {/* Contact Info */}
-          <div>
-            <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">
-              Contact Information
-            </h3>
-            <div className="flex items-center gap-2 text-sm">
-              <Mail className="h-4 w-4 text-gray-400" />
-              <span className="text-gray-900">{student.email}</span>
-            </div>
-          </div>
-
-          {/* Academic Overview */}
-          <div>
-            <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">
-              Academic Overview
-            </h3>
-            <div className="grid grid-cols-3 gap-4">
-              <Card className="p-4 rounded-xl border">
-                <div className="flex items-center gap-2 text-gray-500 mb-1">
-                  <CheckCircle2 className="h-4 w-4" />
-                  <span className="text-xs">Attendance</span>
-                </div>
-                <div className={cn(
-                  'text-2xl font-bold',
-                  student.attendancePercentage >= 80 ? 'text-emerald-600' :
-                  student.attendancePercentage >= 60 ? 'text-amber-600' : 'text-red-600'
-                )}>
-                  {student.attendancePercentage}%
-                </div>
-              </Card>
-              <Card className="p-4 rounded-xl border">
-                <div className="flex items-center gap-2 text-gray-500 mb-1">
-                  <GraduationCap className="h-4 w-4" />
-                  <span className="text-xs">Current Grade</span>
-                </div>
-                <div className={cn('text-2xl font-bold', getGradeColor(student.currentGrade))}>
-                  {student.currentGrade}
-                </div>
-              </Card>
-              <Card className="p-4 rounded-xl border">
-                <div className="flex items-center gap-2 text-gray-500 mb-1">
-                  <BookOpen className="h-4 w-4" />
-                  <span className="text-xs">Courses</span>
-                </div>
-                <div className="text-2xl font-bold text-gray-900">
-                  {student.courses.length}
-                </div>
-              </Card>
-            </div>
-          </div>
-
-          {/* Enrolled Courses */}
-          <div>
-            <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">
-              Enrolled in Your Courses
-            </h3>
-            <div className="space-y-2">
-              {student.courses.map((course, idx) => {
-                const colors = getCourseColor(course.color);
-                return (
-                  <div
-                    key={idx}
-                    className="flex items-center gap-3 p-3 rounded-xl border hover:bg-gray-50"
-                  >
-                    <div className={cn('w-1 h-10 rounded-full', colors.bg)} />
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <span className="font-medium text-gray-900">{course.code}</span>
-                        <span className="text-sm text-gray-500">Section {course.section}</span>
-                      </div>
-                      <div className="text-sm text-gray-600">{course.name}</div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-
-        {/* Footer */}
-        <div className="flex justify-between gap-3 p-6 border-t">
-          <button
-            onClick={onClose}
-            className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-          >
-            Close
-          </button>
-          <div className="flex gap-3">
-            <button
-              onClick={() => {
-                window.location.href = `mailto:${student.email}`;
-              }}
-              className="flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors"
-            >
-              <Mail className="h-4 w-4" />
-              Send Email
-            </button>
-            <button
-              onClick={onViewDetails}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              <User className="h-4 w-4" />
-              View Full Details
-            </button>
-          </div>
-        </div>
-      </Card>
-    </div>
-  );
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -399,6 +248,15 @@ function StudentDetailView({
   );
   const [showAddNote, setShowAddNote] = useState(false);
   const [activeTab, setActiveTab] = useState<'overview' | 'grades' | 'attendance' | 'notes'>('overview');
+
+  // Load full student data from admin student records for additional info
+  const fullStudentData = useMemo(() => {
+    const allStudents = loadStudents();
+    // Try to find by matching first name and last name
+    return allStudents.find(
+      (s) => s.firstName === student.firstName && s.lastName === student.lastName
+    ) || null;
+  }, [student.firstName, student.lastName]);
 
   const handleAddNote = (noteData: Omit<TeacherNote, 'id' | 'createdAt' | 'updatedAt'>) => {
     const newNote: TeacherNote = {
@@ -543,54 +401,179 @@ function StudentDetailView({
         <div className="p-6">
           {activeTab === 'overview' && (
             <div className="grid gap-6 lg:grid-cols-2">
-              {/* Contact Information */}
+              {/* LEFT COLUMN */}
               <div className="space-y-4">
-                <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">
-                  Contact Information
-                </h3>
-                <Card className="p-4 rounded-xl border space-y-3">
-                  <div className="flex items-center gap-3">
-                    <Mail className="h-5 w-5 text-gray-400" />
+                {/* Personal & Contact */}
+                <section className="rounded-lg border bg-slate-50/60 px-4 py-3">
+                  <h2 className="text-sm font-semibold">Personal & Contact</h2>
+                  <div className="mt-3 grid grid-cols-1 gap-3 text-sm md:grid-cols-2">
                     <div>
-                      <div className="text-xs text-gray-500">Email</div>
-                      <div className="text-sm text-gray-900">{student.email}</div>
+                      <p className="text-[11px] font-medium uppercase tracking-wide text-slate-500">
+                        Date of Birth
+                      </p>
+                      <p className="mt-0.5 text-sm text-slate-900">
+                        {fullStudentData?.dateOfBirth || '—'}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-[11px] font-medium uppercase tracking-wide text-slate-500">
+                        Gender
+                      </p>
+                      <p className="mt-0.5 text-sm text-slate-900">
+                        {fullStudentData?.gender || '—'}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-[11px] font-medium uppercase tracking-wide text-slate-500">
+                        Phone
+                      </p>
+                      <p className="mt-0.5 text-sm text-slate-900">
+                        {fullStudentData?.phone || '—'}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-[11px] font-medium uppercase tracking-wide text-slate-500">
+                        Email
+                      </p>
+                      <p className="mt-0.5 text-sm text-slate-900">
+                        {student.email || fullStudentData?.email || '—'}
+                      </p>
+                    </div>
+                    <div className="md:col-span-2">
+                      <p className="text-[11px] font-medium uppercase tracking-wide text-slate-500">
+                        Languages
+                      </p>
+                      <p className="mt-0.5 text-sm text-slate-900">
+                        {fullStudentData?.language || '—'}
+                      </p>
+                    </div>
+                    <div className="md:col-span-2">
+                      <p className="text-[11px] font-medium uppercase tracking-wide text-slate-500">
+                        Address
+                      </p>
+                      <p className="mt-0.5 text-sm text-slate-900">
+                        {fullStudentData?.address || '—'}
+                      </p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <Phone className="h-5 w-5 text-gray-400" />
+                </section>
+
+                {/* Parents / Guardians */}
+                <section className="rounded-lg border bg-slate-50/60 px-4 py-3">
+                  <h2 className="text-sm font-semibold">Parents / Guardians</h2>
+                  <div className="mt-3 space-y-2 text-sm">
+                    {fullStudentData?.guardians && fullStudentData.guardians.length > 0 ? (
+                      fullStudentData.guardians.map((g, idx) => (
+                        <div
+                          key={idx}
+                          className="rounded-md border bg-white px-3 py-2 text-xs md:text-sm"
+                        >
+                          <div className="flex items-center justify-between gap-2">
+                            <p className="font-medium">
+                              {g.name}{' '}
+                              <span className="text-[11px] uppercase tracking-wide text-slate-500">
+                                • {g.relationship}
+                              </span>
+                            </p>
+                            {g.isEmergencyContact && (
+                              <span className="rounded-full bg-rose-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-rose-700">
+                                Emergency
+                              </span>
+                            )}
+                          </div>
+                          <p className="mt-1 text-xs text-slate-600">
+                            Phone: {g.phone}
+                            {g.email ? ` • Email: ${g.email}` : ''}
+                          </p>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-xs text-slate-500">No guardian information available.</p>
+                    )}
+                  </div>
+                </section>
+
+                {/* Health */}
+                <section className="rounded-lg border bg-slate-50/60 px-4 py-3">
+                  <h2 className="text-sm font-semibold">Health</h2>
+                  <div className="mt-3 grid grid-cols-1 gap-3 text-sm md:grid-cols-2">
                     <div>
-                      <div className="text-xs text-gray-500">Phone</div>
-                      <div className="text-sm text-gray-900">(555) 123-4567</div>
+                      <p className="text-[11px] font-medium uppercase tracking-wide text-slate-500">
+                        Allergies
+                      </p>
+                      <p className="mt-0.5 text-sm text-slate-900">
+                        {fullStudentData?.health?.allergies || '—'}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-[11px] font-medium uppercase tracking-wide text-slate-500">
+                        Medical Notes
+                      </p>
+                      <p className="mt-0.5 text-sm text-slate-900">
+                        {fullStudentData?.health?.medicalNotes || '—'}
+                      </p>
+                    </div>
+                    <div className="md:col-span-2">
+                      <p className="text-[11px] font-medium uppercase tracking-wide text-slate-500">
+                        Emergency Instructions
+                      </p>
+                      <p className="mt-0.5 text-sm text-slate-900">
+                        {fullStudentData?.health?.emergencyInstructions || '—'}
+                      </p>
                     </div>
                   </div>
-                </Card>
+                </section>
               </div>
 
-              {/* Enrolled Courses */}
+              {/* RIGHT COLUMN */}
               <div className="space-y-4">
-                <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">
-                  Enrolled in Your Courses
-                </h3>
-                <div className="space-y-2">
-                  {student.courses.map((course, idx) => {
-                    const colors = getCourseColor(course.color);
-                    return (
-                      <Card
-                        key={idx}
-                        className="flex items-center gap-3 p-4 rounded-xl border"
-                      >
-                        <div className={cn('w-1.5 h-12 rounded-full', colors.bg)} />
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2">
-                            <span className="font-semibold text-gray-900">{course.code}</span>
-                            <span className="text-sm text-gray-500">Section {course.section}</span>
+                {/* Enrolled Courses */}
+                <section className="rounded-lg border bg-slate-50/60 px-4 py-3">
+                  <h2 className="text-sm font-semibold">Enrolled in Your Courses</h2>
+                  <div className="mt-3 space-y-2">
+                    {student.courses.map((course, idx) => {
+                      const colors = getCourseColor(course.color);
+                      return (
+                        <div
+                          key={idx}
+                          className="flex items-center gap-3 rounded-md border bg-white px-3 py-2"
+                        >
+                          <div className={cn('w-1.5 h-10 rounded-full', colors.bg)} />
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2">
+                              <span className="font-semibold text-gray-900">{course.code}</span>
+                              <span className="text-sm text-gray-500">Section {course.section}</span>
+                            </div>
+                            <div className="text-sm text-gray-600">{course.name}</div>
                           </div>
-                          <div className="text-sm text-gray-600">{course.name}</div>
                         </div>
-                      </Card>
-                    );
-                  })}
-                </div>
+                      );
+                    })}
+                  </div>
+                </section>
+
+                {/* Quick Contact */}
+                <section className="rounded-lg border bg-slate-50/60 px-4 py-3">
+                  <h2 className="text-sm font-semibold">Quick Contact</h2>
+                  <div className="mt-3 space-y-2">
+                    <button
+                      onClick={() => window.location.href = `mailto:${student.email}`}
+                      className="w-full flex items-center gap-3 rounded-md border bg-white px-3 py-2 hover:bg-blue-50 transition-colors"
+                    >
+                      <Mail className="h-4 w-4 text-blue-600" />
+                      <span className="text-sm text-gray-700">Send Email to Student</span>
+                    </button>
+                    {fullStudentData?.guardians?.[0]?.email && (
+                      <button
+                        onClick={() => window.location.href = `mailto:${fullStudentData?.guardians?.[0]?.email}`}
+                        className="w-full flex items-center gap-3 rounded-md border bg-white px-3 py-2 hover:bg-blue-50 transition-colors"
+                      >
+                        <Shield className="h-4 w-4 text-purple-600" />
+                        <span className="text-sm text-gray-700">Contact Parent/Guardian</span>
+                      </button>
+                    )}
+                  </div>
+                </section>
               </div>
             </div>
           )}
@@ -753,17 +736,6 @@ function StudentDetailView({
         </div>
       </Card>
 
-      {/* Actions */}
-      <div className="flex gap-3">
-        <button
-          onClick={() => window.location.href = `mailto:${student.email}`}
-          className="flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors"
-        >
-          <Mail className="h-4 w-4" />
-          Send Email
-        </button>
-      </div>
-
       {/* Add Note Modal */}
       {showAddNote && (
         <AddNoteModal
@@ -783,7 +755,7 @@ export default function TeacherStudents() {
   const [searchTerm, setSearchTerm] = useState('');
   const [courseFilter, setCourseFilter] = useState<string>('all');
   const [selectedStudent, setSelectedStudent] = useState<AggregatedStudent | null>(null);
-  const [viewMode, setViewMode] = useState<'list' | 'quickView' | 'detail'>('list');
+  const [viewMode, setViewMode] = useState<'list' | 'detail'>('list');
 
   const allStudents = useMemo(() => aggregateStudents(), []);
 
@@ -950,7 +922,7 @@ export default function TeacherStudents() {
                   className="hover:bg-gray-50 cursor-pointer"
                   onClick={() => {
                     setSelectedStudent(student);
-                    setViewMode('quickView');
+                    setViewMode('detail');
                   }}
                 >
                   <td className="px-6 py-4">
@@ -1040,17 +1012,6 @@ export default function TeacherStudents() {
         )}
       </Card>
 
-      {/* Student Quick View Modal */}
-      {viewMode === 'quickView' && selectedStudent && (
-        <StudentQuickViewModal
-          student={selectedStudent}
-          onClose={() => {
-            setViewMode('list');
-            setSelectedStudent(null);
-          }}
-          onViewDetails={() => setViewMode('detail')}
-        />
-      )}
     </div>
   );
 }
