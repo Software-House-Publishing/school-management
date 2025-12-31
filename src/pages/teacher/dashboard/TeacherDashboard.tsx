@@ -233,136 +233,111 @@ function TodayScheduleCard() {
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
-   ACTION ITEMS / PENDING TASKS
+   ACTION ITEMS & RECENT SUBMISSIONS - Combined Wide Card
 ───────────────────────────────────────────────────────────────────────────── */
-function ActionItemsCard() {
+function ActionAndSubmissionsCard() {
   const navigate = useNavigate();
 
-  const priorityClasses = {
-    high: 'bg-red-50 text-red-700 border-red-100',
-    medium: 'bg-amber-50 text-amber-700 border-amber-100',
-    low: 'bg-gray-50 text-gray-600 border-gray-100',
+  const priorityDot = {
+    high: 'bg-red-500',
+    medium: 'bg-amber-500',
+    low: 'bg-gray-400',
   };
 
-  const typeIcons = {
-    grade: ClipboardCheck,
-    attendance: CheckCircle2,
-    material: FileText,
-    exam: GraduationCap,
-    document: FileText,
+  const statusConfig = {
+    pending: { text: 'text-amber-600', bg: 'bg-amber-50' },
+    graded: { text: 'text-emerald-600', bg: 'bg-emerald-50' },
+    late: { text: 'text-red-600', bg: 'bg-red-50' },
   };
 
   return (
     <Card className="rounded-2xl border shadow-sm">
-      <div className="flex items-center justify-between border-b px-6 py-4">
-        <div className="flex items-center gap-3">
-          <div className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-red-50 text-red-600 ring-1 ring-red-100">
-            <AlertCircle className="h-5 w-5" />
-          </div>
-          <div>
-            <h2 className="text-base font-semibold text-gray-900">Action Items</h2>
-            <p className="text-xs text-gray-500">{actionItems.length} tasks need attention</p>
-          </div>
-        </div>
-      </div>
-
-      <div className="divide-y max-h-[320px] overflow-y-auto">
-        {actionItems.map((item) => {
-          const Icon = typeIcons[item.type];
-          return (
-            <div key={item.id} className="flex items-start gap-4 px-6 py-4 hover:bg-gray-50">
-              <div className="mt-0.5">
-                <Icon className="h-5 w-5 text-gray-400" />
+      {/* Two Column Layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x">
+        {/* Action Items Column */}
+        <div>
+          <div className="flex items-center justify-between px-6 py-4 border-b">
+            <div className="flex items-center gap-3">
+              <div className="h-9 w-9 rounded-lg bg-gray-100 flex items-center justify-center">
+                <AlertCircle className="h-4 w-4 text-gray-600" />
               </div>
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2">
-                  <span className="font-medium text-gray-900">{item.title}</span>
-                  <span className={cn('text-xs px-2 py-0.5 rounded-full border font-medium', priorityClasses[item.priority])}>
-                    {item.priority}
-                  </span>
-                </div>
-                <p className="mt-1 text-sm text-gray-600">{item.description}</p>
-                {item.dueDate && (
-                  <p className="mt-1 text-xs text-gray-500">Due: {item.dueDate}</p>
-                )}
-              </div>
-              <button className="shrink-0 text-blue-600 hover:text-blue-700">
-                <ChevronRight className="h-5 w-5" />
-              </button>
-            </div>
-          );
-        })}
-      </div>
-    </Card>
-  );
-}
-
-/* ─────────────────────────────────────────────────────────────────────────────
-   RECENT SUBMISSIONS
-───────────────────────────────────────────────────────────────────────────── */
-function RecentSubmissionsCard() {
-  const navigate = useNavigate();
-
-  const statusClasses = {
-    pending: 'bg-amber-50 text-amber-700 border-amber-100',
-    graded: 'bg-emerald-50 text-emerald-700 border-emerald-100',
-    late: 'bg-red-50 text-red-700 border-red-100',
-  };
-
-  const statusIcons = {
-    pending: Clock,
-    graded: CheckCircle2,
-    late: XCircle,
-  };
-
-  return (
-    <Card className="rounded-2xl border shadow-sm">
-      <div className="flex items-center justify-between border-b px-6 py-4">
-        <div className="flex items-center gap-3">
-          <div className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-purple-50 text-purple-600 ring-1 ring-purple-100">
-            <FileText className="h-5 w-5" />
-          </div>
-          <div>
-            <h2 className="text-base font-semibold text-gray-900">Recent Submissions</h2>
-            <p className="text-xs text-gray-500">Latest student work</p>
-          </div>
-        </div>
-        <button
-          onClick={() => navigate('/teacher/courses')}
-          className="text-sm font-medium text-blue-600 hover:text-blue-700"
-        >
-          View All
-        </button>
-      </div>
-
-      <div className="divide-y max-h-[280px] overflow-y-auto">
-        {recentSubmissions.slice(0, 5).map((sub) => {
-          const StatusIcon = statusIcons[sub.status];
-          return (
-            <div key={sub.id} className="flex items-center gap-4 px-6 py-3 hover:bg-gray-50">
-              <div className="h-9 w-9 rounded-full bg-gray-100 flex items-center justify-center text-sm font-medium text-gray-600">
-                {sub.studentName.split(' ').map(n => n[0]).join('')}
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2">
-                  <span className="font-medium text-gray-900 text-sm">{sub.studentName}</span>
-                  <span className={cn('inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full border font-medium', statusClasses[sub.status])}>
-                    <StatusIcon className="h-3 w-3" />
-                    {sub.status}
-                  </span>
-                </div>
-                <p className="text-xs text-gray-500 truncate">
-                  {sub.courseCode} - {sub.assignmentName}
-                </p>
-              </div>
-              <div className="text-right shrink-0">
-                <div className="text-xs text-gray-500">
-                  {new Date(sub.submittedAt).toLocaleDateString()}
-                </div>
+              <div>
+                <h2 className="text-sm font-semibold text-gray-900">Action Items</h2>
+                <p className="text-xs text-gray-500">{actionItems.length} pending</p>
               </div>
             </div>
-          );
-        })}
+          </div>
+
+          <div className="divide-y max-h-[320px] overflow-y-auto">
+            {actionItems.map((item) => (
+              <div
+                key={item.id}
+                className="flex items-start gap-3 px-6 py-3 hover:bg-gray-50 cursor-pointer transition-colors"
+              >
+                <div className={cn('mt-1.5 h-2 w-2 rounded-full shrink-0', priorityDot[item.priority])} />
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-medium text-gray-900 truncate">{item.title}</p>
+                  <p className="text-xs text-gray-500 mt-0.5 truncate">{item.description}</p>
+                  {item.dueDate && (
+                    <p className="text-xs text-gray-400 mt-1">Due: {item.dueDate}</p>
+                  )}
+                </div>
+                <ChevronRight className="h-4 w-4 text-gray-300 shrink-0 mt-1" />
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Recent Submissions Column */}
+        <div>
+          <div className="flex items-center justify-between px-6 py-4 border-b">
+            <div className="flex items-center gap-3">
+              <div className="h-9 w-9 rounded-lg bg-gray-100 flex items-center justify-center">
+                <FileText className="h-4 w-4 text-gray-600" />
+              </div>
+              <div>
+                <h2 className="text-sm font-semibold text-gray-900">Recent Submissions</h2>
+                <p className="text-xs text-gray-500">Latest student work</p>
+              </div>
+            </div>
+            <button
+              onClick={() => navigate('/teacher/courses')}
+              className="text-xs font-medium text-gray-500 hover:text-gray-700"
+            >
+              View All
+            </button>
+          </div>
+
+          <div className="divide-y max-h-[320px] overflow-y-auto">
+            {recentSubmissions.slice(0, 5).map((sub) => {
+              const status = statusConfig[sub.status];
+              return (
+                <div
+                  key={sub.id}
+                  className="flex items-center gap-3 px-6 py-3 hover:bg-gray-50 cursor-pointer transition-colors"
+                >
+                  <div className="h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center text-xs font-medium text-gray-600 shrink-0">
+                    {sub.studentName.split(' ').map(n => n[0]).join('')}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <p className="text-sm font-medium text-gray-900 truncate">{sub.studentName}</p>
+                      <span className={cn('text-xs font-medium capitalize', status.text)}>
+                        {sub.status}
+                      </span>
+                    </div>
+                    <p className="text-xs text-gray-500 truncate">
+                      {sub.courseCode} · {sub.assignmentName}
+                    </p>
+                  </div>
+                  <span className="text-xs text-gray-400 shrink-0">
+                    {new Date(sub.submittedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
       </div>
     </Card>
   );
@@ -507,11 +482,8 @@ export default function TeacherDashboard() {
           {/* Today's Schedule */}
           <TodayScheduleCard />
 
-          {/* Action Items & Submissions Row */}
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-            <ActionItemsCard />
-            <RecentSubmissionsCard />
-          </div>
+          {/* Action Items & Recent Submissions - Wide Card */}
+          <ActionAndSubmissionsCard />
 
           {/* Announcements */}
           <AnnouncementsPanel />
