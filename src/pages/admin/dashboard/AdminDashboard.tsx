@@ -6,6 +6,9 @@ import { useTranslation } from "react-i18next"
 import { useAuthStore } from "@/stores/authStore"
 import { Card } from "@/components/ui/Card"
 import { Button } from "@/components/ui/Button"
+import { PageHeader } from "@/components/shared/PageHeader"
+import { KpiCard, KpiCardsRow } from "@/components/shared/data/KpiCard"
+import { ActionItemsCard, ActionItem } from "@/components/shared/dashboard/ActionItemsCard"
 import {
   Search,
   UserPlus,
@@ -99,17 +102,6 @@ function approvalToneClasses(tone: ApprovalItem["leftTone"]) {
       return "bg-slate-50 text-slate-600"
     case "green":
       return "bg-emerald-50 text-emerald-700"
-  }
-}
-
-function kpiTrendChip(tone: "up" | "down" | "neutral") {
-  switch (tone) {
-    case "up":
-      return "bg-emerald-100 text-emerald-800"
-    case "down":
-      return "bg-rose-100 text-rose-800"
-    case "neutral":
-      return "bg-slate-100 text-slate-700"
   }
 }
 
@@ -523,67 +515,40 @@ export default function AdminDashboard() {
       </div>
 
       {/* Bottom KPIs */}
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate('/school-admin/students')}>
-          <div className="flex items-start justify-between">
-            <p className="text-sm font-medium text-slate-600">Total Enrollment</p>
-            <TrendingUp className="h-4 w-4 text-emerald-600" />
-          </div>
-          <div className="mt-6 text-4xl font-bold text-slate-900">{snapshot.kpiEnrollment}</div>
-          <div className="mt-4 flex items-center gap-2">
-            <span className={cn("rounded-full px-2 py-1 text-xs font-medium", kpiTrendChip("up"))}>
-              +5.2%
-            </span>
-            <span className="text-xs text-slate-500">from last month</span>
-          </div>
-        </Card>
-
-        <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate('/school-admin/finance')}>
-          <div className="flex items-start justify-between">
-            <p className="text-sm font-medium text-slate-600">Monthly Revenue</p>
-            <TrendingUp className="h-4 w-4 text-emerald-600" />
-          </div>
-          <div className="mt-6 text-4xl font-bold text-slate-900">
-            ${snapshot.kpiRevenue.toLocaleString()}
-          </div>
-          <div className="mt-4 flex items-center gap-2">
-            <span className={cn("rounded-full px-2 py-1 text-xs font-medium", kpiTrendChip("up"))}>
-              +4.2%
-            </span>
-            <span className="text-xs text-slate-500">from last month</span>
-          </div>
-        </Card>
-
-        <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate('/school-admin/reports')}>
-          <div className="flex items-start justify-between">
-            <p className="text-sm font-medium text-slate-600">Avg Attendance</p>
-            <TrendingDown className="h-4 w-4 text-rose-600" />
-          </div>
-          <div className="mt-6 text-4xl font-bold text-slate-900">
-            {snapshot.kpiAvgAttendance.toFixed(1)}%
-          </div>
-          <div className="mt-4 flex items-center gap-2">
-            <span className={cn("rounded-full px-2 py-1 text-xs font-medium", kpiTrendChip("down"))}>
-              -1.3%
-            </span>
-            <span className="text-xs text-slate-500">from last month</span>
-          </div>
-        </Card>
-
-        <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate('/school-admin/courses')}>
-          <div className="flex items-start justify-between">
-            <p className="text-sm font-medium text-slate-600">Active Courses</p>
-            <CheckCircle2 className="h-4 w-4 text-emerald-600" />
-          </div>
-          <div className="mt-6 text-4xl font-bold text-slate-900">{snapshot.kpiActiveCourses}</div>
-          <div className="mt-4 flex items-center gap-2">
-            <span className={cn("rounded-full px-2 py-1 text-xs font-medium", kpiTrendChip("neutral"))}>
-              No change
-            </span>
-            <span className="text-xs text-slate-500">this term</span>
-          </div>
-        </Card>
-      </div>
+      <KpiCardsRow columns={4}>
+        <KpiCard
+          icon={Users}
+          label="Total Enrollment"
+          value={snapshot.kpiEnrollment}
+          color="blue"
+          trend={{ direction: "up", value: "+5.2%", label: "from last month" }}
+          onClick={() => navigate('/school-admin/students')}
+        />
+        <KpiCard
+          icon={DollarSign}
+          label="Monthly Revenue"
+          value={`$${snapshot.kpiRevenue.toLocaleString()}`}
+          color="green"
+          trend={{ direction: "up", value: "+4.2%", label: "from last month" }}
+          onClick={() => navigate('/school-admin/finance')}
+        />
+        <KpiCard
+          icon={Calendar}
+          label="Avg Attendance"
+          value={`${snapshot.kpiAvgAttendance.toFixed(1)}%`}
+          color="amber"
+          trend={{ direction: "down", value: "-1.3%", label: "from last month" }}
+          onClick={() => navigate('/school-admin/reports')}
+        />
+        <KpiCard
+          icon={CheckCircle2}
+          label="Active Courses"
+          value={snapshot.kpiActiveCourses}
+          color="emerald"
+          subtext="this term"
+          onClick={() => navigate('/school-admin/courses')}
+        />
+      </KpiCardsRow>
     </div>
   )
 }

@@ -148,12 +148,13 @@ npm run preview
 ## 📚 Documentation
 
 ### Available Documentation
-- [`docs/architecture/frontend-architecture.md`](docs/architecture/frontend-architecture.md) - Technical architecture
-- [`docs/components/component-library.md`](docs/components/component-library.md) - Component documentation
-- [`docs/development/setup-guide.md`](docs/development/setup-guide.md) - Development setup
-- [`docs/api/api-integration.md`](docs/api/api-integration.md) - API integration guide
-- [`docs/deployment/deployment-guide.md`](docs/deployment/deployment-guide.md) - Deployment instructions
-- [`docs/rbac.md`](docs/rbac.md) - Role-based access control specification
+- [`docs/README.md`](docs/README.md) - Documentation entry point
+- [`docs/01-setup/quickstart.md`](docs/01-setup/quickstart.md) - Quick start guide
+- [`docs/02-architecture/frontend.md`](docs/02-architecture/frontend.md) - Technical architecture
+- [`docs/02-architecture/workflow.md`](docs/02-architecture/workflow.md) - Routing and workflows
+- [`docs/03-auth-rbac/roles-permissions.md`](docs/03-auth-rbac/roles-permissions.md) - Role-based access control
+- [`docs/04-ui/component-library.md`](docs/04-ui/component-library.md) - Component documentation
+- [`docs/05-deployment/README.md`](docs/05-deployment/README.md) - Deployment instructions
 
 ## 🚀 Deployment
 
