@@ -1,150 +1,14 @@
-import { useMemo, useState } from "react"
-import type { ReactNode } from "react"
+import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { useAuthStore } from "@/stores/authStore"
 import { Card } from "@/components/ui/Card"
-import { Megaphone, GraduationCap, BookOpen, CalendarDays, QrCode } from "lucide-react"
+import { PageHeader } from "@/components/shared/PageHeader"
+import { IdentityCard } from "@/components/shared/dashboard/IdentityCard"
+import { AnnouncementPanel, AnnouncementItem } from "@/components/shared/dashboard/AnnouncementPanel"
+import { GraduationCap, BookOpen, CalendarDays } from "lucide-react"
 
 function cn(...c: Array<string | false | null | undefined>) {
   return c.filter(Boolean).join(" ")
-}
-
-/* ----------------------------- Announcements ----------------------------- */
-
-type AnnouncementPriority = "urgent" | "info"
-
-type Announcement = {
-  id: string
-  scope: "university" | "course"
-  title: string
-  body: string
-  dateLabel: string
-  priority?: AnnouncementPriority
-  courseName?: string
-}
-
-function Badge({
-  tone,
-  children,
-}: {
-  tone: "urgent" | "info" | "neutral"
-  children: ReactNode
-}) {
-  const cls =
-    tone === "urgent"
-      ? "bg-red-50 text-red-700 border-red-100"
-      : tone === "info"
-      ? "bg-blue-50 text-blue-700 border-blue-100"
-      : "bg-gray-50 text-gray-700 border-gray-100"
-
-  return (
-    <span
-      className={cn(
-        "inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold",
-        cls
-      )}
-    >
-      {children}
-    </span>
-  )
-}
-
-function AnnouncementsPanel({ announcements }: { announcements: Announcement[] }) {
-  const [mode, setMode] = useState<"university" | "course">("university")
-
-  const filtered = announcements
-    .filter((a) => a.scope === mode)
-    .slice(0, 5)
-
-  return (
-    <Card className="rounded-2xl border shadow-sm">
-      <div className="flex items-center justify-between gap-4 border-b p-5">
-        <div className="flex items-center gap-3">
-          <div className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-700 ring-1 ring-indigo-100">
-            <Megaphone className="h-5 w-5" />
-          </div>
-          <div>
-            <h2 className="text-base font-semibold text-gray-900">Announcements</h2>
-            <p className="text-xs text-gray-500">Latest 3–5 (daily)</p>
-          </div>
-        </div>
-
-        {/* segmented (University / My Courses) */}
-        <div className="inline-flex rounded-2xl bg-gray-100 p-1">
-          <button
-            type="button"
-            onClick={() => setMode("university")}
-            className={cn(
-              "inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold transition",
-              mode === "university"
-                ? "bg-white text-gray-900 shadow-sm"
-                : "text-gray-600 hover:text-gray-900"
-            )}
-          >
-            <GraduationCap className="h-4 w-4" />
-            University
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setMode("course")}
-            className={cn(
-              "inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold transition",
-              mode === "course"
-                ? "bg-white text-gray-900 shadow-sm"
-                : "text-gray-600 hover:text-gray-900"
-            )}
-          >
-            <BookOpen className="h-4 w-4" />
-            My Courses
-          </button>
-        </div>
-      </div>
-
-      <div className="px-6">
-        <div className="divide-y">
-          {filtered.length === 0 ? (
-            <div className="py-8 text-sm text-gray-600">No announcements.</div>
-          ) : (
-            filtered.map((a) => (
-              <div key={a.id} className="py-4">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <p className="truncate text-sm font-semibold text-gray-900">
-                        {a.title}
-                      </p>
-                      {a.priority === "urgent" ? (
-                        <Badge tone="urgent">Urgent</Badge>
-                      ) : a.priority === "info" ? (
-                        <Badge tone="info">Info</Badge>
-                      ) : null}
-                      {a.scope === "course" && a.courseName ? (
-                        <Badge tone="neutral">{a.courseName}</Badge>
-                      ) : null}
-                    </div>
-
-                    <p className="mt-1 line-clamp-2 text-sm text-gray-600">{a.body}</p>
-                  </div>
-
-                  <span className="shrink-0 text-xs font-medium text-gray-500">
-                    {a.dateLabel}
-                  </span>
-                </div>
-              </div>
-            ))
-          )}
-        </div>
-      </div>
-
-      <div className="flex items-center justify-between border-t px-6 py-4 text-sm text-gray-600">
-        <span>Students check this daily</span>
-        <button type="button" className="font-semibold text-blue-700 hover:text-blue-800">
-          View all
-        </button>
-      </div>
-    </Card>
-  )
 }
 
 /* ------------------------------ Today Class UI ------------------------------ */
@@ -340,76 +204,6 @@ function TodayClassCard({
   )
 }
 
-/* ------------------------------ Virtual ID Card ------------------------------ */
-
-function VirtualIdCard({
-  studentName,
-  studentId,
-  status,
-}: {
-  studentName: string
-  studentId: string
-  status: string
-}) {
-  return (
-    <Card className="h-full rounded-2xl border shadow-sm">
-      <div className="flex items-center justify-between border-b p-5">
-        <h2 className="text-base font-semibold text-gray-900">Virtual ID Card</h2>
-        <div className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-amber-50 text-amber-700 ring-1 ring-amber-100">
-          <QrCode className="h-5 w-5" />
-        </div>
-      </div>
-
-      <div className="p-5">
-        <div className="flex h-[128px] items-center justify-center rounded-2xl border border-dashed border-blue-200 bg-blue-50/40 p-4">
-          <div className="flex items-center gap-4">
-            <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-b from-teal-600 to-emerald-700 shadow-md">
-              <div className="grid grid-cols-5 gap-1">
-                {Array.from({ length: 25 }).map((_, i) => (
-                  <div
-                    key={i}
-                    className={cn("h-2 w-2 rounded-sm bg-white/70", i % 6 === 0 && "bg-white")}
-                  />
-                ))}
-              </div>
-            </div>
-
-            <div className="min-w-0">
-              <div className="text-xs font-semibold text-gray-500">QR CODE</div>
-              <div className="mt-1 text-sm font-semibold text-gray-900">{studentId}</div>
-              <div className="mt-1 text-xs text-gray-500">Scan for attendance</div>
-            </div>
-          </div>
-        </div>
-
-        <div className="mt-5 rounded-2xl border bg-white p-4">
-          <div className="text-xs font-semibold tracking-wide text-gray-500">STUDENT NAME</div>
-          <div className="mt-1 text-lg font-semibold text-gray-900">{studentName}</div>
-
-          <div className="mt-4 grid grid-cols-2 gap-3">
-            <div>
-              <div className="text-xs font-semibold tracking-wide text-gray-500">ID</div>
-              <div className="mt-1 text-sm font-medium text-gray-900">{studentId}</div>
-            </div>
-
-            <div>
-              <div className="text-xs font-semibold tracking-wide text-gray-500">STATUS</div>
-              <div className="mt-1 text-sm font-semibold text-green-700">{status}</div>
-            </div>
-          </div>
-        </div>
-
-        <button
-          type="button"
-          className="mt-5 w-full rounded-xl bg-blue-700 px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-        >
-          Show for Attendance
-        </button>
-      </div>
-    </Card>
-  )
-}
-
 /* -------------------------------- Dashboard -------------------------------- */
 
 export default function StudentDashboard() {
@@ -426,7 +220,7 @@ export default function StudentDashboard() {
   const studentId = (user as any)?.studentId || "STU-2400001"
   const status = "Active"
 
-  const announcements: Announcement[] = [
+  const announcements: AnnouncementItem[] = [
     {
       id: "a1",
       scope: "university",
@@ -499,31 +293,44 @@ export default function StudentDashboard() {
   return (
     <div className="w-full">
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold tracking-tight text-gray-900">
-          {t("dashboard.welcomeBack", { defaultValue: "Welcome back!" })}
-        </h1>
-        <p className="mt-2 text-sm text-gray-600">
-          {t("dashboard.academicOverview", {
-            defaultValue: "Here's your academic overview",
-          })}
-        </p>
-      </div>
+      <PageHeader
+        title={t("dashboard.welcomeBack", { defaultValue: "Welcome back!" })}
+        subtitle={t("dashboard.academicOverview", {
+          defaultValue: "Here's your academic overview",
+        })}
+        className="mb-8"
+      />
 
       {/* Main layout */}
       <div className="grid grid-cols-1 gap-8 xl:grid-cols-3">
-        {/* Left */}
+        {/* Left - ID Card */}
         <div className="xl:col-span-1">
-          <VirtualIdCard studentName={studentName} studentId={studentId} status={status} />
+          <IdentityCard
+            type="student"
+            name={studentName}
+            id={studentId}
+            status={status}
+            actionLabel="Show for Attendance"
+            onAction={() => {}}
+          />
         </div>
 
-        {/* Right */}
+        {/* Right - Main content */}
         <div className="xl:col-span-2 space-y-8">
-          {/* QUICK OVERVIEW REMOVED -> replaced with screenshot timetable UI */}
+          {/* Today's schedule */}
           <TodayClassCard items={todayClasses} />
 
-          {/* Announcements (no "Today Classes" tab anymore) */}
-          <AnnouncementsPanel announcements={announcements} />
+          {/* Announcements with tabs */}
+          <AnnouncementPanel
+            items={announcements}
+            tabs={[
+              { id: "university", label: "University", icon: GraduationCap },
+              { id: "course", label: "My Courses", icon: BookOpen },
+            ]}
+            filterFn={(item, tab) => item.scope === tab}
+            maxItems={5}
+            onViewAll={() => {}}
+          />
         </div>
       </div>
     </div>

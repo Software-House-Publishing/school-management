@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { useTranslation } from 'react-i18next';
 import { Toaster } from 'sonner';
 
+import ScrollToTop from '@/components/shared/ScrollToTop';
 // System pages (SaaS provider)
 import SystemHome from '@/pages/system/home/Home';
 import SystemAbout from '@/pages/system/about/About';
@@ -59,30 +60,42 @@ import TeacherExams from '@/pages/teacher/exams/TeacherExams';
 import TeacherAnnouncements from '@/pages/teacher/announcements/TeacherAnnouncements';
 import TeacherProfile from '@/pages/teacher/profile/TeacherProfile';
 
-// Admin portal pages
-import AdminAnnouncement from '@/pages/admin/announcement/AdminAnnouncement';
-import AdminDashboard from '@/pages/admin/dashboard/AdminDashboard';
-import AdminUsers from '@/pages/admin/users/AdminUsers';
-import AdminCourses from '@/pages/admin/courses/AdminCourses';
-import AdminExams from '@/pages/admin/exams/AdminExams';
-import AdminFinance from '@/pages/admin/finance/AdminFinance';
-import AdminInvoices from '@/pages/admin/invoices/AdminInvoices';
-import AdminReports from '@/pages/admin/reports/AdminReports';
-import AdminSettings from '@/pages/admin/settings/AdminSettings';
-import AdminStudents from '@/pages/admin/students/StudentList';
-import AdminTeachers from '@/pages/admin/teachers/TeacherList';
-import AdminStudentDetail from '@/pages/admin/students/StudentDetail';
-import AdminStudentCreate from '@/pages/admin/students/StudentCreate';
-import AdminStudentEdit from '@/pages/admin/students/StudentEdit';
-import AdminTeacherDetail from '@/pages/admin/teachers/TeacherDetail';
-import AdminTeacherCreate from '@/pages/admin/teachers/TeacherCreate';
-import AdminTeacherEdit from '@/pages/admin/teachers/TeacherEdit';
-import AdminUserDetail from '@/pages/admin/users/UserDetail';
-import AdminUserCreate from '@/pages/admin/users/UserCreate';
-import AdminUserEdit from '@/pages/admin/users/UserEdit';
+// School Admin portal pages (folder: admin, routes: /school-admin)
+import SchoolAdminAnnouncement from '@/pages/admin/announcement/AdminAnnouncement';
+import SchoolAdminDashboard from '@/pages/admin/dashboard/AdminDashboard';
+import SchoolAdminUsers from '@/pages/admin/users/AdminUsers';
+import SchoolAdminCourses from '@/pages/admin/courses/AdminCourses';
+import SchoolAdminExams from '@/pages/admin/exams/AdminExams';
+import SchoolAdminFinance from '@/pages/admin/finance/AdminFinance';
+import SchoolAdminInvoices from '@/pages/admin/invoices/AdminInvoices';
+import SchoolAdminReports from '@/pages/admin/reports/AdminReports';
+import SchoolAdminSettings from '@/pages/admin/settings/AdminSettings';
+import SchoolAdminStudents from '@/pages/admin/students/StudentList';
+import SchoolAdminTeachers from '@/pages/admin/teachers/TeacherList';
+import SchoolAdminStudentDetail from '@/pages/admin/students/StudentDetail';
+import SchoolAdminStudentCreate from '@/pages/admin/students/StudentCreate';
+import SchoolAdminStudentEdit from '@/pages/admin/students/StudentEdit';
+import SchoolAdminTeacherDetail from '@/pages/admin/teachers/TeacherDetail';
+import SchoolAdminTeacherCreate from '@/pages/admin/teachers/TeacherCreate';
+import SchoolAdminTeacherEdit from '@/pages/admin/teachers/TeacherEdit';
+import SchoolAdminUserDetail from '@/pages/admin/users/UserDetail';
+import SchoolAdminUserCreate from '@/pages/admin/users/UserCreate';
+import SchoolAdminUserEdit from '@/pages/admin/users/UserEdit';
 
 // System Admin portal pages
 import SystemDashboard from '@/pages/system-admin/dashboard/SystemDashboard';
+import SystemSchoolsPage from '@/pages/system-admin/schools/SchoolsPage';
+import SystemSchoolAdminsPage from '@/pages/system-admin/school-admins/SchoolAdminsPage';
+import SystemUsersPage from '@/pages/system-admin/users/SystemUsersPage';
+import SystemRolesPage from '@/pages/system-admin/roles/RolesPermissionsPage';
+import SystemAnnouncementsPage from '@/pages/system-admin/announcements/SystemAnnouncementsPage';
+import SystemReportsPage from '@/pages/system-admin/reports/SystemReportsPage';
+import SystemIntegrationsPage from '@/pages/system-admin/integrations/IntegrationsPage';
+import SystemAuditLogsPage from '@/pages/system-admin/audit-logs/AuditLogsPage';
+import SystemSettingsPage from '@/pages/system-admin/settings/SystemSettingsPage';
+import SystemSupportPage from '@/pages/system-admin/support/SupportCenterPage';
+import SystemSecurityPage from '@/pages/system-admin/security/SecurityPage';
+import SystemHealthPage from '@/pages/system-admin/health/SystemHealthPage';
 
 // Shared pages
 import NotificationsPage from '@/pages/shared/notifications/NotificationsPage';
@@ -104,6 +117,7 @@ function App() {
   return (
     <div dir={i18n.language === 'my' ? 'rtl' : 'ltr'}>
       <Router>
+        <ScrollToTop />
         <Routes>
           {/* System routes (SaaS provider) */}
           <Route path="/" element={<SystemHome />} />
@@ -188,23 +202,23 @@ function App() {
             }
           >
             <Route index element={<Navigate to="/school-admin/dashboard" replace />} />
-            <Route path="dashboard" element={<AdminDashboard />} />
-            <Route path="students" element={<AdminStudents />} />
-            <Route path="students/new" element={<AdminStudentCreate />} />
-            <Route path="students/:id" element={<AdminStudentDetail />} />
-            <Route path="students/:id/edit" element={<AdminStudentEdit />} />
-            <Route path="teachers" element={<AdminTeachers />} />
-            <Route path="teachers/new" element={<AdminTeacherCreate />} />
-            <Route path="teachers/:id" element={<AdminTeacherDetail />} />
-            <Route path="teachers/:id/edit" element={<AdminTeacherEdit />} />
-            <Route path="courses" element={<AdminCourses />} />
-            <Route path="announcements" element={<AdminAnnouncement />} />
-            <Route path="exams" element={<AdminExams />} />
-            <Route path="finance" element={<AdminFinance />} />
-            <Route path="invoices" element={<AdminInvoices />} />
-            <Route path="reports" element={<AdminReports />} />
+            <Route path="dashboard" element={<SchoolAdminDashboard />} />
+            <Route path="students" element={<SchoolAdminStudents />} />
+            <Route path="students/new" element={<SchoolAdminStudentCreate />} />
+            <Route path="students/:id" element={<SchoolAdminStudentDetail />} />
+            <Route path="students/:id/edit" element={<SchoolAdminStudentEdit />} />
+            <Route path="teachers" element={<SchoolAdminTeachers />} />
+            <Route path="teachers/new" element={<SchoolAdminTeacherCreate />} />
+            <Route path="teachers/:id" element={<SchoolAdminTeacherDetail />} />
+            <Route path="teachers/:id/edit" element={<SchoolAdminTeacherEdit />} />
+            <Route path="courses" element={<SchoolAdminCourses />} />
+            <Route path="announcements" element={<SchoolAdminAnnouncement />} />
+            <Route path="exams" element={<SchoolAdminExams />} />
+            <Route path="finance" element={<SchoolAdminFinance />} />
+            <Route path="invoices" element={<SchoolAdminInvoices />} />
+            <Route path="reports" element={<SchoolAdminReports />} />
             <Route path="notifications" element={<NotificationsPage />} />
-            <Route path="settings" element={<AdminSettings />} />
+            <Route path="settings" element={<SchoolAdminSettings />} />
           </Route>
 
           {/* System Admin portal */}
@@ -218,15 +232,19 @@ function App() {
           >
             <Route index element={<Navigate to="/system-admin/dashboard" replace />} />
             <Route path="dashboard" element={<SystemDashboard />} />
-            <Route path="users" element={<AdminUsers />} />
-            <Route path="users/new" element={<AdminUserCreate />} />
-            <Route path="users/:id" element={<AdminUserDetail />} />
-            <Route path="users/:id/edit" element={<AdminUserEdit />} />
-            <Route path="courses" element={<AdminCourses />} />
-            <Route path="finance" element={<AdminFinance />} />
-            <Route path="reports" element={<AdminReports />} />
+            <Route path="schools" element={<SystemSchoolsPage />} />
+            <Route path="school-admins" element={<SystemSchoolAdminsPage />} />
+            <Route path="users" element={<SystemUsersPage />} />
+            <Route path="roles" element={<SystemRolesPage />} />
+            <Route path="announcements" element={<SystemAnnouncementsPage />} />
+            <Route path="reports" element={<SystemReportsPage />} />
+            <Route path="integrations" element={<SystemIntegrationsPage />} />
+            <Route path="audit-logs" element={<SystemAuditLogsPage />} />
+            <Route path="settings" element={<SystemSettingsPage />} />
+            <Route path="support" element={<SystemSupportPage />} />
+            <Route path="security" element={<SystemSecurityPage />} />
+            <Route path="health" element={<SystemHealthPage />} />
             <Route path="notifications" element={<NotificationsPage />} />
-            <Route path="settings" element={<AdminSettings />} />
           </Route>
 
           {/* Catch all route */}

@@ -16,7 +16,16 @@ import {
   ClipboardList,
   UserCircle,
   Calendar,
-  Bell
+  Bell,
+  Building2,
+  Shield,
+  KeyRound,
+  Megaphone,
+  Plug,
+  ScrollText,
+  Wrench,
+  HeadphonesIcon,
+  Activity
 } from 'lucide-react';
 import { NavItem } from '@/components/shared/Sidebar';
 
@@ -104,13 +113,27 @@ export const adminNavItems: NavItem[] = [
 
 export const managerNavItems = adminNavItems;
 
-// Admin navigation items
-export const directorNavItems: NavItem[] = [
+// System Admin navigation items
+export const systemAdminNavItems: NavItem[] = [
   {
     id: 'dashboard',
     label: 'Dashboard',
     href: '/system-admin/dashboard',
     icon: <Home size={18} />,
+    section: 'primary'
+  },
+  {
+    id: 'schools',
+    label: 'Schools',
+    href: '/system-admin/schools',
+    icon: <Building2 size={18} />,
+    section: 'primary'
+  },
+  {
+    id: 'school-admins',
+    label: 'School Admins',
+    href: '/system-admin/school-admins',
+    icon: <UserCog size={18} />,
     section: 'primary'
   },
   {
@@ -121,17 +144,17 @@ export const directorNavItems: NavItem[] = [
     section: 'primary'
   },
   {
-    id: 'courses',
-    label: 'Courses',
-    href: '/system-admin/courses',
-    icon: <BookOpen size={18} />,
+    id: 'roles-permissions',
+    label: 'Roles & Permissions',
+    href: '/system-admin/roles',
+    icon: <KeyRound size={18} />,
     section: 'primary'
   },
   {
-    id: 'finance',
-    label: 'Finance',
-    href: '/system-admin/finance',
-    icon: <Wallet size={18} />,
+    id: 'announcements',
+    label: 'Announcements',
+    href: '/system-admin/announcements',
+    icon: <Megaphone size={18} />,
     section: 'primary'
   },
   {
@@ -142,20 +165,51 @@ export const directorNavItems: NavItem[] = [
     section: 'primary'
   },
   {
-    id: 'notifications',
-    label: 'Notifications',
-    href: '/system-admin/notifications',
-    icon: <Bell size={18} />,
-    section: 'secondary'
+    id: 'integrations',
+    label: 'Integrations',
+    href: '/system-admin/integrations',
+    icon: <Plug size={18} />,
+    section: 'primary'
+  },
+  {
+    id: 'audit-logs',
+    label: 'Audit Logs',
+    href: '/system-admin/audit-logs',
+    icon: <ScrollText size={18} />,
+    section: 'primary'
   },
   {
     id: 'settings',
-    label: 'Settings',
+    label: 'System Settings',
     href: '/system-admin/settings',
-    icon: <Settings size={18} />,
+    icon: <Wrench size={18} />,
+    section: 'secondary'
+  },
+  {
+    id: 'support',
+    label: 'Support Center',
+    href: '/system-admin/support',
+    icon: <HeadphonesIcon size={18} />,
+    section: 'secondary'
+  },
+  {
+    id: 'security',
+    label: 'Security',
+    href: '/system-admin/security',
+    icon: <Shield size={18} />,
+    section: 'secondary'
+  },
+  {
+    id: 'system-health',
+    label: 'System Health',
+    href: '/system-admin/health',
+    icon: <Activity size={18} />,
     section: 'secondary'
   }
 ];
+
+// Keep backward compatibility alias
+export const directorNavItems = systemAdminNavItems;
 
 // Student navigation items
 export const studentNavItems: NavItem[] = [

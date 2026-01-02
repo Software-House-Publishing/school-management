@@ -1,18 +1,23 @@
 # API Integration Guide
 
-## Overview
+Backend integration patterns, service layer architecture, and data fetching strategies.
 
-This document outlines the API integration patterns and conventions used in the School Management System frontend. The system integrates with a FastAPI backend and Supabase for authentication and database operations.
+---
 
 ## API Architecture
 
 ### Backend Services
-- **FastAPI**: Main application server
-- **Supabase**: Authentication and real-time database
-- **PostgreSQL**: Primary database
-- **Redis**: Caching and session management
 
-### API Endpoints Structure
+| Service | Technology | Purpose |
+|---------|------------|---------|
+| API Server | FastAPI | REST endpoints |
+| Authentication | Supabase Auth | User sessions |
+| Database | PostgreSQL (Supabase) | Data persistence |
+| Cache | Redis | Session and caching |
+| File Storage | Supabase Storage | File uploads |
+
+### Endpoint Structure
+
 ```
 /api/v1/
 ├── auth/           # Authentication endpoints
@@ -27,9 +32,12 @@ This document outlines the API integration patterns and conventions used in the 
 └── reports/        # Analytics and reporting
 ```
 
-## Authentication Integration
+---
+
+## Authentication
 
 ### Supabase Auth Configuration
+
 ```typescript
 // src/services/auth.service.ts
 import { createClient } from '@supabase/supabase-js';
@@ -71,6 +79,7 @@ export const authService = {
 ```
 
 ### JWT Token Management
+
 ```typescript
 // src/stores/authStore.ts
 import { create } from 'zustand';
@@ -94,16 +103,17 @@ export const useAuthStore = create<AuthStore>()(
         return token ? { Authorization: `Bearer ${token}` } : {};
       }
     }),
-    {
-      name: 'auth-token'
-    }
+    { name: 'auth-token' }
   )
 );
 ```
 
-## HTTP Client Configuration
+---
 
-### Axios Instance Setup
+## HTTP Client
+
+### Axios Configuration
+
 ```typescript
 // src/services/api/client.ts
 import axios from 'axios';
@@ -119,42 +129,41 @@ export const apiClient = axios.create({
   },
 });
 
-// Request interceptor
+// Request interceptor - add auth token
 apiClient.interceptors.request.use(
   (config) => {
     const { getAuthHeader } = useAuthStore.getState();
     const authHeader = getAuthHeader();
-    
+
     if (authHeader.Authorization) {
       config.headers.Authorization = authHeader.Authorization;
     }
-    
+
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
-// Response interceptor
+// Response interceptor - handle 401
 apiClient.interceptors.response.use(
   (response) => response,
   async (error) => {
     if (error.response?.status === 401) {
-      // Handle unauthorized access
       const { clearToken } = useAuthStore.getState();
       clearToken();
       window.location.href = '/login';
     }
-    
     return Promise.reject(error);
   }
 );
 ```
 
+---
+
 ## Service Layer Pattern
 
 ### Base Service Class
+
 ```typescript
 // src/services/api/base.service.ts
 import { apiClient } from './client';
@@ -188,11 +197,12 @@ export class BaseService<T> {
 }
 ```
 
-### Specific Service Implementation
+### Domain Service Example
+
 ```typescript
 // src/services/user.service.ts
 import { BaseService } from './base.service';
-import { User } from '@/types/user';
+import { User, UserRole } from '@/types/user';
 
 class UserService extends BaseService<User> {
   constructor() {
@@ -221,9 +231,12 @@ class UserService extends BaseService<User> {
 export const userService = new UserService();
 ```
 
+---
+
 ## React Query Integration
 
 ### Query Client Configuration
+
 ```typescript
 // src/services/queryClient.ts
 import { QueryClient } from '@tanstack/react-query';
@@ -233,14 +246,15 @@ export const queryClient = new QueryClient({
     queries: {
       retry: 3,
       retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
-      staleTime: 5 * 60 * 1000, // 5 minutes
-      cacheTime: 10 * 60 * 1000, // 10 minutes
+      staleTime: 5 * 60 * 1000,     // 5 minutes
+      cacheTime: 10 * 60 * 1000,    // 10 minutes
     },
   },
 });
 ```
 
-### Custom Hooks for Data Fetching
+### Custom Data Hooks
+
 ```typescript
 // src/hooks/api/useUsers.ts
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -264,7 +278,7 @@ export function useUser(id: string) {
 
 export function useCreateUser() {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: (data: Partial<User>) => userService.create(data),
     onSuccess: () => {
@@ -275,9 +289,9 @@ export function useCreateUser() {
 
 export function useUpdateUser() {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: Partial<User> }) => 
+    mutationFn: ({ id, data }: { id: string; data: Partial<User> }) =>
       userService.update(id, data),
     onSuccess: (updatedUser) => {
       queryClient.invalidateQueries({ queryKey: ['users'] });
@@ -287,9 +301,12 @@ export function useUpdateUser() {
 }
 ```
 
+---
+
 ## Error Handling
 
-### API Error Types
+### Error Types
+
 ```typescript
 // src/types/api.ts
 export interface ApiError {
@@ -313,6 +330,7 @@ export class ApiException extends Error {
 ```
 
 ### Global Error Handler
+
 ```typescript
 // src/services/api/errorHandler.ts
 import { toast } from 'sonner';
@@ -350,9 +368,12 @@ export function handleApiError(error: any): void {
 }
 ```
 
+---
+
 ## Real-time Features
 
-### Supabase Real-time Subscriptions
+### Supabase Subscriptions
+
 ```typescript
 // src/services/realtime.service.ts
 import { supabase } from './supabase';
@@ -363,34 +384,17 @@ export class RealtimeService {
   subscribeToAnnouncements(callback: (announcement: Announcement) => void) {
     const subscription = supabase
       .channel('announcements')
-      .on('postgres_changes', 
+      .on('postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'announcements' },
         (payload) => callback(payload.new as Announcement)
       )
       .subscribe();
 
     this.subscriptions.set('announcements', subscription);
-    
+
     return () => {
       subscription.unsubscribe();
       this.subscriptions.delete('announcements');
-    };
-  }
-
-  subscribeToUserUpdates(userId: string, callback: (user: User) => void) {
-    const subscription = supabase
-      .channel(`user:${userId}`)
-      .on('postgres_changes',
-        { event: 'UPDATE', schema: 'public', table: 'users', filter: `id=eq.${userId}` },
-        (payload) => callback(payload.new as User)
-      )
-      .subscribe();
-
-    this.subscriptions.set(`user:${userId}`, subscription);
-    
-    return () => {
-      subscription.unsubscribe();
-      this.subscriptions.delete(`user:${userId}`);
     };
   }
 
@@ -405,9 +409,12 @@ export class RealtimeService {
 export const realtimeService = new RealtimeService();
 ```
 
-## File Upload Integration
+---
 
-### File Upload Service
+## File Uploads
+
+### Upload Service
+
 ```typescript
 // src/services/upload.service.ts
 import { supabase } from './supabase';
@@ -419,7 +426,7 @@ export class UploadService {
     path: string
   ): Promise<{ data: { path: string }; error: any }> {
     const fileName = `${path}/${Date.now()}-${file.name}`;
-    
+
     const { data, error } = await supabase.storage
       .from(bucket)
       .upload(fileName, file);
@@ -440,38 +447,12 @@ export class UploadService {
 export const uploadService = new UploadService();
 ```
 
-## Rate Limiting and Caching
+---
 
-### Request Throttling
-```typescript
-// src/services/api/throttle.ts
-export class ThrottleService {
-  private requests: Map<string, number[]> = new Map();
-  private readonly maxRequests = 100;
-  private readonly windowMs = 60 * 1000; // 1 minute
+## Security Best Practices
 
-  async throttle(key: string, fn: () => Promise<any>): Promise<any> {
-    const now = Date.now();
-    const requests = this.requests.get(key) || [];
-    
-    // Clean old requests
-    const validRequests = requests.filter(time => now - time < this.windowMs);
-    
-    if (validRequests.length >= this.maxRequests) {
-      throw new Error('Rate limit exceeded');
-    }
-    
-    validRequests.push(now);
-    this.requests.set(key, validRequests);
-    
-    return fn();
-  }
-}
-```
+### Input Sanitization
 
-## Security Considerations
-
-### Request Sanitization
 ```typescript
 // src/services/api/sanitizer.ts
 export function sanitizeInput(input: string): string {
@@ -483,7 +464,7 @@ export function sanitizeInput(input: string): string {
 
 export function sanitizeObject(obj: Record<string, any>): Record<string, any> {
   const sanitized: Record<string, any> = {};
-  
+
   for (const [key, value] of Object.entries(obj)) {
     if (typeof value === 'string') {
       sanitized[key] = sanitizeInput(value);
@@ -491,14 +472,23 @@ export function sanitizeObject(obj: Record<string, any>): Record<string, any> {
       sanitized[key] = value;
     }
   }
-  
+
   return sanitized;
 }
 ```
 
-## Testing API Integration
+### Request Validation
+
+1. **Client-side**: Zod schemas for form validation
+2. **Server-side**: FastAPI Pydantic models
+3. **Database**: Supabase RLS policies
+
+---
+
+## Testing
 
 ### Mock Service Worker (MSW)
+
 ```typescript
 // src/mocks/handlers.ts
 import { http, HttpResponse } from 'msw';
@@ -513,13 +503,12 @@ export const handlers = [
 
   http.post('/api/v1/users', async ({ request }) => {
     const body = await request.json();
-    return HttpResponse.json({
-      id: '3',
-      ...body,
-    });
+    return HttpResponse.json({ id: '3', ...body });
   }),
 ];
 ```
+
+---
 
 ## Best Practices
 
@@ -534,7 +523,7 @@ export const handlers = [
 - Use skeleton screens for better UX
 
 ### 3. Caching Strategy
-- Use React Query for server state management
+- Use React Query for server state
 - Implement appropriate cache times
 - Invalidate caches on mutations
 
@@ -545,6 +534,13 @@ export const handlers = [
 
 ### 5. Security
 - Sanitize all user inputs
-- Validate data on both client and server
+- Validate on both client and server
 - Use HTTPS for all API calls
-- Implement rate limiting
+
+---
+
+## See Also
+
+- [Frontend Architecture](./frontend.md) - Overall architecture
+- [Workflow & Routing](./workflow.md) - Route structure
+- [Roles & Permissions](../03-auth-rbac/roles-permissions.md) - Access control
