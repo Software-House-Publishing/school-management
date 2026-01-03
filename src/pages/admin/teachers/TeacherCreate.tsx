@@ -3,12 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import {
-  Teacher,
   TeacherStatus,
   EmploymentType,
   DocumentInfo,
-  loadTeachers,
-  saveTeachers,
 } from './teacherData';
 import { Check, X } from 'lucide-react';
 
@@ -21,14 +18,28 @@ const DOCUMENT_TYPES = [
   'CPR Certification',
 ];
 
+// Retrieve JWT token from localStorage persisted store
+const getAuthToken = (): string | null => {
+  const authData = localStorage.getItem('auth-storage');
+  if (!authData) return null;
+  try {
+    const parsed = JSON.parse(authData);
+    return parsed?.state?.token || null;
+  } catch {
+    return null;
+  }
+};
+
+const API_BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8080';
+
 export default function TeacherCreate() {
   const navigate = useNavigate();
 
   // Basic info
-  const [teacherId, setTeacherId] = useState('');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('Teacher@123');
   const [phone, setPhone] = useState('');
   const [gender, setGender] = useState('');
   const [dateOfBirth, setDateOfBirth] = useState('');
@@ -68,78 +79,111 @@ export default function TeacherCreate() {
     );
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!firstName || !lastName || !email) {
+      alert('Please fill first name, last name, and email.');
+      return;
+    }
 
-    if (!teacherId || !firstName || !lastName || !department) {
-      alert('Please fill Teacher ID, first name, last name, and department.');
+    const token = getAuthToken();
+    if (!token) {
+      alert('Authentication token not found. Please log in.');
       return;
     }
 
     const today = new Date().toISOString().slice(0, 10);
 
-    const newTeacher: Teacher = {
-      id: Date.now().toString(),
-      teacherId,
+    // Build payload to create teacher via backend
+    const payload: any = {
+      email,
+      password: password || 'Teacher@123',
+      roles: ['teacher'],
+      status,
       firstName,
       lastName,
-      email: email || undefined,
-      phone: phone || undefined,
-      gender: gender || undefined,
-      dateOfBirth: dateOfBirth || undefined,
-      address: address || undefined,
-      department,
-      status,
-      office: office || undefined,
-      officeHours: officeHours || undefined,
-      emergencyContact: emergencyName
-        ? {
-            name: emergencyName,
-            phone: emergencyPhone || '-',
-            relationship: emergencyRelationship || 'Contact',
-          }
-        : undefined,
-      employment: {
-        type: employmentType,
-        role,
-        joinDate: today,
-        qualifications: qualifications
-          ? qualifications.split(',').map((q) => q.trim()).filter(Boolean)
-          : [],
-        yearsOfExperience: yearsOfExperience ? Number(yearsOfExperience) : 0,
-        teachingLicense: teachingLicense || undefined,
-        salaryGrade: salaryGrade || undefined,
+      teacherDetails: {
+        phone: phone || undefined,
+        dateOfBirth: dateOfBirth || undefined,
+        gender: gender || undefined,
+        address: address || undefined,
+        department: department || undefined,
+        office: office || undefined,
+        officeHours: officeHours || undefined,
+        emergencyContact:
+          emergencyName
+            ? {
+                name: emergencyName,
+                phone: emergencyPhone || '-',
+                relationship: emergencyRelationship || 'Contact',
+              }
+            : undefined,
+        employment: {
+          type: employmentType,
+          role,
+          joinDate: today,
+          qualifications: qualifications
+            ? qualifications
+                .split(',')
+                .map((q) => q.trim())
+                .filter(Boolean)
+            : [],
+          yearsOfExperience: yearsOfExperience ? Number(yearsOfExperience) : 0,
+          teachingLicense: teachingLicense || undefined,
+          salaryGrade: salaryGrade || undefined,
+        },
+        teaching: {
+          assignedCourses: [],
+          totalSections: 0,
+          totalStudents: 0,
+          weeklyHours: 0,
+          academicTerm: 'Fall 2024',
+        },
+        operations: {
+          attendanceSubmissionRate: 0,
+          gradingProgress: { midterm: 0, final: 0 },
+          pendingTasks: 0,
+          lateSubmissions: 0,
+        },
+        leave: {
+          sickLeaveBalance: 10,
+          casualLeaveBalance: 7,
+          requests: [],
+        },
+        system: {
+          portalUsername:
+            portalUsername || `${firstName.toLowerCase()}.${lastName.toLowerCase()}`,
+          portalActive,
+          twoFactorEnabled,
+          staffQrId: staffQrId || undefined,
+        },
+        documents: documents.filter((d) => d.uploaded || DOCUMENT_TYPES.includes(d.type)),
       },
-      teaching: {
-        assignedCourses: [],
-        totalSections: 0,
-        totalStudents: 0,
-        weeklyHours: 0,
-        academicTerm: 'Fall 2024',
-      },
-      operations: {
-        attendanceSubmissionRate: 0,
-        gradingProgress: { midterm: 0, final: 0 },
-        pendingTasks: 0,
-        lateSubmissions: 0,
-      },
-      leave: {
-        sickLeaveBalance: 10,
-        casualLeaveBalance: 7,
-        requests: [],
-      },
-      system: {
-        portalUsername: portalUsername || `${firstName.toLowerCase()}.${lastName.toLowerCase()}`,
-        portalActive,
-        twoFactorEnabled,
-        staffQrId: staffQrId || undefined,
-      },
-      documents: documents.filter((d) => d.uploaded || DOCUMENT_TYPES.includes(d.type)),
     };
 
-    const current = loadTeachers();
-    saveTeachers([...current, newTeacher]);
-    navigate('/school-admin/teachers');
+    try {
+      const resp = await fetch(`${API_BASE_URL}/api/school-admin/users`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!resp.ok) {
+        let msg = `Failed to create teacher (${resp.status})`;
+        try {
+          const errData = await resp.json();
+          if (errData?.error) msg = errData.error;
+        } catch {}
+        throw new Error(msg);
+      }
+
+      navigate('/school-admin/teachers');
+    } catch (err: any) {
+      alert(err?.message || 'Failed to create teacher');
+    }
   }
 
   return (
@@ -161,14 +205,6 @@ export default function TeacherCreate() {
           <section className="space-y-4">
             <h2 className="text-sm font-semibold">Basic Information</h2>
             <div className="grid gap-4 md:grid-cols-2">
-              <Field label="Teacher ID *">
-                <input
-                  className="w-full rounded-md border px-3 py-2 text-sm"
-                  value={teacherId}
-                  onChange={(e) => setTeacherId(e.target.value)}
-                  placeholder="TCH-2024-000009"
-                />
-              </Field>
               <Field label="Email">
                 <input
                   className="w-full rounded-md border px-3 py-2 text-sm"
@@ -177,6 +213,16 @@ export default function TeacherCreate() {
                   placeholder="teacher@scitech.edu"
                   type="email"
                 />
+              </Field>
+              <Field label="Initial Password">
+                <input
+                  className="w-full rounded-md border px-3 py-2 text-sm"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Teacher@123"
+                  type="text"
+                />
+                <p className="text-[10px] text-slate-400 mt-1">Used for first login; change later.</p>
               </Field>
               <Field label="First Name *">
                 <input

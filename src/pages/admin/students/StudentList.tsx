@@ -1,11 +1,40 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/Button';
 import { DataTable, Column, Filter } from '@/components/ui/DataTable';
 import { StatusBadge } from '@/components/ui/Badge';
-import { Student, loadStudents, saveStudents } from './studentData';
 import { fullName, getInitials } from '@/utils/formatters';
 import { Plus } from 'lucide-react';
+
+// Define the structure of the User object from the backend
+export interface BackendUser {
+  id: string;
+  userID: string;
+  email: string;
+  roles: string[];
+  status: 'active' | 'inactive' | 'suspended';
+  schoolId: string;
+  createdAt: string;
+  // The backend user doesn't have name fields, so we'll derive from email or use a placeholder
+  firstName: string;
+  lastName: string;
+}
+
+// A simple function to get a token from localStorage
+const getAuthToken = (): string | null => {
+  const authData = localStorage.getItem('auth-storage');
+  if (!authData) return null;
+  try {
+    const parsed = JSON.parse(authData);
+    // The token is nested inside the 'state' property
+    return parsed?.state?.token || null;
+  } catch (e) {
+    console.error("Failed to parse auth data from localStorage", e);
+    return null;
+  }
+};
+
+const API_BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8080';
 
 // Status filter options
 const STATUS_OPTIONS = [
@@ -16,42 +45,129 @@ const STATUS_OPTIONS = [
 ];
 
 export default function StudentList() {
-  const [students, setStudents] = useState<Student[]>(() => loadStudents());
+  const [students, setStudents] = useState<BackendUser[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
-  const handleView = (student: Student) => {
+  useEffect(() => {
+    const fetchStudents = async () => {
+      setLoading(true);
+      setError(null);
+      const token = getAuthToken();
+
+      if (!token) {
+        setError('Authentication token not found. Please log in.');
+        setLoading(false);
+        // Optional: redirect to login
+        // navigate('/login');
+        return;
+      }
+
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/school-admin/students`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || `Failed to fetch students: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        console.log(data);
+
+        // Map backend data to the frontend structure, preferring backend first/last names.
+        const processedData = data.map((user: any) => {
+          const emailLocal = (user.email ?? '').split('@')[0] ?? '';
+          const derivedFirst = emailLocal ? (emailLocal.charAt(0).toUpperCase() + emailLocal.slice(1)) : '';
+          const firstName = (user.firstName ?? derivedFirst);
+          const lastName = (user.lastName ?? '');
+          return {
+            // Normalize id/_id to a single id field
+            id: user.id ?? user._id ?? '',
+            // Normalize userID casing variations (userID, userId, userid)
+            userID: user.userID ?? user.userId ?? user.userid ?? '',
+            email: user.email ?? '',
+            roles: user.roles ?? [],
+            status: user.status ?? 'active',
+            schoolId: user.schoolId ?? '',
+            createdAt: user.createdAt ?? new Date().toISOString(),
+            firstName,
+            lastName,
+          } as BackendUser;
+        });
+
+
+        setStudents(processedData);
+      } catch (err: any) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStudents();
+  }, []);
+
+
+  const handleView = (student: BackendUser) => {
+    // This might need adjustment based on what the detail page expects
     navigate(`/school-admin/students/${student.id}`);
   };
 
-  const handleEdit = (student: Student) => {
+  const handleEdit = (student: BackendUser) => {
     navigate(`/school-admin/students/${student.id}/edit`);
   };
 
-  const handleDelete = (student: Student) => {
+  const handleDelete = async (student: BackendUser) => {
     const ok = window.confirm('Are you sure you want to delete this student?');
     if (!ok) return;
 
-    setStudents((prev) => {
-      const updated = prev.filter((s) => s.id !== student.id);
-      saveStudents(updated);
-      return updated;
-    });
+    const token = getAuthToken();
+    if (!token) {
+      setError('Authentication token not found. Please log in.');
+      return;
+    }
+
+    try {
+      const resp = await fetch(`${API_BASE_URL}/api/school-admin/users/${student.id}` , {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (!resp.ok && resp.status !== 204) {
+        let msg = `Failed to delete student (${resp.status})`;
+        try {
+          const errData = await resp.json();
+          if (errData?.error) msg = errData.error;
+        } catch {}
+        throw new Error(msg);
+      }
+
+      // Remove from UI after successful delete
+      setStudents((prev) => prev.filter((s) => s.id !== student.id));
+    } catch (e: any) {
+      setError(e?.message ?? 'Failed to delete student');
+    }
   };
 
   // Search filter function
-  const searchFilter = (student: Student, term: string): boolean => {
+  const searchFilter = (student: BackendUser, term: string): boolean => {
     const name = fullName(student).toLowerCase();
-    const classLabel = `${student.enrollment.grade}-${student.enrollment.section ?? ''}`.toLowerCase();
     return (
       name.includes(term) ||
-      student.studentId.toLowerCase().includes(term) ||
-      (student.email ?? '').toLowerCase().includes(term) ||
-      classLabel.includes(term)
+      student.userID.toLowerCase().includes(term) ||
+      (student.email ?? '').toLowerCase().includes(term)
     );
   };
 
   // Define table columns
-  const columns: Column<Student>[] = [
+  const columns: Column<BackendUser>[] = [
     {
       key: 'student',
       header: 'Student',
@@ -59,15 +175,13 @@ export default function StudentList() {
       render: (s) => (
         <div className="flex items-center gap-3">
           <div className="flex-shrink-0 h-10 w-10 rounded-full overflow-hidden bg-gradient-to-br from-sky-500 to-indigo-500 flex items-center justify-center text-white font-semibold text-sm">
-            {s.photoUrl ? (
-              <img src={s.photoUrl} alt={fullName(s)} className="h-full w-full object-cover" />
-            ) : (
-              getInitials(s)
-            )}
+            {/* The backend user has no photoUrl, using initials */}
+            {getInitials(s)}
           </div>
           <div className="min-w-0">
             <p className="font-medium text-gray-900 truncate">{fullName(s)}</p>
-            <p className="text-xs text-gray-500">{s.phone || 'No phone'}</p>
+            {/* The backend user has no phone, showing email instead */}
+            <p className="text-xs text-gray-500">{s.email}</p>
           </div>
         </div>
       ),
@@ -76,7 +190,11 @@ export default function StudentList() {
       key: 'studentId',
       header: 'ID',
       width: '12%',
-      render: (s) => <span className="text-xs font-mono text-gray-600">{s.studentId}</span>,
+      render: (s) => (
+        <span className="text-xs font-mono text-gray-600">
+          {s.userID}
+        </span>
+      ),
     },
     {
       key: 'email',
@@ -92,10 +210,11 @@ export default function StudentList() {
       width: '10%',
       align: 'center',
       render: (s) => {
-        const classLabel = `${s.enrollment.grade}${s.enrollment.section ? `-${s.enrollment.section}` : ''}`;
+        // The backend user model does not have class/enrollment info.
+        // This is a placeholder.
         return (
-          <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 text-xs font-medium">
-            {classLabel}
+          <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-gray-50 text-gray-700 text-xs font-medium">
+            N/A
           </span>
         );
       },
@@ -105,18 +224,30 @@ export default function StudentList() {
       header: 'Status',
       width: '12%',
       align: 'center',
-      render: (s) => <StatusBadge status={s.enrollment.status} type="student" />,
+      render: (s) => <StatusBadge status={s.status} type="student" />,
     },
   ];
 
-  // Define filters
+  // Define filters - This needs to be adapted for the new data structure
   const filters: Filter[] = [
     {
-      key: 'enrollment.status',
+      key: 'status',
       label: 'All Status',
-      options: STATUS_OPTIONS,
+      options: [
+        { value: 'active', label: 'Active' },
+        { value: 'inactive', label: 'Inactive' },
+        { value: 'suspended', label: 'Suspended' },
+      ],
     },
   ];
+
+  if (loading) {
+    return <div>Loading students...</div>;
+  }
+
+  if (error) {
+    return <div className="text-red-500">Error: {error}</div>;
+  }
 
   return (
     <div className="space-y-6">
@@ -146,7 +277,7 @@ export default function StudentList() {
         onDelete={handleDelete}
         onRowClick={handleView}
         emptyTitle="No students found"
-        emptyDescription="Try adjusting your search or filters"
+        emptyDescription={error ? `Error: ${error}` : "No students match the current filters."}
       />
     </div>
   );
