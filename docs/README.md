@@ -24,6 +24,10 @@ Welcome to the School Management System (Classivo) documentation. This guide cov
 - [UI Patterns](./04-ui/patterns.md) - Standard UI patterns and guidelines
 - [Component Audit](./04-ui/component-audit.md) - Audit report and extraction roadmap
 
+### Features
+- [Calendar & Timetable](./07-features/calendar-timetable.md) - Calendar and Timetable Management for School Admin
+- [Timetable Planner](./08-timetable-planner/api-schema.md) - Comprehensive Timetable Planner with Teacher Availability & Scheduling Engine
+
 ### Deployment
 - [Deployment Guide](./05-deployment/README.md) - Production deployment instructions
 
@@ -51,8 +55,12 @@ docs/
 │   └── component-audit.md         # Component audit report
 ├── 05-deployment/
 │   └── README.md                  # Deployment guide
-└── migrations/
-    └── moved-docs-map.md          # Old → New path mappings
+├── 06-migrations/
+│   └── moved-docs-map.md          # Old → New path mappings
+├── 07-features/
+│   └── calendar-timetable.md      # Calendar and Timetable Management
+└── 08-timetable-planner/
+    └── api-schema.md              # Timetable Planner API & Database Schema
 ```
 
 ---

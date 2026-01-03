@@ -25,7 +25,9 @@ import {
   ScrollText,
   Wrench,
   HeadphonesIcon,
-  Activity
+  Activity,
+  Clock,
+  LayoutGrid,
 } from 'lucide-react';
 import { NavItem } from '@/components/shared/Sidebar';
 
@@ -92,6 +94,27 @@ export const adminNavItems: NavItem[] = [
     label: 'Reports',
     href: '/school-admin/reports',
     icon: <BarChart3 size={18} />,
+    section: 'primary',
+  },
+  {
+    id: 'calendar',
+    label: 'Calendar',
+    href: '/school-admin/calendar',
+    icon: <Calendar size={18} />,
+    section: 'primary',
+  },
+  {
+    id: 'timetable-planner',
+    label: 'Timetable Planner',
+    href: '/school-admin/timetable-dashboard',
+    icon: <LayoutGrid size={18} />,
+    section: 'primary',
+  },
+  {
+    id: 'teacher-availability',
+    label: 'Teacher Availability',
+    href: '/school-admin/teacher-availability',
+    icon: <CalendarDays size={18} />,
     section: 'primary',
   },
   {
@@ -341,6 +364,13 @@ export const teacherNavItems: NavItem[] = [
     label: 'Announcements',
     href: '/teacher/announcements',
     icon: <BellPlus size={18} />,
+    section: 'primary'
+  },
+  {
+    id: 'availability',
+    label: 'My Availability',
+    href: '/teacher/availability',
+    icon: <Clock size={18} />,
     section: 'primary'
   },
   {
