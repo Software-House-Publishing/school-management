@@ -59,6 +59,7 @@ import TeacherSchedule from '@/pages/teacher/schedule/TeacherSchedule';
 import TeacherExams from '@/pages/teacher/exams/TeacherExams';
 import TeacherAnnouncements from '@/pages/teacher/announcements/TeacherAnnouncements';
 import TeacherProfile from '@/pages/teacher/profile/TeacherProfile';
+import TeacherAvailability from '@/pages/teacher/availability/TeacherAvailability';
 
 // School Admin portal pages (folder: admin, routes: /school-admin)
 import SchoolAdminAnnouncement from '@/pages/admin/announcement/AdminAnnouncement';
@@ -81,6 +82,10 @@ import SchoolAdminTeacherEdit from '@/pages/admin/teachers/TeacherEdit';
 import SchoolAdminUserDetail from '@/pages/admin/users/UserDetail';
 import SchoolAdminUserCreate from '@/pages/admin/users/UserCreate';
 import SchoolAdminUserEdit from '@/pages/admin/users/UserEdit';
+import SchoolAdminCalendar from '@/pages/admin/calendar/AdminCalendar';
+import SchoolAdminTeacherAvailability from '@/pages/admin/teacher-availability/TeacherAvailabilityAdmin';
+import SchoolAdminTimetableDashboard from '@/pages/admin/timetable-planner/TimetableDashboard';
+import SchoolAdminTimetablePlanner from '@/pages/admin/timetable-planner/TimetablePlanner';
 
 // System Admin portal pages
 import SystemDashboard from '@/pages/system-admin/dashboard/SystemDashboard';
@@ -188,6 +193,7 @@ function App() {
             <Route path="schedule" element={<TeacherSchedule />} />
             <Route path="exams" element={<TeacherExams />} />
             <Route path="announcements" element={<TeacherAnnouncements />} />
+            <Route path="availability" element={<TeacherAvailability />} />
             <Route path="notifications" element={<NotificationsPage />} />
             <Route path="profile" element={<TeacherProfile />} />
           </Route>
@@ -217,6 +223,10 @@ function App() {
             <Route path="finance" element={<SchoolAdminFinance />} />
             <Route path="invoices" element={<SchoolAdminInvoices />} />
             <Route path="reports" element={<SchoolAdminReports />} />
+            <Route path="calendar" element={<SchoolAdminCalendar />} />
+            <Route path="teacher-availability" element={<SchoolAdminTeacherAvailability />} />
+            <Route path="timetable-dashboard" element={<SchoolAdminTimetableDashboard />} />
+            <Route path="timetable-planner" element={<SchoolAdminTimetablePlanner />} />
             <Route path="notifications" element={<NotificationsPage />} />
             <Route path="settings" element={<SchoolAdminSettings />} />
           </Route>
