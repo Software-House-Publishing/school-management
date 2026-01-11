@@ -9,8 +9,8 @@ import { getDefaultRoute } from '@/config/routes';
 import AuthLayout from '@/components/layouts/AuthLayout';
 import { UserRole } from '@/types/auth';
 
-// Backend base URL (Vite env)
-const API_BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8080';
+
+const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 const loginSchema = z.object({
   email: emailSchema,

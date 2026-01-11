@@ -9,11 +9,7 @@ import { Mail, Lock, ArrowRight } from 'lucide-react';
 import AuthLayout from '@/components/layouts/AuthLayout';
 import { UserRole } from '@/types/auth';
 
-// 🔑 Backend base URL (change VITE_API_URL in .env if you want)
-// Use the VITE_ prefix so Vite exposes the variable in the browser.
-// Default to localhost:8080 (backend) in development so login works even
-// if env var is not configured.
-const API_BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8080';
+const API_BASE_URL = import.meta.env.VITE_API_URL;
 console.log('api: ', API_BASE_URL);
 
 
