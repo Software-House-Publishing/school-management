@@ -1,8 +1,7 @@
-import React, { useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
-import { loadStudents, saveStudents } from './studentData';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 
@@ -19,6 +18,20 @@ function statusClasses(status: string) {
   }
 }
 
+// Retrieve JWT token from localStorage persisted store
+const getAuthToken = (): string | null => {
+  const authData = localStorage.getItem('auth-storage');
+  if (!authData) return null;
+  try {
+    const parsed = JSON.parse(authData);
+    return parsed?.state?.token || null;
+  } catch {
+    return null;
+  }
+};
+
+const API_BASE_URL = import.meta.env.VITE_API_URL;
+
 export default function StudentDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -26,16 +39,142 @@ export default function StudentDetail() {
   // this ref will be used to capture the layout for PDF
   const reportRef = useRef<HTMLDivElement | null>(null);
 
-  const student = loadStudents().find((s) => s.id === id);
+  const [student, setStudent] = useState<any | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
-  if (!student) {
+  useEffect(() => {
+    const token = getAuthToken();
+    if (!token) {
+      setError('Authentication required. Please log in.');
+      setLoading(false);
+      return;
+    }
+
+    const fetchStudent = async () => {
+      try {
+        const resp = await fetch(`${API_BASE_URL}/api/school-admin/students`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        if (!resp.ok) {
+          throw new Error(`Failed to load students (${resp.status})`);
+        }
+        const data = await resp.json();
+
+        // Try to find by multiple possible id fields
+        const found = (Array.isArray(data) ? data : data?.items || []).find((s: any) => {
+          const sid = s.id || s._id || s.userID || s.userId || s.studentId;
+          return sid === id;
+        });
+
+        if (!found) {
+          setError('Student not found.');
+          setLoading(false);
+          return;
+        }
+
+        const details = found.studentDetails || found.details || {};
+
+        // Normalize to the shape used in the UI below
+        const normalized = {
+          id: found.id || found._id || found.userID || found.userId || found.studentId,
+          firstName:
+            found.firstName || (found.email ? found.email.split('@')[0] : 'Student'),
+          lastName: found.lastName || '',
+          email: found.email || details.email || '',
+          dateOfBirth: details.dateOfBirth || '',
+          gender: details.gender || '',
+          phone: details.phone || '',
+          address: details.address || '',
+          language: details.language || '',
+          guardians: Array.isArray(details.guardians) ? details.guardians : [],
+          enrollment: {
+            admissionDate:
+              (details.enrollment && details.enrollment.admissionDate) || found.createdAt || '',
+            grade: (details.enrollment && details.enrollment.grade) || '',
+            section: (details.enrollment && details.enrollment.section) || '',
+            status:
+              (details.enrollment && details.enrollment.status) || found.status || 'active',
+            homeroomTeacher:
+              (details.enrollment && details.enrollment.homeroomTeacher) || '',
+          },
+          academics: {
+            gpa:
+              details.academics && details.academics.gpa != null
+                ? Number(details.academics.gpa)
+                : null,
+            currentSubjects:
+              details.academics && Array.isArray(details.academics.currentSubjects)
+                ? details.academics.currentSubjects
+                : [],
+            lastExamScore:
+              details.academics && details.academics.lastExamScore != null
+                ? Number(details.academics.lastExamScore)
+                : null,
+            remarks:
+              (details.academics && details.academics.remarks) || '',
+          },
+          attendance: {
+            totalDays:
+              details.attendance && details.attendance.totalDays != null
+                ? Number(details.attendance.totalDays)
+                : null,
+            presentDays:
+              details.attendance && details.attendance.presentDays != null
+                ? Number(details.attendance.presentDays)
+                : null,
+            absentDays:
+              details.attendance && details.attendance.absentDays != null
+                ? Number(details.attendance.absentDays)
+                : null,
+            attendancePercentage:
+              details.attendance && details.attendance.attendancePercentage != null
+                ? Number(details.attendance.attendancePercentage)
+                : null,
+            lastAbsentDate:
+              (details.attendance && details.attendance.lastAbsentDate) || null,
+          },
+          health: details.health || {},
+          finance: details.finance || {},
+          system: details.system || {},
+          documents: Array.isArray(details.documents) ? details.documents : [],
+          studentId: found.studentId || found.userID || found.userId || found.id || '',
+        };
+
+        setStudent(normalized);
+        setLoading(false);
+      } catch (err: any) {
+        setError(err?.message || 'Failed to load student');
+        setLoading(false);
+      }
+    };
+
+    fetchStudent();
+  }, [id]);
+
+  if (loading) {
     return (
       <div className="space-y-4">
         <Button type="button" variant="outline" onClick={() => navigate('/school-admin/students')}>
           ← Back to Students
         </Button>
         <Card padding="lg">
-          <p className="text-sm text-red-600">Student not found.</p>
+          <p className="text-sm">Loading student…</p>
+        </Card>
+      </div>
+    );
+  }
+
+  if (!student || error) {
+    return (
+      <div className="space-y-4">
+        <Button type="button" variant="outline" onClick={() => navigate('/school-admin/students')}>
+          ← Back to Students
+        </Button>
+        <Card padding="lg">
+          <p className="text-sm text-red-600">{error || 'Student not found.'}</p>
         </Card>
       </div>
     );
@@ -110,13 +249,31 @@ export default function StudentDetail() {
           <Button
             type="button"
             className="bg-red-600 text-white border-red-600 hover:bg-red-700 hover:border-red-700 hover:scale-105 transition-all duration-200 shadow-sm hover:shadow-md rounded-lg px-5 py-2.5 text-sm font-medium"
-            onClick={() => {
+            onClick={async () => {
               const ok = window.confirm('Are you sure you want to delete this student?');
               if (!ok) return;
-              const current = loadStudents();
-              const updated = current.filter((s) => s.id !== student.id);
-              saveStudents(updated);
-              navigate('/school-admin/students');
+              const token = getAuthToken();
+              if (!token) {
+                alert('Authentication required.');
+                return;
+              }
+              try {
+                const resp = await fetch(`${API_BASE_URL}/api/school-admin/users/${student.id}`, {
+                  method: 'DELETE',
+                  headers: { Authorization: `Bearer ${token}` },
+                });
+                if (!resp.ok) {
+                  let msg = `Delete failed (${resp.status})`;
+                  try {
+                    const errData = await resp.json();
+                    if (errData?.error) msg = errData.error;
+                  } catch {}
+                  throw new Error(msg);
+                }
+                navigate('/school-admin/students');
+              } catch (err: any) {
+                alert(err?.message || 'Failed to delete student');
+              }
             }}
           >
             Delete

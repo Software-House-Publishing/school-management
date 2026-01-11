@@ -2,13 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
-import {
-  Student,
-  StudentStatus,
-  loadStudents,
-  saveStudents,
-  DocumentInfo,
-} from './studentData';
+import { StudentStatus, DocumentInfo } from './studentData';
 import { Check, X } from 'lucide-react';
 
 const DOCUMENT_TYPES = [
@@ -20,14 +14,28 @@ const DOCUMENT_TYPES = [
   'ID Photo',
 ];
 
+// A simple function to get a token from localStorage
+const getAuthToken = (): string | null => {
+  const authData = localStorage.getItem('auth-storage');
+  if (!authData) return null;
+  try {
+    const parsed = JSON.parse(authData);
+    return parsed?.state?.token || null;
+  } catch {
+    return null;
+  }
+};
+
+const API_BASE_URL = import.meta.env.VITE_API_URL;
+
 export default function StudentCreate() {
   const navigate = useNavigate();
 
   // Basic Info
-  const [studentId, setStudentId] = useState('');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('Student@123');
   const [phone, setPhone] = useState('');
   const [dateOfBirth, setDateOfBirth] = useState('');
   const [gender, setGender] = useState('');
@@ -65,101 +73,90 @@ export default function StudentCreate() {
     );
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!firstName || !lastName || !email) {
+      alert('Please fill first name, last name, and email.');
+      return;
+    }
 
-    if (!studentId || !firstName || !lastName || !grade) {
-      alert('Please fill ID, first name, last name and grade.');
+    const token = getAuthToken();
+    if (!token) {
+      alert('Authentication token not found. Please log in.');
       return;
     }
 
     const today = new Date().toISOString().slice(0, 10);
 
-    const newStudent: Student = {
-      id: Date.now().toString(),
-      studentId,
+    // Build a minimal payload for backend creation
+    const payload: any = {
+      email,
+      password: password || 'Student@123',
+      roles: ['student'],
+      status,
       firstName,
       lastName,
-      email: email || undefined,
-      gender: gender || undefined,
-      dateOfBirth: dateOfBirth || undefined,
-      address: address || undefined,
-      phone: phone || undefined,
-      language: '',
-      photoUrl: undefined,
-
-      guardians: guardianName
-        ? [
-            {
-              name: guardianName,
-              relationship: guardianRelationship || 'Parent',
-              phone: guardianPhone || '-',
-              email: guardianEmail || undefined,
-              isEmergencyContact: true,
-            },
-          ]
-        : [],
-
-      enrollment: {
-        admissionDate: today,
-        grade,
-        section: section || undefined,
-        status,
-        previousSchool: '',
-        homeroomTeacher: '',
-        rollNumber: '',
+      studentDetails: {
+        phone: phone || undefined,
+        dateOfBirth: dateOfBirth || undefined,
+        gender: gender || undefined,
+        address: address || undefined,
+        guardians:
+          guardianName
+            ? [
+                {
+                  name: guardianName,
+                  relationship: guardianRelationship || 'Parent',
+                  phone: guardianPhone || '-',
+                  email: guardianEmail || undefined,
+                  isEmergencyContact: true,
+                },
+              ]
+            : [],
+        enrollment: {
+          admissionDate: today,
+          grade: grade || undefined,
+          section: section || undefined,
+          status,
+        },
+        health: {
+          allergies: allergies || undefined,
+          medicalNotes: medicalNotes || undefined,
+          emergencyInstructions: emergencyInstructions || undefined,
+        },
+        system: {
+          portalUsername:
+            portalUsername || `${firstName.toLowerCase()}.${lastName.charAt(0).toLowerCase()}`,
+          portalActive,
+          rfidCardId: rfidCardId || undefined,
+        },
+        documents: documents.filter((d) => d.uploaded || DOCUMENT_TYPES.includes(d.type)),
       },
-
-      academics: {
-        gpa: undefined,
-        currentSubjects: [],
-        lastExamScore: undefined,
-        remarks: '',
-      },
-
-      attendance: {
-        totalDays: undefined,
-        presentDays: undefined,
-        absentDays: undefined,
-        attendancePercentage: undefined,
-        lastAbsentDate: undefined,
-      },
-
-      activities: {
-        clubs: [],
-        sports: [],
-        awards: [],
-        disciplineNotes: '',
-      },
-
-      health: {
-        allergies: allergies || undefined,
-        medicalNotes: medicalNotes || undefined,
-        emergencyInstructions: emergencyInstructions || undefined,
-      },
-
-      finance: {
-        feePlan: '',
-        totalDue: undefined,
-        totalPaid: undefined,
-        outstanding: undefined,
-        lastPaymentDate: undefined,
-        scholarship: '',
-      },
-
-      system: {
-        portalUsername: portalUsername || `${firstName.toLowerCase()}.${lastName.charAt(0).toLowerCase()}`,
-        portalActive,
-        rfidCardId: rfidCardId || undefined,
-      },
-
-      documents: documents.filter((d) => d.uploaded || DOCUMENT_TYPES.includes(d.type)),
     };
 
-    const current = loadStudents();
-    saveStudents([...current, newStudent]);
+    try {
+      const resp = await fetch(`${API_BASE_URL}/api/school-admin/users`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
 
-    navigate('/school-admin/students');
+      if (!resp.ok) {
+        let msg = `Failed to create student (${resp.status})`;
+        try {
+          const errData = await resp.json();
+          if (errData?.error) msg = errData.error;
+        } catch {}
+        throw new Error(msg);
+      }
+
+      navigate('/school-admin/students');
+    } catch (err: any) {
+      alert(err?.message || 'Failed to create student');
+    }
   }
 
   return (
@@ -182,15 +179,6 @@ export default function StudentCreate() {
             <h2 className="text-sm font-semibold">Basic Information</h2>
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-1 text-sm">
-                <label className="text-xs font-medium text-slate-600">Student ID *</label>
-                <input
-                  className="w-full rounded-md border px-3 py-2 text-sm"
-                  value={studentId}
-                  onChange={(e) => setStudentId(e.target.value)}
-                  placeholder="STU-2400011"
-                />
-              </div>
-              <div className="space-y-1 text-sm">
                 <label className="text-xs font-medium text-slate-600">Email</label>
                 <input
                   className="w-full rounded-md border px-3 py-2 text-sm"
@@ -199,6 +187,17 @@ export default function StudentCreate() {
                   placeholder="student@school.com"
                   type="email"
                 />
+              </div>
+              <div className="space-y-1 text-sm">
+                <label className="text-xs font-medium text-slate-600">Initial Password</label>
+                <input
+                  className="w-full rounded-md border px-3 py-2 text-sm"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Student@123"
+                  type="text"
+                />
+                <p className="text-[10px] text-slate-400">Used for first login; change later.</p>
               </div>
               <div className="space-y-1 text-sm">
                 <label className="text-xs font-medium text-slate-600">First Name *</label>

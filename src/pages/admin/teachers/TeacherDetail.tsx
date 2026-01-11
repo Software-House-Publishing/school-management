@@ -1,8 +1,7 @@
-import React, { useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
-import { loadTeachers, saveTeachers } from './teacherData';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 
@@ -45,21 +44,173 @@ function employmentTypeLabel(type: string) {
   }
 }
 
+// Retrieve JWT token from localStorage persisted store
+const getAuthToken = (): string | null => {
+  const authData = localStorage.getItem('auth-storage');
+  if (!authData) return null;
+  try {
+    const parsed = JSON.parse(authData);
+    return parsed?.state?.token || null;
+  } catch {
+    return null;
+  }
+};
+
+const API_BASE_URL = import.meta.env.VITE_API_URL;
+
 export default function TeacherDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const reportRef = useRef<HTMLDivElement | null>(null);
 
-  const teacher = loadTeachers().find((t) => t.id === id);
+  const [teacher, setTeacher] = useState<any | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
-  if (!teacher) {
+  useEffect(() => {
+    const token = getAuthToken();
+    if (!token) {
+      setError('Authentication required. Please log in.');
+      setLoading(false);
+      return;
+    }
+
+    const fetchTeacher = async () => {
+      try {
+        const resp = await fetch(`${API_BASE_URL}/api/school-admin/teachers`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!resp.ok) {
+          throw new Error(`Failed to load teachers (${resp.status})`);
+        }
+        const data = await resp.json();
+        const found = (Array.isArray(data) ? data : data?.items || []).find((t: any) => {
+          const tid = t.id || t._id || t.userID || t.userId || t.teacherId;
+          return tid === id;
+        });
+        if (!found) {
+          setError('Teacher not found.');
+          setLoading(false);
+          return;
+        }
+
+        const details = found.teacherDetails || found.details || {};
+
+        const normalized = {
+          id: found.id || found._id || found.userID || found.userId || found.teacherId,
+          firstName:
+            found.firstName || (found.email ? found.email.split('@')[0] : 'Teacher'),
+          lastName: found.lastName || '',
+          email: found.email || details.email || '',
+          phone: details.phone || '',
+          gender: details.gender || '',
+          dateOfBirth: details.dateOfBirth || '',
+          address: details.address || '',
+          department: details.department || found.department || '',
+          status: found.status || details.status || 'active',
+          office: details.office || '',
+          officeHours: details.officeHours || '',
+          emergencyContact: details.emergencyContact || undefined,
+          employment: {
+            type: (details.employment && details.employment.type) || 'full_time',
+            role: (details.employment && details.employment.role) || 'Teacher',
+            joinDate: (details.employment && details.employment.joinDate) || found.createdAt || '',
+            qualifications:
+              (details.employment && details.employment.qualifications) || [],
+            yearsOfExperience:
+              details.employment && details.employment.yearsOfExperience != null
+                ? Number(details.employment.yearsOfExperience)
+                : 0,
+            teachingLicense:
+              (details.employment && details.employment.teachingLicense) || '',
+            salaryGrade: (details.employment && details.employment.salaryGrade) || '',
+            contractStart: (details.employment && details.employment.contractStart) || undefined,
+            contractEnd: (details.employment && details.employment.contractEnd) || undefined,
+          },
+          teaching: {
+            assignedCourses:
+              (details.teaching && details.teaching.assignedCourses) || [],
+            totalSections:
+              details.teaching && details.teaching.totalSections != null
+                ? Number(details.teaching.totalSections)
+                : 0,
+            totalStudents:
+              details.teaching && details.teaching.totalStudents != null
+                ? Number(details.teaching.totalStudents)
+                : 0,
+            weeklyHours:
+              details.teaching && details.teaching.weeklyHours != null
+                ? Number(details.teaching.weeklyHours)
+                : 0,
+            academicTerm: (details.teaching && details.teaching.academicTerm) || 'Fall 2024',
+          },
+          operations: {
+            attendanceSubmissionRate:
+              details.operations && details.operations.attendanceSubmissionRate != null
+                ? Number(details.operations.attendanceSubmissionRate)
+                : 0,
+            gradingProgress:
+              (details.operations && details.operations.gradingProgress) || {
+                midterm: 0,
+                final: 0,
+              },
+            pendingTasks:
+              details.operations && details.operations.pendingTasks != null
+                ? Number(details.operations.pendingTasks)
+                : 0,
+            lateSubmissions:
+              details.operations && details.operations.lateSubmissions != null
+                ? Number(details.operations.lateSubmissions)
+                : 0,
+          },
+          leave: {
+            sickLeaveBalance:
+              details.leave && details.leave.sickLeaveBalance != null
+                ? Number(details.leave.sickLeaveBalance)
+                : 10,
+            casualLeaveBalance:
+              details.leave && details.leave.casualLeaveBalance != null
+                ? Number(details.leave.casualLeaveBalance)
+                : 7,
+            requests: (details.leave && details.leave.requests) || [],
+          },
+          system: details.system || {},
+          documents: Array.isArray(details.documents) ? details.documents : [],
+          teacherId: found.teacherId || found.userID || found.userId || found.id || '',
+        };
+
+        setTeacher(normalized);
+        setLoading(false);
+      } catch (err: any) {
+        setError(err?.message || 'Failed to load teacher');
+        setLoading(false);
+      }
+    };
+
+    fetchTeacher();
+  }, [id]);
+
+  if (loading) {
     return (
       <div className="space-y-4">
         <Button type="button" variant="outline" onClick={() => navigate('/school-admin/teachers')}>
           ← Back to Teachers
         </Button>
         <Card padding="lg">
-          <p className="text-sm text-red-600">Teacher not found.</p>
+          <p className="text-sm">Loading teacher…</p>
+        </Card>
+      </div>
+    );
+  }
+
+  if (!teacher || error) {
+    return (
+      <div className="space-y-4">
+        <Button type="button" variant="outline" onClick={() => navigate('/school-admin/teachers')}>
+          ← Back to Teachers
+        </Button>
+        <Card padding="lg">
+          <p className="text-sm text-red-600">{error || 'Teacher not found.'}</p>
         </Card>
       </div>
     );
@@ -119,13 +270,31 @@ export default function TeacherDetail() {
           <Button
             type="button"
             className="bg-red-600 text-white border-red-600 hover:bg-red-700 hover:border-red-700 hover:scale-105 transition-all duration-200 shadow-sm hover:shadow-md rounded-lg px-5 py-2.5 text-sm font-medium"
-            onClick={() => {
+            onClick={async () => {
               const ok = window.confirm('Are you sure you want to delete this teacher?');
               if (!ok) return;
-              const current = loadTeachers();
-              const updated = current.filter((t) => t.id !== teacher.id);
-              saveTeachers(updated);
-              navigate('/school-admin/teachers');
+              const token = getAuthToken();
+              if (!token) {
+                alert('Authentication required.');
+                return;
+              }
+              try {
+                const resp = await fetch(`${API_BASE_URL}/api/school-admin/users/${teacher.id}`, {
+                  method: 'DELETE',
+                  headers: { Authorization: `Bearer ${token}` },
+                });
+                if (!resp.ok) {
+                  let msg = `Delete failed (${resp.status})`;
+                  try {
+                    const errData = await resp.json();
+                    if (errData?.error) msg = errData.error;
+                  } catch {}
+                  throw new Error(msg);
+                }
+                navigate('/school-admin/teachers');
+              } catch (err: any) {
+                alert(err?.message || 'Failed to delete teacher');
+              }
             }}
           >
             Delete
